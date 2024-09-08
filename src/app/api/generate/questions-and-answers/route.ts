@@ -11,9 +11,13 @@ export async function POST(request: NextRequest) {
     const marks = Number(formData.getAll("marks")[0]);
     const difficultyLevel = Number(formData.getAll("difficulty-level")[0]);
     const requirements = formData.getAll("requirements")[0] as string;
+    const startingFrom: number | undefined = Number(
+      formData.getAll("startingFrom")[0]
+    );
+    const endingAt: number | undefined = Number(formData.getAll("endingAt")[0]);
 
     console.log(
-      `Starting to generate questions and answers...(${numberOfQuestions} questions, ${marks} marks, ${difficultyLevel}% difficulty, requirements: "${requirements}")`
+      `Starting to generate the assessment...(${numberOfQuestions} questions, ${marks} marks, ${difficultyLevel}% difficulty, from Page ${startingFrom} to Page ${endingAt}, requirements: "${requirements}")`
     );
 
     console.log("Processing file...");
@@ -22,14 +26,18 @@ export async function POST(request: NextRequest) {
 
     console.log("Picking context pages...");
 
-    const randomPages = getRandomPages(pages, numberOfQuestions);
+    const randomPages = getRandomPages(
+      startingFrom && endingAt
+        ? pages.slice(startingFrom - 1, endingAt)
+        : pages,
+      numberOfQuestions,
+      difficultyLevel
+    );
 
     console.log(
-      `Generating questions and answers from pages: ${randomPages.pages.join(
-        ", "
-      )} ...`
+      `Generating assessment from pages: ${randomPages.pages.join(", ")} ...`
     );
-    const questions = await GenerateQuestions(
+    const assessment = await GenerateQuestions(
       numberOfQuestions,
       randomPages.content,
       marks,
@@ -37,26 +45,31 @@ export async function POST(request: NextRequest) {
       requirements
     );
 
-    console.log(questions);
+    console.log(assessment);
 
-    if (questions !== "") {
+    if (assessment !== "") {
       JSON.parse(
         JSON.stringify(
-          questions
+          assessment
             .replaceAll("\n", "")
             .replaceAll("\r", "")
             .replaceAll("\t", "")
         )
       );
-      console.log("Questions and answers generated");
+      console.log("Assessment successfully generated");
 
       return new NextResponse(
-        JSON.stringify(
-          questions
+        JSON.stringify({
+          assessment: assessment
             .replaceAll("\n", "")
             .replaceAll("\r", "")
-            .replaceAll("\t", "")
-        )
+            .replaceAll("\t", ""),
+          context: randomPages.content
+            .join(" ")
+            .replaceAll("\n", "")
+            .replaceAll("\r", "")
+            .replaceAll("\t", ""),
+        })
       );
     } else {
       throw new Error(
@@ -70,20 +83,60 @@ export async function POST(request: NextRequest) {
   }
 }
 
-const getRandomPages = (pages: string[], numberOfQuestions: number) => {
+const getRandomPages = (
+  pages: string[],
+  numberOfQuestions: number,
+  difficultyLevel: number
+) => {
   let pageNumbers: number[] = [];
   let pageContent: string[] = [];
 
   for (let i = 0; i < numberOfQuestions; i++) {
-    const randomPageIndex = Math.floor(Math.random() * (pages.length - 1));
-    pageNumbers.push(randomPageIndex);
-    pageNumbers.push(randomPageIndex + 1);
-    pageContent.push(`PAGE NUMBER ${randomPageIndex}: 
+    const difficultyPercentage = difficultyLevel / 100;
+    const pagesLength = pages.length;
+    const firstTwentyPercent = Math.floor(pagesLength * 0.2);
+    const secondTwentyPercent = Math.floor(pagesLength * 0.4);
+    const thirdTwentyPercent = Math.floor(pagesLength * 0.6);
+    const fourthTwentyPercent = Math.floor(pagesLength * 0.8);
+
+    let randomPageIndex;
+    if (difficultyPercentage < 0.2) {
+      randomPageIndex = Math.floor(Math.random() * firstTwentyPercent);
+    } else if (difficultyPercentage < 0.4) {
+      randomPageIndex = Math.floor(
+        Math.random() * (secondTwentyPercent - firstTwentyPercent) +
+          firstTwentyPercent
+      );
+    } else if (difficultyPercentage < 0.6) {
+      randomPageIndex = Math.floor(
+        Math.random() * (thirdTwentyPercent - secondTwentyPercent) +
+          secondTwentyPercent
+      );
+    } else if (difficultyPercentage < 0.8) {
+      randomPageIndex = Math.floor(
+        Math.random() * (fourthTwentyPercent - thirdTwentyPercent) +
+          thirdTwentyPercent
+      );
+    } else {
+      randomPageIndex = Math.floor(
+        Math.random() * (pagesLength - fourthTwentyPercent) +
+          fourthTwentyPercent
+      );
+    }
+
+    if (
+      !pageNumbers.includes(randomPageIndex) &&
+      !pageNumbers.includes(randomPageIndex + 1)
+    ) {
+      pageNumbers.push(randomPageIndex);
+      pageNumbers.push(randomPageIndex + 1);
+      pageContent.push(`PAGE NUMBER ${randomPageIndex}: 
     
     ${pages[randomPageIndex]}`);
-    pageContent.push(`PAGE NUMBER ${randomPageIndex + 1}: 
+      pageContent.push(`PAGE NUMBER ${randomPageIndex + 1}: 
     
     ${pages[randomPageIndex + 1]}`);
+    }
   }
 
   return {

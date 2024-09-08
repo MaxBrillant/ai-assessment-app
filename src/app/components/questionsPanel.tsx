@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Question from "./question";
-import { IoIosAddCircleOutline } from "react-icons/io";
 import AddQuestionButton from "./addQuestionButton";
+import { AssessmentContext } from "../context/assessmentContext";
 
 type QuestionListType = {
   type: "short-answer" | "long-answer" | "multiple-choice";
@@ -16,11 +16,17 @@ type QuestionListType = {
   };
 }[];
 export default function QuestionPanel(props: {
-  generatedQuestions: QuestionListType;
+  defaultQuestions: QuestionListType;
 }) {
   const [questions, setQuestions] = useState<QuestionListType>(
-    props.generatedQuestions
+    props.defaultQuestions
   );
+  const assessmentContext = useContext(AssessmentContext);
+
+  useEffect(() => {
+    assessmentContext.questions = questions;
+  }, [questions]);
+
   return (
     <div className="p-5 w-fit mx-auto">
       {questions.map((question, index) => {
@@ -43,36 +49,36 @@ export default function QuestionPanel(props: {
                 choices: question.answer.choices,
               }}
               onEdit={(data) => {
-                props.generatedQuestions[index] = data;
-                setQuestions([...props.generatedQuestions]);
+                props.defaultQuestions[index] = data;
+                setQuestions([...props.defaultQuestions]);
               }}
               onDelete={() => {
-                props.generatedQuestions.splice(index, 1);
-                setQuestions([...props.generatedQuestions]);
+                props.defaultQuestions.splice(index, 1);
+                setQuestions([...props.defaultQuestions]);
               }}
               onMoveUp={() => {
                 if (index > 0) {
-                  const temp = props.generatedQuestions[index - 1];
-                  props.generatedQuestions[index - 1] =
-                    props.generatedQuestions[index];
-                  props.generatedQuestions[index] = temp;
-                  setQuestions([...props.generatedQuestions]);
+                  const temp = props.defaultQuestions[index - 1];
+                  props.defaultQuestions[index - 1] =
+                    props.defaultQuestions[index];
+                  props.defaultQuestions[index] = temp;
+                  setQuestions([...props.defaultQuestions]);
                 }
               }}
               onMoveDown={() => {
-                if (index < props.generatedQuestions.length - 1) {
-                  const temp = props.generatedQuestions[index + 1];
-                  props.generatedQuestions[index + 1] =
-                    props.generatedQuestions[index];
-                  props.generatedQuestions[index] = temp;
-                  setQuestions([...props.generatedQuestions]);
+                if (index < props.defaultQuestions.length - 1) {
+                  const temp = props.defaultQuestions[index + 1];
+                  props.defaultQuestions[index + 1] =
+                    props.defaultQuestions[index];
+                  props.defaultQuestions[index] = temp;
+                  setQuestions([...props.defaultQuestions]);
                 }
               }}
             />
             <AddQuestionButton
               onAdd={(data) => {
-                props.generatedQuestions.splice(index + 1, 0, data);
-                setQuestions([...props.generatedQuestions]);
+                props.defaultQuestions.splice(index + 1, 0, data);
+                setQuestions([...props.defaultQuestions]);
               }}
             />
           </div>

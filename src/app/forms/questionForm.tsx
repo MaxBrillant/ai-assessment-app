@@ -2,13 +2,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
-import { QuestionType } from "./question";
 import { questionSchema } from "../validation/questionValidation";
 import { z } from "zod";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MdDeleteOutline } from "react-icons/md";
+import { QuestionType } from "../components/question";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
 type QuestionFormType = QuestionType & {
@@ -44,11 +44,11 @@ export default function QuestionForm(props: QuestionFormType) {
     }
   }, [watch("type")]);
 
-  useEffect(() => {
-    if (watch("type") === "multiple-choice") {
-      setValue("choices", choices);
-    }
-  }, [choices]);
+  // useEffect(() => {
+  //   if (watch("type") === "multiple-choice") {
+  //     setValue("choices", choices);
+  //   }
+  // }, [choices]);
 
   const errorMessages = Object.values(errors).flatMap((error: any) => {
     if (Array.isArray(error)) {
@@ -72,7 +72,7 @@ export default function QuestionForm(props: QuestionFormType) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="max-w-md flex flex-col gap-5 p-5 rounded-2xl border border-black"
+      className="max-w-md flex flex-col gap-5 p-5 rounded-2xl border-2 border-blue"
     >
       <select {...register("type")}>
         <option value="short-answer">Short Answer</option>
@@ -114,11 +114,11 @@ export default function QuestionForm(props: QuestionFormType) {
                 />
                 <Textarea
                   autoFocus={choice === ""}
-                  id={"" + index}
                   defaultValue={choice}
                   placeholder="Write a choice"
                   onChange={(e) => {
-                    setChoices(
+                    setValue(
+                      "choices",
                       choices.map((c, i) => (i === index ? e.target.value : c))
                     );
                     const updatedAnswerChoices = watch("answer.choices")?.map(
@@ -128,6 +128,11 @@ export default function QuestionForm(props: QuestionFormType) {
                     setValue("answer.choices", updatedAnswerChoices);
                     e.target.style.height = "auto";
                     e.target.style.height = `${e.target.scrollHeight + 2}px`;
+                  }}
+                  onBlur={(e) => {
+                    setChoices(
+                      choices.map((c, i) => (i === index ? e.target.value : c))
+                    );
                   }}
                 />
                 <Button
@@ -143,12 +148,10 @@ export default function QuestionForm(props: QuestionFormType) {
                         (answerChoice) => answerChoice !== choice
                       )
                     );
-                    // setValue(
-                    //   "choices",
-                    //   watch("choices")?.filter(
-                    //     (answerChoice) => answerChoice !== choice
-                    //   )
-                    // );
+                    setValue(
+                      "choices",
+                      choices.filter((answerChoice) => answerChoice !== choice)
+                    );
                     setChoices(
                       choices.filter((answerChoice) => answerChoice !== choice)
                     );
@@ -163,6 +166,7 @@ export default function QuestionForm(props: QuestionFormType) {
             disabled={watch("choices")?.includes("")}
             onClick={(e) => {
               e.preventDefault();
+              setValue("choices", [...choices, ""]);
               setChoices([...choices, ""]);
               // setValue("choices", [...(watch("choices") as string[]), ""]);
             }}

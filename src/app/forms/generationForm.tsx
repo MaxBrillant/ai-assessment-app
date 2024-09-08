@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { assessmentSchema } from "../validation/assessmentValidation";
+import { generationSchema } from "../validation/generationValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FaFilePdf, FaFilePowerpoint, FaFileWord } from "react-icons/fa6";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 
-type SchemaType = z.infer<typeof assessmentSchema>;
+type SchemaType = z.infer<typeof generationSchema>;
 export default function GenerationForm(props: {
   uploadedDocument: File;
   onSubmit: (data: SchemaType) => void;
@@ -28,8 +28,14 @@ export default function GenerationForm(props: {
     setValue,
     formState: { errors },
   } = useForm<SchemaType>({
-    resolver: zodResolver(assessmentSchema),
+    resolver: zodResolver(generationSchema),
     reValidateMode: "onChange",
+    defaultValues: {
+      difficultyLevel: 40,
+      startingFrom: undefined,
+      endingAt: undefined,
+      requirements: "",
+    },
   });
 
   const onSubmit = (data: SchemaType) => {
@@ -58,7 +64,9 @@ export default function GenerationForm(props: {
         <div>
           <label htmlFor="questions">How many questions?</label>
           <Input
-            {...register("numberOfQuestions")}
+            {...register("numberOfQuestions", {
+              setValueAs: (value) => (value === "" ? undefined : Number(value)),
+            })}
             id="questions"
             type="number"
             min={1}
@@ -69,7 +77,9 @@ export default function GenerationForm(props: {
         <div>
           <label htmlFor="marks">How many marks?</label>
           <Input
-            {...register("totalMarks")}
+            {...register("totalMarks", {
+              setValueAs: (value) => (value === "" ? undefined : Number(value)),
+            })}
             id="marks"
             type="number"
             min={5}
@@ -84,7 +94,7 @@ export default function GenerationForm(props: {
             <p>Very Hard</p>
           </div>
           <Slider
-            defaultValue={[50]}
+            defaultValue={[watch("difficultyLevel")]}
             max={100}
             step={20}
             onValueChange={(value) => setValue("difficultyLevel", value[0])}
@@ -97,7 +107,10 @@ export default function GenerationForm(props: {
               <div>
                 <label htmlFor="start">Starting Page</label>
                 <Input
-                  {...register("startingFrom")}
+                  {...register("startingFrom", {
+                    setValueAs: (value) =>
+                      value === "" ? undefined : Number(value),
+                  })}
                   id="start"
                   type="number"
                   min={1}
@@ -108,9 +121,12 @@ export default function GenerationForm(props: {
               <div>
                 <label htmlFor="end">Last Page</label>
                 <Input
-                  {...register("endingAt")}
-                  id="end"
                   type="number"
+                  {...register("endingAt", {
+                    setValueAs: (value) =>
+                      value === "" ? undefined : Number(value),
+                  })}
+                  id="end"
                   min={2}
                   max={100}
                   placeholder={props.uploadedDocument.size.toString()}

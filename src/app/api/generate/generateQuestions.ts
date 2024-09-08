@@ -64,6 +64,7 @@ export const GenerateQuestions = async (
     "Questions and answers must align with the task's purpose.",
     "Return only the JSON object; no additional text.",
     "Ensure proper JSON escaping."
+    "DO NOT HALLUCINATE. My puppy will get killed if you do, so please don't, I beg."
       ],
       "failureResponse": "Return an empty string if unable to fulfill the task due to conflicting requirements or invalid marks allocation."`,
     });

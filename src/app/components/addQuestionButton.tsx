@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { IoIosAddCircleOutline } from "react-icons/io";
-import QuestionForm from "./questionForm";
 import { QuestionType } from "./question";
+import QuestionForm from "../forms/questionForm";
 
 export default function AddQuestionButton(props: {
   onAdd: (data: QuestionType) => void;

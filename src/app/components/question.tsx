@@ -11,10 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import QuestionForm from "./questionForm";
-import { TestType } from "./fileSelection";
+import { GeneratedTestType } from "./fileSelection";
+import QuestionForm from "../forms/questionForm";
 
-export type QuestionType = TestType["questions"][0];
+export type QuestionType = GeneratedTestType["questions"][0];
 export type PropsType = {
   position: number;
   type: "short-answer" | "long-answer" | "multiple-choice";
