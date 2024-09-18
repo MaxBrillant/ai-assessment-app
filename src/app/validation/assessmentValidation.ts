@@ -1,21 +1,31 @@
 import { z } from "zod";
+import { questionSchema } from "./questionValidation";
 
 export const assessmentSchema = z.object({
-  numberOfQuestions: z
-    .number()
-    .min(1, "The number of questions cannot be less than 1")
-    .max(20, "The number of questions cannot be more than 20"),
-  totalMarks: z
-    .number()
-    .min(5, "The total marks cannot be less than 5")
-    .max(500, "The total marks cannot be more than 500"),
+  title: z
+    .string()
+    .min(1, "The title cannot be empty")
+    .max(100, "The title cannot be more than 100 characters"),
+  questions: z
+    .array(questionSchema)
+    .min(1, "The questions array cannot be empty"),
+  context: z.string().min(1, "The context cannot be empty"),
+  duration: z.enum(["15", "30", "45", "60", "90", "120", "150", "180"]),
+  instructions: z
+    .string()
+    .max(5000, "The instructions cannot be more than 5000 characters")
+    .optional(),
+  credentials: z.array(
+    z
+      .string()
+      .min(1, "The credential title cannot be empty")
+      .max(100, "The credential title cannot be more than 100 characters")
+  ),
   difficultyLevel: z
     .number()
     .min(0, "The difficulty level cannot be less than 0")
     .max(100, "The difficulty level cannot be more than 100"),
-  startingFrom: z.number().min(1, "The starting page cannot be less than 1"),
-  endingAt: z.number().min(1, "The ending page cannot be less than 1"),
-  requirements: z
+  generationRequirements: z
     .string()
     .max(5000, "The requirements cannot be more than 5000 characters")
     .optional(),
