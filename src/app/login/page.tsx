@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginWithEmail, loginWithGoogle, verifyOTP } from "./actions";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -12,15 +12,27 @@ export default function Login() {
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [otp, setOTP] = useState<string | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const { push } = useRouter();
   const urlParams = useSearchParams();
-  const supabase = CreateBrowserClient();
 
   let redirectUrl: string | undefined;
   useEffect(() => {
     redirectUrl = urlParams.get("redirect")
       ? (urlParams.get("redirect") as string)
       : location.origin;
+
+    const checkForAuthenticatedUser = async () => {
+      const supabase = await CreateBrowserClient();
+
+      const authenticatedUser = await supabase.auth
+        .getUser()
+        .then((user) => user.data.user);
+
+      if (authenticatedUser) {
+        push(redirectUrl as string);
+      }
+    };
+    checkForAuthenticatedUser();
   }, [urlParams]);
 
   return (

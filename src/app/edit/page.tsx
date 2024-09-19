@@ -80,7 +80,7 @@ export default function Edit() {
         });
         const assessmentJson = await data.json();
         const assessmentObject: GeneratedTestType = JSON.parse(
-          (assessmentJson.assessment)
+          assessmentJson.assessment
         );
         setGeneratedAssessment(assessmentObject);
         assessmentContext.context = assessmentJson.context;
@@ -115,6 +115,10 @@ export default function Edit() {
                     assessmentContext.duration = data.duration;
                     assessmentContext.instructions = data.instructions;
                     assessmentContext.credentials = data.credentials;
+
+                    push(
+                      "/login?redirect=" + location.origin + "/edit/success"
+                    );
                   }}
                 />
               </DialogContent>
