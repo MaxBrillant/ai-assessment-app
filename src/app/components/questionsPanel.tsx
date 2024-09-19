@@ -5,7 +5,7 @@ import Question from "./question";
 import AddQuestionButton from "./addQuestionButton";
 import { AssessmentContext } from "../context/assessmentContext";
 
-type QuestionListType = {
+export type QuestionListType = {
   type: "short-answer" | "long-answer" | "multiple-choice";
   content: string;
   choices?: string[];
