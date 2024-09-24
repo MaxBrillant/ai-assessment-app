@@ -12,6 +12,8 @@ export default function Login() {
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [otp, setOTP] = useState<string | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isWaitingGoogleSignIn, setIsWaitingGoogleSignIn] = useState(false);
+
   const { push } = useRouter();
   const urlParams = useSearchParams();
 
@@ -41,9 +43,34 @@ export default function Login() {
       <button
         onClick={async () => {
           if (redirectUrl) {
-            await loginWithGoogle(redirectUrl).catch((error) => {
+            const url = await loginWithGoogle(redirectUrl).catch((error) => {
               console.log(error);
             });
+
+            if (url) {
+              const newWindow = window.open("", "_blank");
+              if (newWindow) {
+                newWindow.location.href = url;
+
+                let intervalId: NodeJS.Timeout | undefined;
+                const checkForAuthenticatedUser = async () => {
+                  const supabase = await CreateBrowserClient();
+
+                  const authenticatedUser = await supabase.auth
+                    .getUser()
+                    .then((user) => user.data.user);
+
+                  if (authenticatedUser) {
+                    clearInterval(intervalId);
+                    push(redirectUrl as string);
+                  }
+                  return () => {
+                    clearInterval(intervalId);
+                  };
+                };
+                intervalId = setInterval(checkForAuthenticatedUser, 10000);
+              }
+            }
           }
         }}
       >
