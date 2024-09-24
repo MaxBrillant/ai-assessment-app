@@ -2,8 +2,7 @@
 
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { EmailOtpType, Provider } from "@supabase/supabase-js";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache"
 
 export async function loginWithEmail(email: string) {
   const supabase = CreateServerClient();
@@ -33,7 +32,7 @@ export async function loginWithGoogle(redirectUrl: string) {
     provider: "google" as Provider,
     options: {
       redirectTo:
-        new URL(redirectUrl).origin + "/auth/callback?redirect=" + redirectUrl,
+        new URL(redirectUrl).origin + "/auth/callback?redirect=" + new URL(redirectUrl).origin+"/login/success",
     },
   };
 
@@ -42,8 +41,7 @@ export async function loginWithGoogle(redirectUrl: string) {
   if (error) {
     throw new Error(error.message);
   }
-
-  redirect(googleData.url);
+  return googleData.url
 }
 
 export async function verifyOTP(

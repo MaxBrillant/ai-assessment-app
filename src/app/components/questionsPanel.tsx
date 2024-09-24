@@ -1,9 +1,8 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Question from "./question";
 import AddQuestionButton from "./addQuestionButton";
-import { AssessmentContext } from "../context/assessmentContext";
 
 export type QuestionListType = {
   type: "short-answer" | "long-answer" | "multiple-choice";
@@ -17,14 +16,14 @@ export type QuestionListType = {
 }[];
 export default function QuestionPanel(props: {
   defaultQuestions: QuestionListType;
+  onChange: (data: QuestionListType) => void;
 }) {
   const [questions, setQuestions] = useState<QuestionListType>(
     props.defaultQuestions
   );
-  const assessmentContext = useContext(AssessmentContext);
 
   useEffect(() => {
-    assessmentContext.questions = questions;
+    props.onChange(questions);
   }, [questions]);
 
   return (
