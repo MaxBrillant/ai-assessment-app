@@ -17,6 +17,7 @@ import { QuestionListType } from "./questionsPanel";
 export type QuestionType = QuestionListType[0];
 export type PropsType = {
   position: number;
+  id: string;
   type: "short-answer" | "long-answer" | "multiple-choice";
   content: string;
   choices?: string[];

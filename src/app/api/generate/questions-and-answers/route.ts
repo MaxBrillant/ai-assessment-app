@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
             .replaceAll("\r", "")
             .replaceAll("\t", ""),
           context: randomPages.content
-            .join(" ")
+            .join("           ")
             .replaceAll("\n", "")
             .replaceAll("\r", "")
             .replaceAll("\t", ""),

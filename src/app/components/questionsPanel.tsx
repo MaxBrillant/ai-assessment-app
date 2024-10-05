@@ -5,6 +5,7 @@ import Question from "./question";
 import AddQuestionButton from "./addQuestionButton";
 
 export type QuestionListType = {
+  id: string;
   type: "short-answer" | "long-answer" | "multiple-choice";
   content: string;
   choices?: string[];
@@ -34,6 +35,7 @@ export default function QuestionPanel(props: {
             <Question
               key={index + 1}
               position={index + 1}
+              id={question.id}
               type={
                 question.type as
                   | "short-answer"

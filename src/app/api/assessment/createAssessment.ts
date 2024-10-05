@@ -1,47 +1,70 @@
 "use server";
 
+import { assessmentSchema } from "@/app/validation/assessmentValidation";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
+import { nanoid } from "nanoid";
 
 export async function CreateAssessment(formdata: FormData) {
-  const supabase = await CreateServerClient();
-  const userId = (await supabase.auth.getUser()).data.user?.id;
-
-  if (!userId) {
-    console.log(
-      "Error while creating the assessment: no authenticated user could be found"
-    );
-    return false;
-  }
-  const { error } = await CreateServerClient()
-    .from("quizzes")
-    .insert({
-      user_id: userId,
+  try {
+    assessmentSchema.parse({
       title: formdata.get("title"),
-      questions: formdata.get("questions"),
+      questions: JSON.parse(formdata.get("questions")?.toString() as string),
       context: formdata.get("context"),
-      difficulty_level: formdata.get("difficultyLevel"),
+      difficultyLevel: Number(formdata.get("difficultyLevel")?.toString()),
 
-      generation_requirements:
+      generationRequirements:
         formdata.get("requirements") === ""
-          ? null
+          ? undefined
           : formdata.get("requirements"),
 
       duration: formdata.get("duration"),
 
       instructions:
         formdata.get("instructions") === ""
-          ? null
+          ? undefined
           : formdata.get("instructions"),
-
       credentials: JSON.parse(
-        formdata.get("credentials") as string
-      ) as string[],
+        formdata.get("credentials")?.toString() as string
+      ),
     });
-
-  if (error) {
-    console.log("Error while creating the assessment: ", error);
-    return false;
+  } catch (err) {
+    console.error("Error while creating the assessment: " + err);
+    return undefined;
   }
 
-  return true;
+  const supabase = CreateServerClient();
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  const nanoId = nanoid();
+
+  if (!userId) {
+    console.error(
+      "Error while creating the assessment: no authenticated user could be found"
+    );
+    return undefined;
+  }
+  const { error } = await supabase.from("quizzes").insert({
+    nano_id: nanoId,
+    user_id: userId,
+    title: formdata.get("title"),
+    questions: formdata.get("questions"),
+    context: formdata.get("context"),
+    difficulty_level: formdata.get("difficultyLevel"),
+
+    generation_requirements:
+      formdata.get("requirements") === "" ? null : formdata.get("requirements"),
+
+    duration: formdata.get("duration"),
+
+    instructions:
+      formdata.get("instructions") === "" ? null : formdata.get("instructions"),
+
+    credentials: JSON.parse(formdata.get("credentials") as string) as string[],
+  });
+
+  if (error) {
+    console.error("Error while creating the assessment: ", error.message);
+    return undefined;
+  }
+
+  return nanoId;
 }

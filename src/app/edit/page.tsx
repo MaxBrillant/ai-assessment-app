@@ -17,6 +17,7 @@ export type GeneratedTestType = {
   title: string;
   totalMarks: number;
   questions: Array<{
+    id: string;
     type: "short-answer" | "long-answer" | "multiple-choice";
     content: string;
     choices?: string[];

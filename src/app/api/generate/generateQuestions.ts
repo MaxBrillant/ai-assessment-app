@@ -44,6 +44,7 @@ export const GenerateQuestions = async (
         "totalMarks": "number", // Total marks for all questions combined.
         "questions": [  // array of exactly ${numberOfQuestions} items (from 1 to ${numberOfQuestions})
           {
+            "id": "string", // Unique valid uuid4 identifier for each question
             "type": "short-answer" | "long-answer" | "multiple-choice", // Alternate between types; no more than two consecutive of the same type.
             "content": "string",  //Content of the question; generate it based on the difficulty and content provided
             "choices": ["string"], // Only for "multiple-choice" type questions.
