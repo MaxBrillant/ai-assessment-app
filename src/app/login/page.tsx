@@ -7,12 +7,14 @@ import { loginWithEmail, loginWithGoogle, verifyOTP } from "./actions";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CreateBrowserClient } from "@/utils/supabase/browserClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [otp, setOTP] = useState<string | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isWaitingGoogleSignIn, setIsWaitingGoogleSignIn] = useState(false);
+  const { toast } = useToast();
 
   const { push } = useRouter();
   const urlParams = useSearchParams();
@@ -20,7 +22,9 @@ export default function Login() {
   let redirectUrl: string | undefined;
   useEffect(() => {
     redirectUrl = urlParams.get("redirect")
-      ? (urlParams.get("redirect") as string)
+      ? urlParams.get("redirect")?.includes("http")
+        ? (urlParams.get("redirect") as string)
+        : location.origin + (urlParams.get("redirect") as string)
       : location.origin;
 
     const checkForAuthenticatedUser = async () => {
@@ -44,7 +48,12 @@ export default function Login() {
         onClick={async () => {
           if (redirectUrl) {
             const url = await loginWithGoogle(redirectUrl).catch((error) => {
-              console.log(error);
+              toast({
+                description:
+                  "Something went wrong while logging in with Google",
+                title: "Error",
+                variant: "destructive",
+              });
             });
 
             if (url) {
@@ -94,7 +103,12 @@ export default function Login() {
                 setIsDialogOpen(true);
               })
               .catch((error) => {
-                console.log(error);
+                toast({
+                  description:
+                    "Something went wrong while logging in with email",
+                  title: "Error",
+                  variant: "destructive",
+                });
               });
           }
         }}
@@ -116,7 +130,11 @@ export default function Login() {
             onClick={async () => {
               if (redirectUrl && email && otp) {
                 await verifyOTP(email, otp, redirectUrl).catch((error) => {
-                  console.log(error);
+                  toast({
+                    description: "Something went wrong while verifying OTP",
+                    title: "Error",
+                    variant: "destructive",
+                  });
                 });
               }
             }}

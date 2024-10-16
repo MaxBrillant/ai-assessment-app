@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { MdDeleteOutline } from "react-icons/md";
 import { z } from "zod";
 import { assessmentSchema } from "../validation/assessmentValidation";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 const rulesSchema = assessmentSchema.pick({
   title: true,
@@ -18,7 +17,8 @@ const rulesSchema = assessmentSchema.pick({
 });
 type RulesSchemaType = z.infer<typeof rulesSchema>;
 type propsType = {
-  title: string;
+  defaultValues: RulesSchemaType;
+  mode: "create" | "update";
   onSubmit: (data: RulesSchemaType) => void;
 };
 export default function RulesForm(props: propsType) {
@@ -31,8 +31,10 @@ export default function RulesForm(props: propsType) {
   } = useForm<RulesSchemaType>({
     resolver: zodResolver(rulesSchema),
     defaultValues: {
-      duration: "60",
-      credentials: ["Full name", "Student ID"],
+      title: props.defaultValues.title,
+      instructions: props.defaultValues.instructions,
+      duration: props.defaultValues.duration,
+      credentials: props.defaultValues.credentials,
     },
     reValidateMode: "onChange",
   });
@@ -59,7 +61,7 @@ export default function RulesForm(props: propsType) {
         <label htmlFor="title">Title</label>
         <Input
           {...register("title")}
-          defaultValue={props.title}
+          defaultValue={watch("title")}
           id="title"
           placeholder="Write the title here"
         />
@@ -85,13 +87,21 @@ export default function RulesForm(props: propsType) {
       <div className="flex flex-col">
         <label htmlFor="instructions">Instructions</label>
         <Textarea
-          {...register("instructions")}
+          {...register("instructions", {
+            setValueAs: (value) => (value === "" ? undefined : value),
+          })}
           id="instructions"
+          defaultValue={watch("instructions")}
           placeholder="Write instructions here"
         />
       </div>
       <div className="flex flex-col gap-1">
         <p>Credentials</p>
+        {props.mode === "update" && (
+          <p>
+            You cannot edit or delete credentials once the assessment is created
+          </p>
+        )}
         {watch("credentials")?.map((credential, index) => {
           return (
             <div className="flex flex-row justify-between" key={index}>
@@ -99,6 +109,7 @@ export default function RulesForm(props: propsType) {
                 value={credential}
                 autoFocus={credential === ""}
                 placeholder="Enter a credential"
+                disabled={props.mode === "update"}
                 onChange={(e) =>
                   setValue(
                     "credentials",
@@ -108,28 +119,34 @@ export default function RulesForm(props: propsType) {
                   )
                 }
               />
-              <Button
-                size={"icon"}
-                variant={"outline"}
-                className="aspect-square"
-                onClick={() =>
-                  setValue(
-                    "credentials",
-                    watch("credentials")?.filter((_, i) => i !== index)
-                  )
-                }
-              >
-                <MdDeleteOutline className="w-6 h-6" />
-              </Button>
+              {props.mode === "create" && (
+                <Button
+                  size={"icon"}
+                  variant={"outline"}
+                  className="aspect-square"
+                  onClick={() =>
+                    setValue(
+                      "credentials",
+                      watch("credentials")?.filter((_, i) => i !== index)
+                    )
+                  }
+                >
+                  <MdDeleteOutline className="w-6 h-6" />
+                </Button>
+              )}
             </div>
           );
         })}
-        <Button
-          variant={"outline"}
-          onClick={() => setValue("credentials", [...watch("credentials"), ""])}
-        >
-          Add a credential
-        </Button>
+        {props.mode === "create" && (
+          <Button
+            variant={"outline"}
+            onClick={() =>
+              setValue("credentials", [...watch("credentials"), ""])
+            }
+          >
+            Add a credential
+          </Button>
+        )}
       </div>
 
       {errorMessages.length > 0 && (
@@ -139,7 +156,7 @@ export default function RulesForm(props: propsType) {
           ))}
         </div>
       )}
-      <Button type="submit">Publish</Button>
+      <Button type="submit">{props.mode === "create" ? "Publish" : "Update"}</Button>
     </form>
   );
 }
