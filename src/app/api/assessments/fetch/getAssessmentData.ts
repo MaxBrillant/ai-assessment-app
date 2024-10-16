@@ -12,13 +12,17 @@ type AssessmentDataType = {
   instructions: string | undefined;
   credentials: string[];
   questions: string;
+  modified_at: Date;
 }[];
 export default async function getAssessmentData(nanoId: string) {
   const supabase = CreateServerClient();
+
+  console.log("Fetching assessment data for assessment of nano ID " + nanoId);
+
   const { data, error } = await supabase
-    .from("quizzes")
+    .from("assessments")
     .select(
-      "id, nano_id, user_id, title, questions, duration, instructions, credentials"
+      "id, nano_id, title, questions, duration, instructions, credentials, modified_at"
     )
     .eq("nano_id", nanoId)
     .returns<AssessmentDataType>();
@@ -32,6 +36,8 @@ export default async function getAssessmentData(nanoId: string) {
     return undefined;
   }
 
+  console.log("Parsing questions...");
+
   const schema = questionSchema;
   const questionsObject: z.infer<typeof schema>[] = JSON.parse(
     data[0].questions
@@ -42,6 +48,10 @@ export default async function getAssessmentData(nanoId: string) {
     return questionWithoutAnswer;
   });
 
+  console.log("Questions parsed");
+
+  console.log("Successfully fetched assessment data");
+
   return {
     id: data[0].id,
     nanoId: data[0].nano_id,
@@ -50,5 +60,6 @@ export default async function getAssessmentData(nanoId: string) {
     instructions: data[0].instructions,
     credentials: data[0].credentials,
     questions: questionsWithoutAnswers,
+    modifiedAt: data[0].modified_at,
   };
 }

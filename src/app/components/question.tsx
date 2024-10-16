@@ -2,7 +2,6 @@
 import { FaCheckSquare } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
 import { MdCheckBoxOutlineBlank, MdMoreVert } from "react-icons/md";
-import { TbReload } from "react-icons/tb";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +29,14 @@ export type PropsType = {
   onDelete: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onQuestionGenerationRequest: (
+    currentlySelectedType: "short-answer" | "multiple-choice" | "long-answer"
+  ) => void;
+  onAnswerGenerationRequest: (
+    currentAnswer: string | undefined,
+    currentQuestion: string,
+    currentlySelectedType: "short-answer" | "long-answer"
+  ) => void;
 };
 export default function Question(props: PropsType) {
   const [isEditing, setIsEditing] = useState(false);
@@ -39,6 +46,22 @@ export default function Question(props: PropsType) {
       {...props}
       onSubmit={(data) => {
         props.onEdit(data);
+        setIsEditing(false);
+      }}
+      onQuestionGenerationRequest={(currentlySelectedType) => {
+        props.onQuestionGenerationRequest(currentlySelectedType);
+        setIsEditing(false);
+      }}
+      onAnswerGenerationRequest={(
+        currentAnswer,
+        currentQuestion,
+        currentlySelectedType
+      ) => {
+        props.onAnswerGenerationRequest(
+          currentAnswer,
+          currentQuestion,
+          currentlySelectedType
+        );
         setIsEditing(false);
       }}
     />
@@ -95,10 +118,6 @@ export default function Question(props: PropsType) {
         <p className="text-sm text-black/70">{props.marks} marks</p>
       </div>
       <div className="flex flex-wrap gap-5">
-        <button className="flex flex-row items-center gap-1">
-          <TbReload />
-          Regenerate
-        </button>
         <button
           className="flex flex-row items-center gap-1"
           onClick={() => setIsEditing(true)}
@@ -112,10 +131,6 @@ export default function Question(props: PropsType) {
           <p>Answer</p>
           <p className="text-sm text-black/70">{props.answer.content}</p>
           <div className="flex flex-wrap gap-5">
-            <button className="flex flex-row items-center gap-1">
-              <TbReload />
-              Regenerate
-            </button>
             <button
               className="flex flex-row items-center gap-1"
               onClick={() => setIsEditing(true)}

@@ -3,6 +3,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 type editorProps = {
+  id: string;
   value: string | undefined;
   onChange: (value: string) => void;
 };
@@ -22,6 +23,8 @@ export default function TextEditor(props: editorProps) {
 
   return (
     <ReactQuill
+      id={props.id}
+      key={props.id}
       modules={{ toolbar: toolbarOptions }}
       theme="snow"
       value={props.value}

@@ -3,7 +3,7 @@ import { Document } from "langchain/document";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { loadQAStuffChain } from "langchain/chains";
 
-export const GenerateQuestions = async (
+export const generateAssessment = async (
   numberOfQuestions: number,
   content: string[],
   marks: number,

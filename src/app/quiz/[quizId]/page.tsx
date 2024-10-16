@@ -1,67 +1,101 @@
-import getAssessmentData from "@/app/api/assessment/getAssessmentData";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
-import QuizForm from "./quizForm";
+import AssessmentForm from "./assessmentForm";
 import CountdownTimer from "@/app/components/countDownTimer";
-import QuizOverview from "./quizOverview";
-import getSubmissionData from "@/app/api/assessment/getSubmissionData";
+import AssessmentOverview from "./assessmentOverview";
 import Link from "next/link";
+import StartResubmissionDialog from "./startResubmissionDialog";
+import InstructionsDialog from "./instructionsDialog";
+import getAssessmentData from "@/app/api/assessments/fetch/getAssessmentData";
+import getSubmissionData from "@/app/api/submissions/fetch/getSubmissionData";
 
 export default async function Page({
   params,
   searchParams,
 }: {
-  params: { quizId: string };
+  params: { assessmentId: string };
   searchParams: { submissionId: string | undefined };
 }) {
-  const quizNanoId = params.quizId;
+  const assessmentNanoId = params.assessmentId;
 
-  const quizData = await getAssessmentData(quizNanoId);
+  const assessmentData = await getAssessmentData(assessmentNanoId);
 
   const submissionData =
-    quizData && searchParams.submissionId
-      ? await getSubmissionData(quizData?.id, searchParams.submissionId)
+    assessmentData && searchParams.submissionId
+      ? await getSubmissionData(assessmentData?.id, searchParams.submissionId)
       : undefined;
 
-  if (!quizData) {
+  if (!assessmentData) {
     return notFound();
   }
 
   return (
     <div>
       {!searchParams.submissionId && (
-        <QuizOverview
-          id={quizData.id}
-          title={quizData.title}
-          duration={quizData.duration}
-          instructions={quizData.instructions}
-          credentials={quizData.credentials}
+        <AssessmentOverview
+          id={assessmentData.id}
+          creatorEmail={"Tuzobimenya hanyuma"}
+          title={assessmentData.title}
+          duration={assessmentData.duration}
+          instructions={assessmentData.instructions}
+          credentials={assessmentData.credentials}
         />
       )}
       <div className="flex flex-col p-4 border-b border-black">
-        <p className="text-2xl font-semibold">{quizData.title}</p>
+        <p className="text-2xl font-semibold">{assessmentData.title}</p>
         <p>Total marks: 50 marks</p>
-        <Button variant={"link"} className="w-fit underline">
-          Read instructions
-        </Button>
-        {submissionData && (
+        {assessmentData.instructions ? (
+          <InstructionsDialog instructions={assessmentData.instructions} />
+        ) : (
+          <p>No instructions provided</p>
+        )}
+        {submissionData && submissionData.submissionStatus !== "submitted" && (
           <CountdownTimer
-            assessmentCreationTime={new Date(submissionData.created_at)}
-            assessmentDuration={quizData.duration * 60}
+            id={submissionData.id}
+            assessmentCreationTime={
+              submissionData.submissionStatus === "resubmission-allowed" &&
+              submissionData.resubmissionStartedAt
+                ? new Date(submissionData.resubmissionStartedAt)
+                : new Date(submissionData.created_at)
+            }
+            assessmentDuration={assessmentData.duration * 60}
             submissionStatus={submissionData.submissionStatus}
           />
         )}
       </div>
+
+      {submissionData &&
+        submissionData.submissionTime &&
+        submissionData.submissionStatus === "submitted" &&
+        assessmentData.modifiedAt > submissionData.submissionTime && (
+          <StartResubmissionDialog id={submissionData.id} />
+        )}
+
       {submissionData ? (
-        <QuizForm
-          id={submissionData.id}
-          questions={quizData.questions}
-          defaultValues={submissionData.answers}
-        />
+        submissionData.submissionStatus === "resubmission-allowed" ? (
+          <AssessmentForm
+            id={submissionData.id}
+            questions={assessmentData.questions.filter(
+              (question) =>
+                !submissionData.answers.some(
+                  (answer) => answer.questionId === question.id
+                )
+            )}
+            defaultValues={submissionData.answers}
+            submissionStatus={submissionData.submissionStatus}
+          />
+        ) : (
+          <AssessmentForm
+            id={submissionData.id}
+            questions={assessmentData.questions}
+            defaultValues={submissionData.answers}
+            submissionStatus={submissionData.submissionStatus}
+          />
+        )
       ) : (
         <div>
           <p>Please begin the assessment to access the questions</p>
-          <Link href={`/quiz/${quizNanoId}`}>
+          <Link href={`/quiz/${assessmentNanoId}`}>
             <Button>Begin the assessment</Button>
           </Link>
         </div>

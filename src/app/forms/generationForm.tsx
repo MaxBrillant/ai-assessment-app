@@ -135,7 +135,9 @@ export default function GenerationForm(props: {
               <div className="col-span-2">
                 <label htmlFor="requirements">Any special requirements?</label>
                 <Textarea
-                  {...register("requirements")}
+                  {...register("requirements", {
+                    setValueAs: (value) => (value === "" ? undefined : value),
+                  })}
                   id="requirements"
                   placeholder="Write any special requirements here"
                 />

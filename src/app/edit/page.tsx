@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import QuestionPanel from "../components/questionsPanel";
 import RulesForm from "../forms/rulesForm";
 import Link from "next/link";
-import { CreateAssessment } from "../api/assessment/createAssessment";
+import { createAssessment } from "../api/assessments/mutations";
+import { useToast } from "@/hooks/use-toast";
 
 export type GeneratedTestType = {
   title: string;
@@ -36,6 +37,7 @@ export default function Edit() {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const { push } = useRouter();
   const urlParams = useSearchParams();
+  const { toast } = useToast();
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -77,16 +79,24 @@ export default function Edit() {
         formData.append("startingFrom", String(assessmentContext.startingFrom));
         formData.append("endingAt", String(assessmentContext.endingAt));
 
-        const data = await fetch("/api/generate/questions-and-answers", {
-          method: "POST",
-          body: formData,
-        });
-        const assessmentJson = await data.json();
-        const assessmentObject: GeneratedTestType = JSON.parse(
-          assessmentJson.assessment
-        );
-        setGeneratedAssessment(assessmentObject);
-        assessmentContext.context = assessmentJson.context;
+        try {
+          const data = await fetch("/api/generate/assessment", {
+            method: "POST",
+            body: formData,
+          });
+          const assessmentJson = await data.json();
+          const assessmentObject: GeneratedTestType = JSON.parse(
+            assessmentJson.assessment
+          );
+          setGeneratedAssessment(assessmentObject);
+          assessmentContext.context = assessmentJson.context;
+        } catch (err) {
+          toast({
+            description: "Something went wrong while generating the assessment",
+            title: "Error",
+            variant: "destructive",
+          });
+        }
       };
 
       const createNewAssessment = async () => {
@@ -114,10 +124,18 @@ export default function Edit() {
           "credentials",
           JSON.stringify(assessmentContext.credentials)
         );
-        const isAssessmentCreated = await CreateAssessment(formData);
+        const newAssessmentNanoId = await createAssessment(formData);
 
-        if (isAssessmentCreated) {
-          window.alert("Assessment created successfully");
+        if (newAssessmentNanoId) {
+          toast({
+            title: "Assessment created successfully",
+          });
+        } else {
+          toast({
+            description: "Something went wrong while creating the assessment",
+            title: "Error",
+            variant: "destructive",
+          });
         }
       };
       if (urlParams.get("create") && urlParams.get("create") === "true") {
@@ -151,7 +169,13 @@ export default function Edit() {
                 </DialogTrigger>
                 <DialogContent className="max-h-[100vh] overflow-auto">
                   <RulesForm
-                    title={generatedAssessment.title}
+                    defaultValues={{
+                      title: generatedAssessment.title,
+                      instructions: undefined,
+                      duration: "60",
+                      credentials: ["Full name", "Student ID"],
+                    }}
+                    mode="create"
                     onSubmit={(data) => {
                       assessmentContext.title = data.title;
                       assessmentContext.duration = data.duration;
@@ -170,6 +194,9 @@ export default function Edit() {
             </div>
             <QuestionPanel
               defaultQuestions={generatedAssessment.questions}
+              context={assessmentContext.context}
+              difficultyLevel={assessmentContext.difficultyLevel}
+              requirements={assessmentContext.requirements}
               onChange={(questions) => {
                 assessmentContext.questions = questions;
               }}

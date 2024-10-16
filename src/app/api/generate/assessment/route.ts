@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ProcessFile } from "../processFile";
-import { GenerateQuestions } from "../generateQuestions";
+import { generateAssessment } from "./generateAssessment";
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     console.log(
       `Generating assessment from pages: ${randomPages.pages.join(", ")} ...`
     );
-    const assessment = await GenerateQuestions(
+    const assessment = await generateAssessment(
       numberOfQuestions,
       randomPages.content,
       marks,

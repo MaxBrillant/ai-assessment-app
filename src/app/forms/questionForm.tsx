@@ -4,15 +4,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
 import { questionSchema } from "../validation/questionValidation";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MdDeleteOutline } from "react-icons/md";
 import { QuestionType } from "../components/question";
+import { TbReload } from "react-icons/tb";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
 type QuestionFormType = QuestionType & {
   onSubmit: (data: QuestionSchemaType) => void;
+  onQuestionGenerationRequest: (
+    currentlySelectedType: "short-answer" | "multiple-choice" | "long-answer"
+  ) => void;
+  onAnswerGenerationRequest: (
+    currentAnswer: string | undefined,
+    currentQuestion: string,
+    currentlySelectedType: "short-answer" | "long-answer"
+  ) => void;
 };
 export default function QuestionForm(props: QuestionFormType) {
   const {
@@ -37,6 +46,7 @@ export default function QuestionForm(props: QuestionFormType) {
       setValue("answer.choices", undefined);
     } else {
       setValue("answer.content", undefined);
+      setValue("choices", choices);
       setValue(
         "answer.choices",
         watch("answer.choices") ? watch("answer.choices") : []
@@ -66,6 +76,14 @@ export default function QuestionForm(props: QuestionFormType) {
   });
 
   const onSubmit = (data: QuestionSchemaType) => {
+    if (
+      data.content !== props.content &&
+      (data.answer.content !== props.answer.content ||
+        data.answer.choices !== props.answer.choices)
+    ) {
+      const uuid = crypto.randomUUID();
+      data.id = uuid;
+    }
     props.onSubmit(data);
   };
 
@@ -87,6 +105,17 @@ export default function QuestionForm(props: QuestionFormType) {
           e.target.style.height = `${e.target.scrollHeight + 2}px`;
         }}
       />
+
+      <button
+        className="flex flex-row items-center gap-1"
+        onClick={(e) => {
+          e.preventDefault();
+          props.onQuestionGenerationRequest(watch("type"));
+        }}
+      >
+        <TbReload />
+        Generate with AI
+      </button>
       {watch("type") === "multiple-choice" && (
         <ul className="space-y-2">
           {choices.map((choice, index) => {
@@ -197,6 +226,27 @@ export default function QuestionForm(props: QuestionFormType) {
               e.target.style.height = `${e.target.scrollHeight + 2}px`;
             }}
           />
+
+          {watch("content") &&
+            (watch("type") === "short-answer" ||
+              watch("type") === "long-answer") && (
+              <button
+                className="flex flex-row items-center gap-1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (watch("content")) {
+                    props.onAnswerGenerationRequest(
+                      watch("answer.content"),
+                      watch("content"),
+                      watch("type") as "short-answer" | "long-answer"
+                    );
+                  }
+                }}
+              >
+                <TbReload />
+                Generate with AI
+              </button>
+            )}
         </div>
       )}
       {errorMessages.length > 0 && (

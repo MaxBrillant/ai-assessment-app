@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const questionSchema = z
   .object({
-    id: z.number(),
+    id: z.string(),
     type: z.enum(["short-answer", "long-answer", "multiple-choice"]),
     content: z
       .string()

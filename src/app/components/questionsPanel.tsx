@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import Question from "./question";
 import AddQuestionButton from "./addQuestionButton";
+import { generateQuestion } from "../api/generate/question/generateQuestion";
+import { generateAnswer } from "../api/generate/answer/generateAnswer";
+import { useToast } from "@/hooks/use-toast";
 
 export type QuestionListType = {
   id: string;
@@ -17,11 +20,15 @@ export type QuestionListType = {
 }[];
 export default function QuestionPanel(props: {
   defaultQuestions: QuestionListType;
+  context: string;
+  difficultyLevel: number;
+  requirements: string | undefined;
   onChange: (data: QuestionListType) => void;
 }) {
   const [questions, setQuestions] = useState<QuestionListType>(
     props.defaultQuestions
   );
+  const { toast } = useToast();
 
   useEffect(() => {
     props.onChange(questions);
@@ -75,11 +82,127 @@ export default function QuestionPanel(props: {
                   setQuestions([...props.defaultQuestions]);
                 }
               }}
+              onQuestionGenerationRequest={async (
+                currentlySelectedType:
+                  | "short-answer"
+                  | "multiple-choice"
+                  | "long-answer"
+              ) => {
+                const generatedQuestion = await generateQuestion(
+                  question.content ? question.content : "No question",
+                  currentlySelectedType,
+                  props.context,
+                  props.difficultyLevel,
+                  props.requirements
+                );
+                if (generatedQuestion) {
+                  props.defaultQuestions[index] = generatedQuestion;
+                  setQuestions([...props.defaultQuestions]);
+                } else {
+                  toast({
+                    description:
+                      "Something went wrong while generating the question",
+                    title: "Error",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              onAnswerGenerationRequest={async (
+                currentAnswer,
+                currentQuestion,
+                currentlySelectedType
+              ) => {
+                const generatedAnswer = await generateAnswer(
+                  currentAnswer ? currentAnswer : "No answer",
+                  currentlySelectedType,
+                  currentQuestion,
+                  props.context
+                );
+                if (generatedAnswer) {
+                  props.defaultQuestions[index].answer.content =
+                    generatedAnswer.answer;
+
+                  props.defaultQuestions[index].choices = undefined;
+
+                  props.defaultQuestions[index].answer.choices = undefined;
+
+                  props.defaultQuestions[index].type = currentlySelectedType;
+
+                  props.defaultQuestions[index].content = currentQuestion;
+                  props.defaultQuestions[index].marks = generatedAnswer.marks;
+                  setQuestions([...props.defaultQuestions]);
+                } else {
+                  toast({
+                    description:
+                      "Something went wrong while generating the answer",
+                    title: "Error",
+                    variant: "destructive",
+                  });
+                }
+              }}
             />
             <AddQuestionButton
               onAdd={(data) => {
                 props.defaultQuestions.splice(index + 1, 0, data);
                 setQuestions([...props.defaultQuestions]);
+              }}
+              onQuestionGenerationRequest={async (
+                currentlySelectedType:
+                  | "short-answer"
+                  | "multiple-choice"
+                  | "long-answer"
+              ) => {
+                const generatedQuestion = await generateQuestion(
+                  question.content ? question.content : "No question",
+                  currentlySelectedType,
+                  props.context,
+                  props.difficultyLevel,
+                  props.requirements
+                );
+                if (generatedQuestion) {
+                  props.defaultQuestions[index] = generatedQuestion;
+                  setQuestions([...props.defaultQuestions]);
+                } else {
+                  toast({
+                    description:
+                      "Something went wrong while generating the question",
+                    title: "Error",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              onAnswerGenerationRequest={async (
+                currentAnswer,
+                currentQuestion,
+                currentlySelectedType
+              ) => {
+                const generatedAnswer = await generateAnswer(
+                  currentAnswer ? currentAnswer : "No answer",
+                  currentlySelectedType,
+                  currentQuestion,
+                  props.context
+                );
+                if (generatedAnswer) {
+                  props.defaultQuestions[index].answer.content =
+                    generatedAnswer.answer;
+
+                  props.defaultQuestions[index].choices = undefined;
+
+                  props.defaultQuestions[index].answer.choices = undefined;
+
+                  props.defaultQuestions[index].type = currentlySelectedType;
+
+                  props.defaultQuestions[index].content = currentQuestion;
+                  props.defaultQuestions[index].marks = generatedAnswer.marks;
+                  setQuestions([...props.defaultQuestions]);
+                } else {
+                  toast({
+                    description:
+                      "Something went wrong while generating the answer",
+                    title: "Error",
+                    variant: "destructive",
+                  });
+                }
               }}
             />
           </div>
