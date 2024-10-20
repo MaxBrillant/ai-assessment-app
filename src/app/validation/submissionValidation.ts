@@ -32,3 +32,22 @@ export const submissionSchema = z.object({
 
 const answersSchema = submissionSchema.pick({ submission: true });
 export type answersType = z.infer<typeof answersSchema>["submission"];
+
+export const gradeSchema = z
+  .object({
+    marks: submissionSchema.shape.submission.element.shape.marks,
+    comment: submissionSchema.shape.submission.element.shape.comment,
+  })
+  .refine(
+    (data) => {
+      if (data.marks == undefined && data.comment) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+    {
+      message: `You must give marks in order to leave a comment`,
+      path: ["marks"],
+    }
+  );

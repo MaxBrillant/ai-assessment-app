@@ -18,35 +18,34 @@ export async function gradeSubmission(
       "..."
   );
 
-  await Promise.all(
-    answers.map(async (answer, index) => {
-      const question = questions.find(
-        (question) => question.id === answer.questionId
+  for (let index = 0; index < answers.length; index++) {
+    const answer = answers[index];
+    const question = questions.find(
+      (q) => q.id === answer.questionId && answer.marks == undefined
+    );
+
+    if (question) {
+      const grade = await gradeAnswer(
+        question.content,
+        question.type === "multiple-choice"
+          ? question.answer.choices?.join(",") ?? ""
+          : question.answer.content ?? "",
+        question.type === "multiple-choice"
+          ? answer.choices?.join(",") ?? ""
+          : answer.content ?? "",
+        question.marks
       );
 
-      if (question) {
-        const grade = await gradeAnswer(
-          question.content,
-          question.type === "multiple-choice"
-            ? question.answer.choices?.join(",") ?? ""
-            : question.answer.content ?? "",
-          question.type === "multiple-choice"
-            ? answer.choices?.join(",") ?? ""
-            : answer.content ?? "",
-          question.marks
+      if (grade) {
+        answers[index].marks = grade.receivedMarks;
+        answers[index].comment = grade.comment;
+      } else {
+        console.error(
+          "Something went wrong while grading answer number " + (index + 1)
         );
-
-        if (grade) {
-          answers[index].marks = grade.receivedMarks;
-          answers[index].comment = grade.comment;
-        } else {
-          console.error(
-            "Something went wrong while grading answer number " + (index + 1)
-          );
-        }
       }
-    })
-  );
+    }
+  }
 
   console.log("Updating the submission...");
 

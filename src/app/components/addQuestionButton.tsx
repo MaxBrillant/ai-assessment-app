@@ -3,18 +3,12 @@ import { useState } from "react";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { QuestionType } from "./question";
 import QuestionForm from "../forms/questionForm";
-import { randomUUID } from "crypto";
 
 export default function AddQuestionButton(props: {
   onAdd: (data: QuestionType) => void;
-  onQuestionGenerationRequest: (
-    currentlySelectedType: "short-answer" | "multiple-choice" | "long-answer"
-  ) => void;
-  onAnswerGenerationRequest: (
-    currentAnswer: string | undefined,
-    currentQuestion: string,
-    currentlySelectedType: "short-answer" | "long-answer"
-  ) => void;
+  context: string;
+  difficultyLevel: number;
+  requirements: string | undefined;
 }) {
   const [isAdding, setIsAdding] = useState(false);
 
@@ -27,16 +21,11 @@ export default function AddQuestionButton(props: {
       answer={{
         content: "",
       }}
+      context={props.context}
+      difficultyLevel={props.difficultyLevel}
+      requirements={props.requirements}
       onSubmit={(data) => {
         props.onAdd(data);
-        setIsAdding(false);
-      }}
-      onQuestionGenerationRequest={(currentlySelectedType) => {
-        props.onQuestionGenerationRequest(currentlySelectedType);
-        setIsAdding(false);
-      }}
-      onAnswerGenerationRequest={(currentAnswer, currentQuestion, currentlySelectedType) => {
-        props.onAnswerGenerationRequest(currentAnswer, currentQuestion, currentlySelectedType);
         setIsAdding(false);
       }}
     />

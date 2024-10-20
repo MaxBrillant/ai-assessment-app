@@ -9,7 +9,8 @@ export const generateQuestion = async (
   type: "short-answer" | "multiple-choice" | "long-answer",
   context: string,
   difficultyLevel: number,
-  requirements: string | undefined
+  requirements: string | undefined,
+  newRequirement: string
 ) => {
   try {
     // const model = new ChatGroq({
@@ -55,7 +56,8 @@ export const generateQuestion = async (
           },
       "guidelines": [
     "Difficulty level: ${difficultyLevel}% (0% = very easy, 100% = very hard). Adjust marks accordingly.",
-    "Requirements: ${requirements}",
+    "Requirements that were used to generate the previous question: ${requirements}",
+    "Newly provided requirements: ${newRequirement}",
     "Vary marks per question based on difficulty and content; avoid uniform marking.",
     "Questions and answers must align with the task's purpose.",
     "Return only the JSON object; no additional text.",

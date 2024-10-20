@@ -36,6 +36,7 @@ export default function RulesForm(props: propsType) {
       duration: props.defaultValues.duration,
       credentials: props.defaultValues.credentials,
     },
+    mode: "onChange",
     reValidateMode: "onChange",
   });
 
@@ -156,7 +157,9 @@ export default function RulesForm(props: propsType) {
           ))}
         </div>
       )}
-      <Button type="submit">{props.mode === "create" ? "Publish" : "Update"}</Button>
+      <Button type="submit">
+        {props.mode === "create" ? "Publish" : "Update"}
+      </Button>
     </form>
   );
 }

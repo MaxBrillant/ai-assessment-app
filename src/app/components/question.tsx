@@ -25,18 +25,13 @@ export type PropsType = {
     content?: string;
     choices?: string[];
   };
+  context: string;
+  difficultyLevel: number;
+  requirements: string | undefined;
   onEdit: (data: QuestionType) => void;
   onDelete: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
-  onQuestionGenerationRequest: (
-    currentlySelectedType: "short-answer" | "multiple-choice" | "long-answer"
-  ) => void;
-  onAnswerGenerationRequest: (
-    currentAnswer: string | undefined,
-    currentQuestion: string,
-    currentlySelectedType: "short-answer" | "long-answer"
-  ) => void;
 };
 export default function Question(props: PropsType) {
   const [isEditing, setIsEditing] = useState(false);
@@ -48,52 +43,72 @@ export default function Question(props: PropsType) {
         props.onEdit(data);
         setIsEditing(false);
       }}
-      onQuestionGenerationRequest={(currentlySelectedType) => {
-        props.onQuestionGenerationRequest(currentlySelectedType);
-        setIsEditing(false);
-      }}
-      onAnswerGenerationRequest={(
-        currentAnswer,
-        currentQuestion,
-        currentlySelectedType
-      ) => {
-        props.onAnswerGenerationRequest(
-          currentAnswer,
-          currentQuestion,
-          currentlySelectedType
-        );
-        setIsEditing(false);
-      }}
     />
   ) : (
     <div
-      className="relative max-w-md flex flex-col gap-5 p-5 rounded-2xl border border-black"
+      className="relative max-w-md flex flex-col rounded-lg border border-black overflow-clip"
       onBlur={() => setIsEditing(false)}
     >
-      <p>Question {props.position}</p>
+      <div className="flex flex-col p-5 gap-3">
+        <p>
+          Question {props.position}
+          <span className="text-sm text-gray-500">
+            {" • "}
+            {props.type === "multiple-choice"
+              ? "Multiple Choice"
+              : props.type === "long-answer"
+              ? "Long Answer"
+              : "Short Answer"}
+          </span>
+        </p>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger className="absolute right-5 space-x-2">
-          <MdMoreVert className="w-6 h-6 rounded-full" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => props.onMoveUp()}>
-            Move up
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => props.onMoveDown()}>
-            Move down
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => props.onDelete()}>
-            Remove
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="absolute right-5 space-x-2">
+            <MdMoreVert className="w-6 h-6 rounded-full" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => props.onMoveUp()}>
+              Move up
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => props.onMoveDown()}>
+              Move down
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => props.onDelete()}>
+              Remove
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-      <div>
         <p className="text-lg font-medium">{props.content}</p>
+        <p className="text-sm text-black/70">{props.marks} marks</p>
+        <button
+          className="flex flex-row items-center gap-1"
+          onClick={() => setIsEditing(true)}
+        >
+          <FiEdit />
+          Edit
+        </button>
+      </div>
+      <div className="p-5 border-t border-gray-300">
+        {props.answer.content && (
+          <div className="space-y-2">
+            <p>Answer</p>
+            <p className="text-sm text-black/70">{props.answer.content}</p>
+            <div className="flex flex-wrap gap-5">
+              <button
+                className="flex flex-row items-center gap-1"
+                onClick={() => setIsEditing(true)}
+              >
+                <FiEdit />
+                Edit
+              </button>
+            </div>
+          </div>
+        )}
+
         {props.choices && (
-          <ul className="p-3 space-y-2">
+          <ul className="space-y-2">
             {props.choices?.map((choice) => {
               return (
                 <li
@@ -115,32 +130,7 @@ export default function Question(props: PropsType) {
             })}
           </ul>
         )}
-        <p className="text-sm text-black/70">{props.marks} marks</p>
       </div>
-      <div className="flex flex-wrap gap-5">
-        <button
-          className="flex flex-row items-center gap-1"
-          onClick={() => setIsEditing(true)}
-        >
-          <FiEdit />
-          Edit
-        </button>
-      </div>
-      {props.answer.content && (
-        <div className="p-3 space-y-2 bg-lime-100/80 rounded-2xl border border-black/30">
-          <p>Answer</p>
-          <p className="text-sm text-black/70">{props.answer.content}</p>
-          <div className="flex flex-wrap gap-5">
-            <button
-              className="flex flex-row items-center gap-1"
-              onClick={() => setIsEditing(true)}
-            >
-              <FiEdit />
-              Edit
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
