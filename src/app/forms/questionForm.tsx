@@ -10,18 +10,17 @@ import { Button } from "@/components/ui/button";
 import { MdDeleteOutline } from "react-icons/md";
 import { QuestionType } from "../components/question";
 import { TbReload } from "react-icons/tb";
+import GeneratePopover from "./generatePopover";
+import { useToast } from "@/hooks/use-toast";
+import { generateQuestion } from "../api/generate/question/generateQuestion";
+import { generateAnswer } from "../api/generate/answer/generateAnswer";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
 type QuestionFormType = QuestionType & {
+  context: string;
+  difficultyLevel: number;
+  requirements: string | undefined;
   onSubmit: (data: QuestionSchemaType) => void;
-  onQuestionGenerationRequest: (
-    currentlySelectedType: "short-answer" | "multiple-choice" | "long-answer"
-  ) => void;
-  onAnswerGenerationRequest: (
-    currentAnswer: string | undefined,
-    currentQuestion: string,
-    currentlySelectedType: "short-answer" | "long-answer"
-  ) => void;
 };
 export default function QuestionForm(props: QuestionFormType) {
   const {
@@ -39,6 +38,8 @@ export default function QuestionForm(props: QuestionFormType) {
   const [choices, setChoices] = useState<string[]>(
     props.choices ? props.choices : []
   );
+
+  const { toast } = useToast();
 
   useEffect(() => {
     if (watch("type") === "short-answer" || watch("type") === "long-answer") {
@@ -106,16 +107,47 @@ export default function QuestionForm(props: QuestionFormType) {
         }}
       />
 
-      <button
-        className="flex flex-row items-center gap-1"
-        onClick={(e) => {
-          e.preventDefault();
-          props.onQuestionGenerationRequest(watch("type"));
+      <GeneratePopover
+        children={
+          <button className="flex flex-row items-center gap-1">
+            <TbReload />
+            Generate with AI
+          </button>
+        }
+        onSubmit={async (newRequirement) => {
+          try {
+            const generatedQuestion = await generateQuestion(
+              watch("content") ? watch("content") : "No question",
+              watch("type"),
+              props.context,
+              props.difficultyLevel,
+              props.requirements,
+              newRequirement
+            );
+            setValue("type", generatedQuestion.type);
+            setValue("content", generatedQuestion.content);
+            setValue("marks", generatedQuestion.marks);
+            if (generatedQuestion.type === "multiple-choice") {
+              setValue("choices", generatedQuestion.choices);
+              setValue("answer.choices", generatedQuestion.answer.choices);
+              setChoices(generatedQuestion.choices as string[]);
+              setValue("answer.content", undefined);
+            } else {
+              setValue("answer.content", generatedQuestion.answer.content);
+              setValue("choices", undefined);
+              setValue("answer.choices", undefined);
+              setChoices([]);
+            }
+          } catch (err) {
+            toast({
+              description: "Something went wrong while generating the question",
+              title: "Error",
+              variant: "destructive",
+            });
+          }
         }}
-      >
-        <TbReload />
-        Generate with AI
-      </button>
+      />
+
       {watch("type") === "multiple-choice" && (
         <ul className="space-y-2">
           {choices.map((choice, index) => {
@@ -230,22 +262,41 @@ export default function QuestionForm(props: QuestionFormType) {
           {watch("content") &&
             (watch("type") === "short-answer" ||
               watch("type") === "long-answer") && (
-              <button
-                className="flex flex-row items-center gap-1"
-                onClick={(e) => {
-                  e.preventDefault();
+              <GeneratePopover
+                children={
+                  <button className="flex flex-row items-center gap-1">
+                    <TbReload />
+                    Generate with AI
+                  </button>
+                }
+                onSubmit={async (newRequirement) => {
                   if (watch("content")) {
-                    props.onAnswerGenerationRequest(
-                      watch("answer.content"),
+                    const generatedAnswer = await generateAnswer(
+                      watch("answer.content")
+                        ? (watch("answer.content") as string)
+                        : "No answer",
+                      watch("type") as "short-answer" | "long-answer",
                       watch("content"),
-                      watch("type") as "short-answer" | "long-answer"
+                      props.context,
+                      newRequirement
                     );
+                    if (generatedAnswer) {
+                      setValue("answer.content", generatedAnswer.answer);
+                      setValue("choices", undefined);
+                      setValue("answer.choices", undefined);
+                      setChoices([]);
+                      setValue("marks", generatedAnswer.marks);
+                    } else {
+                      toast({
+                        description:
+                          "Something went wrong while generating the answer",
+                        title: "Error",
+                        variant: "destructive",
+                      });
+                    }
                   }
                 }}
-              >
-                <TbReload />
-                Generate with AI
-              </button>
+              />
             )}
         </div>
       )}

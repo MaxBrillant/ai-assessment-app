@@ -27,7 +27,7 @@ export default function AssessmentTabs(props: {
   const { toast } = useToast();
 
   return (
-    <Tabs defaultValue="questions" className="w-[400px]">
+    <Tabs defaultValue="questions">
       <TabsList>
         <TabsTrigger value="questions">
           Questions ({props.questions.length})
@@ -60,7 +60,7 @@ export default function AssessmentTabs(props: {
         />
       </TabsContent>
       <TabsContent value="submissions">
-        <div className="grid grid-cols-2 bg-green">
+        <div className="grid grid-cols-2">
           <div>
             {props.submissions.filter(
               (submission) => submission.submissionStatus === "submitted"
