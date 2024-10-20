@@ -7,7 +7,8 @@ export const generateAnswer = async (
   previousAnswer: string,
   type: "short-answer" | "long-answer",
   question: string,
-  context: string
+  context: string,
+  newRequirement: string
 ) => {
   try {
     const model = new ChatAnthropic({
@@ -40,6 +41,7 @@ export const generateAnswer = async (
             "answer": "string", // Answer to the question according to the context. If the type is "long-answer", make it very detailed and in-depth, and don't leave out any details.
         },
       "guidelines": [
+    "Newly provided requirements: ${newRequirement}",
     "The answer must align with the task's purpose.",
     "Return only the JSON object; no additional text.",
     "Ensure proper JSON escaping."

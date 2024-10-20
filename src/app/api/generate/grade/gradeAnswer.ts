@@ -8,6 +8,9 @@ export const gradeAnswer = async (
   submittedAnswer: string,
   marks: number
 ) => {
+  console.log("question: " + question);
+  console.log("answer: " + answer);
+  console.log("submittedAnswer: " + submittedAnswer);
   try {
     const model = new ChatAnthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
@@ -22,7 +25,7 @@ export const gradeAnswer = async (
 
     const res = await chain.invoke({
       input_documents: [],
-      question: `"task": "Grade an answer submitter by a student to the question asked, from 0 to ${marks}, based on the provided formal answer.",
+      question: `"task": "Grade an answer submitted by a student to the question asked, from 0 to ${marks}, based on the provided formal answer.",
       "outputFormat": "JSON",
       "questionAsked": "${question}",
       "formalAnswer": "${answer}",
@@ -34,6 +37,7 @@ export const gradeAnswer = async (
             "comment": "string", // Comments on why the student received those marks, where they did wrong, the mistakes they made, and what they should have done instead.
         },
       "guidelines": [
+      "If the submitted answer is empty, or is not present, just give the student a 0 mark.",
     "The answer must align with the task's purpose.",
     "Return only the JSON object; no additional text.",
     "Ensure proper JSON escaping."
