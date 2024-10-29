@@ -1,7 +1,8 @@
 "use client";
-import { FaCheckSquare } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
-import { MdCheckBoxOutlineBlank, MdMoreVert } from "react-icons/md";
+import { MdMoreVert, MdReplay } from "react-icons/md";
+import { RxDotFilled } from "react-icons/rx";
+import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,9 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import QuestionForm from "../forms/questionForm";
 import { QuestionListType } from "./questionsPanel";
+import { FaCheck } from "react-icons/fa6";
+import { Dialog, DialogOverlay } from "@/components/ui/dialog";
 
 export type QuestionType = QuestionListType[0];
 export type PropsType = {
@@ -35,25 +38,47 @@ export type PropsType = {
 };
 export default function Question(props: PropsType) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showButton, setShowButton] = useState(false);
+  const containerRef = useRef<HTMLDivElement>();
+
+  useEffect(() => {
+    // Check if content height is greater than 120px
+    if (containerRef.current) {
+      const contentHeight = containerRef.current.scrollHeight;
+      setShowButton(contentHeight >= 120);
+      // If content is smaller than or equal to 120px, keep it expanded
+      setIsExpanded(contentHeight <= 120);
+    }
+  }, [props.answer]);
 
   return isEditing ? (
-    <QuestionForm
-      {...props}
-      onSubmit={(data) => {
-        props.onEdit(data);
-        setIsEditing(false);
-      }}
-    />
+    <div className="w-full flex flex-col">
+      <div
+        className="fixed inset-0 z-20 bg-black/50"
+        onClick={(e) => e.stopPropagation()}
+        style={{ isolation: "isolate" }}
+      ></div>
+      <div className="z-30" onClick={(e) => e.stopPropagation()}>
+        <QuestionForm
+          {...props}
+          onSubmit={(data) => {
+            props.onEdit(data);
+            setIsEditing(false);
+          }}
+          onCancel={() => {
+            setIsEditing(false);
+          }}
+        />
+      </div>
+    </div>
   ) : (
-    <div
-      className="relative max-w-md flex flex-col rounded-lg border border-black overflow-clip"
-      onBlur={() => setIsEditing(false)}
-    >
+    <div className="relative w-full flex flex-col bg-white rounded-xl border border-black/30 overflow-clip">
       <div className="flex flex-col p-5 gap-3">
-        <p>
+        <p className="text-sm">
           Question {props.position}
-          <span className="text-sm text-gray-500">
-            {" • "}
+          {" • "}
+          <span className="text-xs text-black/70">
             {props.type === "multiple-choice"
               ? "Multiple Choice"
               : props.type === "long-answer"
@@ -63,8 +88,8 @@ export default function Question(props: PropsType) {
         </p>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="absolute right-5 space-x-2">
-            <MdMoreVert className="w-6 h-6 rounded-full" />
+          <DropdownMenuTrigger className="absolute right-5 top-3 space-x-2">
+            <MdMoreVert className="w-7 h-7 p-1 rounded-full bg-black/5 border border-black/10" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => props.onMoveUp()}>
@@ -80,30 +105,35 @@ export default function Question(props: PropsType) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <p className="text-lg font-medium">{props.content}</p>
-        <p className="text-sm text-black/70">{props.marks} marks</p>
-        <button
-          className="flex flex-row items-center gap-1"
-          onClick={() => setIsEditing(true)}
-        >
-          <FiEdit />
-          Edit
-        </button>
+        <p className="font-medium">{props.content}</p>
+        <p className="text-sm font-light text-">{props.marks} marks</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
+            onClick={() => setIsEditing(true)}
+          >
+            <FiEdit />
+            Edit
+          </button>
+          <button
+            className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
+            onClick={() => {}}
+          >
+            <MdReplay />
+            Regenerate
+          </button>
+        </div>
       </div>
-      <div className="p-5 border-t border-gray-300">
+      <div
+        ref={containerRef as any}
+        className={
+          `${isExpanded ? "h-auto" : "h-[120px]"}` +
+          " relative p-3 border-t border-black/30 transition-all duration-300 ease-in-out"
+        }
+      >
         {props.answer.content && (
           <div className="space-y-2">
-            <p>Answer</p>
-            <p className="text-sm text-black/70">{props.answer.content}</p>
-            <div className="flex flex-wrap gap-5">
-              <button
-                className="flex flex-row items-center gap-1"
-                onClick={() => setIsEditing(true)}
-              >
-                <FiEdit />
-                Edit
-              </button>
-            </div>
+            <p className="text-sm font-light">{props.answer.content}</p>
           </div>
         )}
 
@@ -115,20 +145,42 @@ export default function Question(props: PropsType) {
                   key={choice}
                   className={
                     props.answer.choices?.includes(choice)
-                      ? "text-green-500 font-bold flex flex-row gap-1"
-                      : " flex flex-row gap-1"
+                      ? "text-green-500 text-sm flex flex-row gap-1"
+                      : "text-black/70 text-sm flex flex-row gap-1"
                   }
                 >
                   {props.answer.choices?.includes(choice) ? (
-                    <FaCheckSquare className="w-5 h-5 mt-1" />
+                    <FaCheck className="w-5 h-5" />
                   ) : (
-                    <MdCheckBoxOutlineBlank className="w-5 h-5 mt-1" />
+                    <RxDotFilled className="w-5 h-5 text-black/30" />
                   )}
                   <span className="w-[80%]">{choice}</span>
                 </li>
               );
             })}
           </ul>
+        )}
+
+        {showButton && (
+          <div
+            className={
+              isExpanded
+                ? "flex flex-col items-center justify-end pt-2"
+                : "absolute h-3/4 bottom-0 left-0 right-0 bg-gradient-to-b from-white/0 via-white/60 via-40% to-white/100 flex flex-col justify-end items-center pb-2"
+            }
+          >
+            <button
+              className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-gray-100 border border-gray-400 rounded-full"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? <IoChevronUp /> : <IoChevronDown />}
+              {isExpanded
+                ? "Show less"
+                : props.type === "multiple-choice"
+                ? "Show all choices"
+                : "Show more"}
+            </button>
+          </div>
         )}
       </div>
     </div>

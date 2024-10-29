@@ -14,16 +14,20 @@ export default function GeneratePopover(props: {
   onSubmit: (newRequirement: string) => void;
 }) {
   const [newRequirement, setNewRequirement] = useState<string | undefined>();
+  const [open, setOpen] = useState(false);
 
   const onSubmit = () => {
     props.onSubmit(newRequirement as string);
   };
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{props.children}</PopoverTrigger>
-      <PopoverContent>
-        <form>
-          <p>What do you want to change or improve?</p>
+      {open && (
+        <div className="fixed top-0 bottom-0 left-0 right-0 z-20 bg-black/20"></div>
+      )}
+      <PopoverContent className="z-30">
+        <form className="flex flex-col gap-2">
+          <p className="text-sm">What do you want to change or improve?</p>
           <Textarea
             placeholder="Write something here"
             value={newRequirement}
@@ -38,6 +42,8 @@ export default function GeneratePopover(props: {
             onClick={(e) => {
               e.preventDefault();
               onSubmit();
+              setOpen(false);
+              setNewRequirement(undefined);
             }}
           >
             Generate

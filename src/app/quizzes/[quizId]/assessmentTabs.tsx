@@ -4,11 +4,19 @@ import QuestionPanel from "@/app/components/questionsPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import SubmissionView from "./submissionView";
-import { updateAssessmentQuestions } from "@/app/api/assessments/mutations";
+import {
+  updateAssessmentQuestions,
+  updateAssessmentRules,
+} from "@/app/api/assessments/mutations";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import RulesForm from "@/app/forms/rulesForm";
 
 export default function AssessmentTabs(props: {
   id: number;
+  title: string;
+  duration: number;
+  instructions: string | undefined;
   questions: QuestionType[];
   credentials: string[];
   submissions: {
@@ -24,19 +32,24 @@ export default function AssessmentTabs(props: {
   const [selectedSubmission, setSelectedSubmission] = useState<
     string | undefined
   >(undefined);
+
+  const [setHasUpdatedQuestions] = useState(false);
+
+  const { refresh } = useRouter();
   const { toast } = useToast();
 
   return (
-    <Tabs defaultValue="questions">
-      <TabsList>
+    <Tabs defaultValue="questions" className="w-full h-full">
+      <TabsList className="w-full bg-white">
         <TabsTrigger value="questions">
           Questions ({props.questions.length})
         </TabsTrigger>
         <TabsTrigger value="submissions">
           Submissions ({props.submissions.length})
         </TabsTrigger>
+        <TabsTrigger value="settings">Settings</TabsTrigger>
       </TabsList>
-      <TabsContent value="questions">
+      <TabsContent value="questions" className="m-0">
         <QuestionPanel
           defaultQuestions={props.questions}
           context={props.context}
@@ -48,7 +61,9 @@ export default function AssessmentTabs(props: {
               data
             );
 
-            if (!updateQuestions) {
+            if (updateQuestions) {
+              refresh();
+            } else {
               toast({
                 description:
                   "Something went wrong while updating the assessment questions",
@@ -147,6 +162,39 @@ export default function AssessmentTabs(props: {
             </div>
           )}
         </div>
+      </TabsContent>
+      <TabsContent value="settings" className="m-0">
+        <RulesForm
+          defaultValues={{
+            title: props.title,
+            duration: String(props.duration) as any,
+            instructions: props.instructions,
+            credentials: props.credentials,
+          }}
+          mode="update"
+          onSubmit={async (data) => {
+            const updateRules = await updateAssessmentRules(
+              props.id,
+              data.title,
+              data.duration,
+              data.instructions
+            );
+
+            if (updateRules) {
+              toast({
+                title: "Assessment details updated successfully",
+              });
+              refresh();
+            } else {
+              toast({
+                description:
+                  "Something went wrong while updating the assessment details",
+                title: "Error",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
       </TabsContent>
     </Tabs>
   );

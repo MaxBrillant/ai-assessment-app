@@ -144,21 +144,24 @@ export default function AssessmentForm(props: AssessmentFormProps) {
         {props.questions[currentQuestion].type !== "multiple-choice" && (
           <div>
             <TextEditor
-              id={"editor-" + currentQuestion}
               value={watch(`submission.${currentQuestion}.content`)}
               onChange={(value) => {
                 setValue(
                   `submission.${currentQuestion}.content`,
-                  value.replace(/<[^>]*>/g, "") === "" ? undefined : value
+                  (value as string).replace(/<[^>]*>/g, "") === ""
+                    ? undefined
+                    : value
                 );
               }}
+              isTextArea={true}
+              placeholder={"Write your answer here"}
             />
 
             {errors.submission &&
               errors.submission[currentQuestion]?.content && (
                 <div className="p-3 bg-red-100/80 rounded-2xl">
                   <p className="text-red-500 ">
-                    {errors.submission[currentQuestion]?.content.message}
+                    {errors.submission[currentQuestion]?.content?.message}
                   </p>
                 </div>
               )}
@@ -202,7 +205,7 @@ export default function AssessmentForm(props: AssessmentFormProps) {
           {errors.submission && errors.submission[currentQuestion]?.choices && (
             <div className="p-3 bg-red-100/80 rounded-2xl">
               <p className="text-red-500 ">
-                {errors.submission[currentQuestion]?.choices.message}
+                {errors.submission[currentQuestion]?.choices?.message}
               </p>
             </div>
           )}
