@@ -31,10 +31,10 @@ export default function QuestionPanel(props: {
   }, [questions]);
 
   return (
-    <div className="p-5 w-fit mx-auto">
+    <div className="w-full flex flex-col p-5 items-center bg-black/5">
       {questions.map((question, index) => {
         return (
-          <div>
+          <div className="w-full max-w-md flex flex-col">
             <Question
               key={index + 1}
               position={index + 1}
@@ -56,36 +56,34 @@ export default function QuestionPanel(props: {
               difficultyLevel={props.difficultyLevel}
               requirements={props.requirements}
               onEdit={(data) => {
-                props.defaultQuestions[index] = data;
-                setQuestions([...props.defaultQuestions]);
+                questions[index] = data;
+                setQuestions([...questions]);
               }}
               onDelete={() => {
-                props.defaultQuestions.splice(index, 1);
-                setQuestions([...props.defaultQuestions]);
+                questions.splice(index, 1);
+                setQuestions([...questions]);
               }}
               onMoveUp={() => {
                 if (index > 0) {
-                  const temp = props.defaultQuestions[index - 1];
-                  props.defaultQuestions[index - 1] =
-                    props.defaultQuestions[index];
-                  props.defaultQuestions[index] = temp;
-                  setQuestions([...props.defaultQuestions]);
+                  const temp = questions[index - 1];
+                  questions[index - 1] = questions[index];
+                  questions[index] = temp;
+                  setQuestions([...questions]);
                 }
               }}
               onMoveDown={() => {
-                if (index < props.defaultQuestions.length - 1) {
-                  const temp = props.defaultQuestions[index + 1];
-                  props.defaultQuestions[index + 1] =
-                    props.defaultQuestions[index];
-                  props.defaultQuestions[index] = temp;
-                  setQuestions([...props.defaultQuestions]);
+                if (index < questions.length - 1) {
+                  const temp = questions[index + 1];
+                  questions[index + 1] = questions[index];
+                  questions[index] = temp;
+                  setQuestions([...questions]);
                 }
               }}
             />
             <AddQuestionButton
               onAdd={(data) => {
-                props.defaultQuestions.splice(index + 1, 0, data);
-                setQuestions([...props.defaultQuestions]);
+                questions.splice(index + 1, 0, data);
+                setQuestions([...questions]);
               }}
               context={props.context}
               difficultyLevel={props.difficultyLevel}

@@ -1,7 +1,6 @@
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { redirect } from "next/navigation";
 import AssessmentTabs from "./assessmentTabs";
-import EditAssessmentDetails from "./editAssessmentDetails";
 import getAdminAssessmentData from "@/app/api/assessments/fetch/getAdminAssessmentData";
 
 export default async function Assessment({
@@ -24,17 +23,12 @@ export default async function Assessment({
   return adminAssessmentData ? (
     <div>
       <div>
-        <p>{adminAssessmentData.title}</p>
-        <p>{adminAssessmentData.duration} minutes</p>
-        <EditAssessmentDetails
+        <p className="text-lg px-3 py-1">{adminAssessmentData.title}</p>
+        <AssessmentTabs
           id={adminAssessmentData.id}
           title={adminAssessmentData.title}
           duration={adminAssessmentData.duration}
           instructions={adminAssessmentData.instructions}
-          credentials={adminAssessmentData.credentials}
-        />
-        <AssessmentTabs
-          id={adminAssessmentData.id}
           credentials={adminAssessmentData.credentials}
           questions={adminAssessmentData.questions}
           submissions={adminAssessmentData.submissions}
