@@ -13,10 +13,10 @@ export default async function Page({
   params,
   searchParams,
 }: {
-  params: { assessmentId: string };
+  params: { quizId: string };
   searchParams: { submissionId: string | undefined };
 }) {
-  const assessmentNanoId = params.assessmentId;
+  const assessmentNanoId = params.quizId;
 
   const assessmentData = await getAssessmentData(assessmentNanoId);
 

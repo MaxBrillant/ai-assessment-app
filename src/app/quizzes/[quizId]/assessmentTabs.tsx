@@ -11,6 +11,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import RulesForm from "@/app/forms/rulesForm";
+import { getTimeAgo } from "@/utils/formatDates";
+import { IoMdClose } from "react-icons/io";
 
 export default function AssessmentTabs(props: {
   id: number;
@@ -32,8 +34,6 @@ export default function AssessmentTabs(props: {
   const [selectedSubmission, setSelectedSubmission] = useState<
     string | undefined
   >(undefined);
-
-  const [setHasUpdatedQuestions] = useState(false);
 
   const { refresh } = useRouter();
   const { toast } = useToast();
@@ -75,74 +75,123 @@ export default function AssessmentTabs(props: {
         />
       </TabsContent>
       <TabsContent value="submissions">
-        <div className="grid grid-cols-2">
-          <div>
+        <div
+          className={`max-h-[90vh] overflow-y-auto ${
+            selectedSubmission
+              ? "grid grid-cols-1 sm:flex sm:flex-row sm:divide-x"
+              : "grid grid-cols-1"
+          }`}
+        >
+          <div
+            className={`w-full sm:max-w-sm flex flex-col mx-auto ${
+              selectedSubmission && "hidden sm:w-[40vw] sm:flex sm:flex-col"
+            }`}
+          >
             {props.submissions.filter(
               (submission) => submission.submissionStatus === "submitted"
             ).length > 0 && (
-              <div>
-                <p>Non graded</p>
+              <div className="my-1 p-3">
+                <p className="font-bold text-sm text-black/70 mb-2">
+                  Ungraded submissions
+                </p>
 
-                {props.submissions
-                  .filter(
-                    (submission) => submission.submissionStatus === "submitted"
-                  )
-                  .map((submission) => {
-                    return (
-                      <button
-                        key={submission.nanoId}
-                        onClick={() => setSelectedSubmission(submission.nanoId)}
-                      >
-                        {props.credentials.length > 0 ? (
-                          <p>
-                            {props.credentials[0] +
-                              ": " +
-                              submission.credentials[0]}
-                          </p>
-                        ) : (
-                          <p>Anonymous</p>
-                        )}
-                        <p>{submission.submissionTime?.toLocaleString()}</p>
-                      </button>
-                    );
-                  })}
+                <div className="flex flex-col divide-y">
+                  {props.submissions
+                    .filter(
+                      (submission) =>
+                        submission.submissionStatus === "submitted"
+                    )
+                    .map((submission) => {
+                      return (
+                        <button
+                          key={submission.nanoId}
+                          onClick={() => {
+                            setSelectedSubmission(undefined);
+                            setTimeout(() => {
+                              setSelectedSubmission(submission.nanoId);
+                            }, 10);
+                          }}
+                          className={`${
+                            selectedSubmission === submission.nanoId &&
+                            "border-2 border-black/50 bg-black/5"
+                          } flex flex-col items-start gap-1 p-2 hover:bg-black/5 rounded-md`}
+                        >
+                          {props.credentials.length > 0 ? (
+                            <p className="max-w-full truncate">
+                              {submission.credentials[0]}
+                            </p>
+                          ) : (
+                            <p>Anonymous</p>
+                          )}
+                          {submission.submissionTime && (
+                            <p className="text-xs font-light max-w-full truncate">
+                              Submitted{" "}
+                              {getTimeAgo(new Date(submission.submissionTime))}
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
+                </div>
               </div>
             )}
 
             {props.submissions.filter(
               (submission) => submission.submissionStatus === "graded"
             ).length > 0 && (
-              <div>
-                <p>Graded</p>
+              <div className="my-1 p-3">
+                <p className="font-bold text-sm text-black/70 mb-2">
+                  Graded submissions
+                </p>
 
-                {props.submissions
-                  .filter(
-                    (submission) => submission.submissionStatus === "graded"
-                  )
-                  .map((submission) => {
-                    return (
-                      <button
-                        key={submission.nanoId}
-                        onClick={() => setSelectedSubmission(submission.nanoId)}
-                      >
-                        {props.credentials.length > 0 ? (
-                          <p>
-                            {props.credentials[0] +
-                              ": " +
-                              submission.credentials[0]}
-                          </p>
-                        ) : (
-                          <p>Anonymous</p>
-                        )}
-                        <p>{submission.submissionTime?.toLocaleString()}</p>
-                      </button>
-                    );
-                  })}
+                <div className="flex flex-col divide-y">
+                  {props.submissions
+                    .filter(
+                      (submission) => submission.submissionStatus === "graded"
+                    )
+                    .map((submission) => {
+                      return (
+                        <button
+                          key={submission.nanoId}
+                          onClick={() => {
+                            setSelectedSubmission(undefined);
+                            setTimeout(() => {
+                              setSelectedSubmission(submission.nanoId);
+                            }, 10);
+                          }}
+                          className={`${
+                            selectedSubmission === submission.nanoId &&
+                            "border-2 border-black/50 bg-black/5"
+                          } flex flex-col items-start gap-1 p-2 hover:bg-black/5 rounded-md`}
+                        >
+                          {props.credentials.length > 0 ? (
+                            <p className="max-w-full truncate">
+                              {submission.credentials[0]}
+                            </p>
+                          ) : (
+                            <p>Anonymous</p>
+                          )}
+                          {submission.submissionTime && (
+                            <p className="text-xs font-light max-w-full truncate">
+                              Submitted{" "}
+                              {getTimeAgo(new Date(submission.submissionTime))}
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
+                </div>
               </div>
             )}
           </div>
           {selectedSubmission && (
-            <div>
+            <div className="relative flex-grow max-h-[90vh] overflow-y-auto">
+              <button
+                className="absolute z-10 top-4 right-4 rounded-full p-2 bg-black/10"
+                onClick={() => setSelectedSubmission(undefined)}
+              >
+                <IoMdClose className="w-5 h-5" />
+              </button>
               <SubmissionView
                 assessmentId={props.id}
                 submissionNanoId={selectedSubmission}

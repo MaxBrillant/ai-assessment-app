@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import getAllUserAssessments from "../api/assessments/fetch/getAllUserAssessments";
 import { Button } from "@/components/ui/button";
+import { FiPlus } from "react-icons/fi";
 
 export default async function Assessments() {
   const supabase = CreateServerClient();
@@ -18,25 +19,37 @@ export default async function Assessments() {
 
   return (
     <div>
-      <p>All assessments</p>
+      <div className="w-full max-w-lg flex justify-between items-center p-5 mx-auto">
+        <p className="text-2xl font-bold">All assessments</p>
+        <Link href={"/edit"}>
+          <Button>
+            <span>
+              <FiPlus className="w-5 h-5 mr-2" />
+            </span>
+            New
+          </Button>
+        </Link>
+      </div>
+
       {allUserAssessments ? (
         allUserAssessments.length === 0 ? (
           <p>You have not created any assessments...yet</p>
         ) : (
-          allUserAssessments.map((assessment) => (
-            <Link
-              key={assessment.id}
-              href={`/quizzes/${assessment.nanoId}`}
-            >
-              <div>
-                <p>{assessment.title}</p>
-                <p>
+          <div className="flex flex-col divide-y max-w-lg mx-auto">
+            {allUserAssessments.map((assessment) => (
+              <Link
+                key={assessment.id}
+                href={`/quizzes/${assessment.nanoId}`}
+                className="w-full flex flex-col gap-1 p-3 rounded-md hover:bg-black/5"
+              >
+                <p className="max-w-full truncate">{assessment.title}</p>
+                <p className="text-sm text-black/70">
                   {assessment.submissions.length} submission
                   {assessment.submissions.length === 1 ? "" : "s"}
                 </p>
-              </div>
-            </Link>
-          ))
+              </Link>
+            ))}
+          </div>
         )
       ) : (
         <div>
