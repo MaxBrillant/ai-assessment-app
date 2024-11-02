@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FiPlus } from "react-icons/fi";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
 type QuestionFormType = QuestionType & {
@@ -65,7 +66,7 @@ export default function QuestionForm(props: QuestionFormType) {
       setValue("choices", choices);
       setValue(
         "answer.choices",
-        watch("answer.choices") ? watch("answer.choices") : []
+        watch("answer.choices") ? watch("answer.choices") : props.answer.choices
       );
     }
   }, [watch("type")]);
@@ -128,7 +129,7 @@ export default function QuestionForm(props: QuestionFormType) {
                   value as "short-answer" | "long-answer" | "multiple-choice"
                 )
               }
-              defaultValue={watch("type")}
+              value={watch("type")}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -243,6 +244,15 @@ export default function QuestionForm(props: QuestionFormType) {
                     className="w-full p-1 text-sm font-light border-b focus:border focus:rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden"
                     rows={1}
                     onFocus={(e) => autoResize(e.currentTarget)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && index === choices.length - 1) {
+                        e.preventDefault();
+                        e.currentTarget.blur();
+                        setTimeout(() => {
+                          document.getElementById("add-choice")?.click();
+                        }, 30);
+                      }
+                    }}
                     onChange={(e) => {
                       setValue(
                         "choices",
@@ -253,13 +263,22 @@ export default function QuestionForm(props: QuestionFormType) {
                       autoResize(e.target);
                     }}
                     onBlur={(e) => {
-                      const updatedAnswerChoices = watch("answer.choices")?.map(
-                        (answerChoice) =>
-                          !choices?.includes(answerChoice)
-                            ? e.target.value
-                            : answerChoice
-                      );
-                      setValue("answer.choices", updatedAnswerChoices);
+                      // If the previous value has already been selected, select the new value, and don't allow it to be selected again
+
+                      if (watch("answer.choices")?.includes(choices[index])) {
+                        const selectedChoice = watch("answer.choices")?.find(
+                          (choice) => choices[index] === choice
+                        );
+
+                        setValue(
+                          "answer.choices",
+                          watch("answer.choices")
+                            ?.filter(
+                              (answerChoice) => answerChoice !== selectedChoice
+                            )
+                            .concat(e.target.value)
+                        );
+                      }
 
                       setChoices(
                         choices.map((c, i) =>
@@ -293,12 +312,14 @@ export default function QuestionForm(props: QuestionFormType) {
                       );
                     }}
                   >
-                    <IoMdClose className="w-5 h-5" />
+                    <IoMdClose className="w-5 h-5 fill-black/50 hover:fill-red-500" />
                   </button>
                 </div>
               );
             })}
-            <Button
+            <button
+              id="add-choice"
+              className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm gap-1 rounded-full opacity-70 hover:opacity-100 focus:opacity-100 hover:bg-black/5 focus:bg-black/5"
               disabled={watch("choices")?.includes("")}
               onClick={(e) => {
                 e.preventDefault();
@@ -307,8 +328,11 @@ export default function QuestionForm(props: QuestionFormType) {
                 // setValue("choices", [...(watch("choices") as string[]), ""]);
               }}
             >
-              Add Choice
-            </Button>
+              <span>
+                <FiPlus className="w-5 h-5" />
+              </span>
+              Add a choice
+            </button>
           </ul>
         )}
 

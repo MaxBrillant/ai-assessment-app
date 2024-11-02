@@ -8,6 +8,13 @@ import { useForm } from "react-hook-form";
 import { MdDeleteOutline } from "react-icons/md";
 import { z } from "zod";
 import { assessmentSchema } from "../validation/assessmentValidation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const rulesSchema = assessmentSchema.pick({
   title: true,
@@ -40,8 +47,6 @@ export default function RulesForm(props: propsType) {
     reValidateMode: "onChange",
   });
 
-  const [isRulesOpen, setIsRulesOpen] = useState(false);
-
   const errorMessages = Object.values(errors).flatMap((error: any) => {
     if (Array.isArray(error)) {
       const arrayErrors = error.map((arrayError: any) => arrayError.message);
@@ -56,10 +61,14 @@ export default function RulesForm(props: propsType) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <p className="text-2xl font-semibold">Assessment Rules</p>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-8 p-5 max-w-sm mx-auto"
+    >
       <div className="flex flex-col">
-        <label htmlFor="title">Title</label>
+        <label htmlFor="title" className="font-medium">
+          Title
+        </label>
         <Input
           {...register("title")}
           defaultValue={watch("title")}
@@ -68,25 +77,38 @@ export default function RulesForm(props: propsType) {
         />
       </div>
       <div className="flex flex-col">
-        <label htmlFor="duration">Duration of the assessment</label>
-        <select
-          className="w-fit"
-          id="duration"
-          defaultValue={watch("duration")}
-          {...register("duration")}
+        <label htmlFor="duration" className="font-medium">
+          Duration of the assessment
+        </label>
+
+        <Select
+          onValueChange={(value) =>
+            setValue(
+              "duration",
+              value as "15" | "30" | "45" | "60" | "90" | "120" | "150" | "180"
+            )
+          }
+          value={watch("duration")}
         >
-          <option value={"15"}>15 Minutes</option>
-          <option value={"30"}>30 Minutes</option>
-          <option value={"45"}>45 Minutes</option>
-          <option value={"60"}>1 Hour</option>
-          <option value={"90"}>1 Hour 30 Minutes</option>
-          <option value={"120"}>2 Hours</option>
-          <option value={"150"}>2 Hours 30 Minutes</option>
-          <option value={"180"}>3 Hours</option>
-        </select>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={"15"}>15 Minutes</SelectItem>
+            <SelectItem value={"30"}>30 Minutes</SelectItem>
+            <SelectItem value={"45"}>45 Minutes</SelectItem>
+            <SelectItem value={"60"}>1 Hour</SelectItem>
+            <SelectItem value={"90"}>1 Hour 30 Minutes</SelectItem>
+            <SelectItem value={"120"}>2 Hours</SelectItem>
+            <SelectItem value={"150"}>2 Hours 30 Minutes</SelectItem>
+            <SelectItem value={"180"}>3 Hours</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex flex-col">
-        <label htmlFor="instructions">Instructions</label>
+        <label htmlFor="instructions" className="font-medium">
+          Instructions
+        </label>
         <Textarea
           {...register("instructions", {
             setValueAs: (value) => (value === "" ? undefined : value),
@@ -97,9 +119,9 @@ export default function RulesForm(props: propsType) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <p>Credentials</p>
+        <p className="font-medium">Credentials</p>
         {props.mode === "update" && (
-          <p>
+          <p className="text-sm font-light">
             You cannot edit or delete credentials once the assessment is created
           </p>
         )}
@@ -157,7 +179,15 @@ export default function RulesForm(props: propsType) {
           ))}
         </div>
       )}
-      <Button type="submit">
+      <Button
+        type="submit"
+        disabled={
+          errorMessages.length > 0 ||
+          (props.defaultValues.title === watch("title") &&
+            props.defaultValues.instructions === watch("instructions") &&
+            props.defaultValues.duration === watch("duration"))
+        }
+      >
         {props.mode === "create" ? "Publish" : "Update"}
       </Button>
     </form>

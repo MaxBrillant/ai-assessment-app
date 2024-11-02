@@ -1,5 +1,5 @@
 "use client";
-import { FiEdit } from "react-icons/fi";
+import { FiEdit, FiEdit3 } from "react-icons/fi";
 import { MdMoreVert, MdReplay } from "react-icons/md";
 import { RxDotFilled } from "react-icons/rx";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
@@ -106,13 +106,13 @@ export default function Question(props: PropsType) {
         </DropdownMenu>
 
         <p className="font-medium">{props.content}</p>
-        <p className="text-sm font-light text-">{props.marks} marks</p>
+        <p className="text-sm font-light">{props.marks} marks</p>
         <div className="flex flex-wrap gap-2">
           <button
             className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
             onClick={() => setIsEditing(true)}
           >
-            <FiEdit />
+            <FiEdit3 />
             Edit
           </button>
           <button
@@ -145,7 +145,7 @@ export default function Question(props: PropsType) {
                   key={choice}
                   className={
                     props.answer.choices?.includes(choice)
-                      ? "text-green-500 text-sm flex flex-row gap-1"
+                      ? "text-green-600 text-sm flex flex-row gap-1"
                       : "text-black/70 text-sm flex flex-row gap-1"
                   }
                 >
