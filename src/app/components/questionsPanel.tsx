@@ -44,6 +44,7 @@ export default function QuestionPanel(props: {
           window.scrollTo(0, scrollBarHeight);
         }}
         setDraggedId={setDraggedId}
+        hasDelay={true}
       >
         <div className="relative w-full flex flex-col p-5 items-center bg-black/5">
           {questions.map((question, index) => {

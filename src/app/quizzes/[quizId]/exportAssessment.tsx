@@ -53,8 +53,7 @@ export default function ExportAssessment(props: {
             </li>
           </ul>
 
-          <div className="w-full flex gap-4 items-end justify-end">
-            <p className="flex-grow text-sm">Preview</p>
+          <div className="w-full flex gap-1 items-end justify-end">
             <Button
               className="bg-blue-500 hover:bg-blue-700 gap-1"
               onClick={async () => {

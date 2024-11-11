@@ -26,7 +26,6 @@ export default function ExportSubmission(props: {
           <p className="text-xl">Export options</p>
 
           <div className="w-full flex gap-4 items-end justify-end">
-            <p className="flex-grow text-sm">Preview</p>
             <Button
               className="bg-blue-500 hover:bg-blue-700 gap-1"
               onClick={async () => {

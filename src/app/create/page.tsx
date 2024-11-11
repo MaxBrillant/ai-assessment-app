@@ -108,7 +108,7 @@ export default function Create() {
 
         if (newAssessmentNanoId) {
           toast({
-            title: "Assessment published successfully",
+            title: "Assessment created successfully",
           });
           push(`/quizzes/${newAssessmentNanoId}`);
         } else {
