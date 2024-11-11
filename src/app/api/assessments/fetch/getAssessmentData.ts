@@ -7,6 +7,7 @@ import { z } from "zod";
 type AssessmentDataType = {
   id: number;
   nano_id: string;
+  user_email: string;
   title: string;
   duration: number;
   instructions: string | undefined;
@@ -22,9 +23,10 @@ export default async function getAssessmentData(nanoId: string) {
   const { data, error } = await supabase
     .from("assessments")
     .select(
-      "id, nano_id, title, questions, duration, instructions, credentials, modified_at"
+      "id, nano_id, user_email, title, status, questions, number_of_chunks, duration, instructions, credentials, modified_at"
     )
     .eq("nano_id", nanoId)
+    .eq("status", "public")
     .returns<AssessmentDataType>();
 
   if (error || data.length === 0) {
@@ -55,6 +57,7 @@ export default async function getAssessmentData(nanoId: string) {
   return {
     id: data[0].id,
     nanoId: data[0].nano_id,
+    userEmail: data[0].user_email,
     title: data[0].title,
     duration: data[0].duration,
     instructions: data[0].instructions,

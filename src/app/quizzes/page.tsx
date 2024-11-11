@@ -21,7 +21,7 @@ export default async function Assessments() {
     <div>
       <div className="w-full max-w-lg flex justify-between items-center p-5 mx-auto">
         <p className="text-2xl font-bold">All assessments</p>
-        <Link href={"/edit"}>
+        <Link href={"/create"}>
           <Button>
             <span>
               <FiPlus className="w-5 h-5 mr-2" />

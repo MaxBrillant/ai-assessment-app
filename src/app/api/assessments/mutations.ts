@@ -5,35 +5,18 @@ import { assessmentSchema } from "@/app/validation/assessmentValidation";
 import { questionSchema } from "@/app/validation/questionValidation";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { nanoid } from "nanoid";
+import { use } from "react";
 import { z } from "zod";
 
-export async function createAssessment(formdata: FormData) {
+export async function createAssessment(
+  data: z.infer<typeof assessmentSchema>,
+  documentId: string,
+  numberOfChunks: number
+) {
   console.log("Validating the assessment data...");
 
   try {
-    assessmentSchema.parse({
-      title: formdata.get("title"),
-      questions: JSON.parse(
-        formdata.get("questions")?.toString() as string
-      ) as QuestionType[],
-      context: formdata.get("context"),
-      difficultyLevel: Number(formdata.get("difficultyLevel")?.toString()),
-
-      generationRequirements:
-        formdata.get("requirements") === ""
-          ? undefined
-          : formdata.get("requirements"),
-
-      duration: formdata.get("duration"),
-
-      instructions:
-        formdata.get("instructions") === ""
-          ? undefined
-          : formdata.get("instructions"),
-      credentials: JSON.parse(
-        formdata.get("credentials")?.toString() as string
-      ),
-    });
+    assessmentSchema.parse(data);
   } catch (err) {
     console.error("Error while creating the assessment: " + err);
     return undefined;
@@ -44,6 +27,7 @@ export async function createAssessment(formdata: FormData) {
   console.log("Fetching authenticated user...");
 
   const userId = (await supabase.auth.getUser()).data.user?.id;
+  const userEmail = (await supabase.auth.getUser()).data.user?.email;
   const nanoId = nanoid();
 
   if (!userId) {
@@ -58,20 +42,16 @@ export async function createAssessment(formdata: FormData) {
   const { error } = await supabase.from("assessments").insert({
     nano_id: nanoId,
     user_id: userId,
-    title: formdata.get("title"),
-    questions: formdata.get("questions"),
-    context: formdata.get("context"),
-    difficulty_level: formdata.get("difficultyLevel"),
-
-    generation_requirements:
-      formdata.get("requirements") === "" ? null : formdata.get("requirements"),
-
-    duration: formdata.get("duration"),
-
-    instructions:
-      formdata.get("instructions") === "" ? null : formdata.get("instructions"),
-
-    credentials: JSON.parse(formdata.get("credentials") as string) as string[],
+    user_email: userEmail,
+    title: data.title,
+    questions: data.questions,
+    document_id: documentId,
+    number_of_chunks: numberOfChunks,
+    difficulty_level: data.difficultyLevel,
+    generation_requirements: data.generationRequirements,
+    duration: data.duration,
+    instructions: data.instructions,
+    credentials: data.credentials,
   });
 
   if (error) {
@@ -198,3 +178,67 @@ export async function updateAssessmentRules(
   console.log("Assessment rules updated successfully");
   return data[0].nano_id;
 }
+
+export const publishAssessment = async (
+  id: number,
+  title: string,
+  duration: string,
+  instructions: string | undefined,
+  credentials: string[]
+) => {
+  console.log("Validating the assessment data...");
+
+  try {
+    const questionListSchema = assessmentSchema.pick({
+      title: true,
+      duration: true,
+      instructions: true,
+      credentials: true,
+    });
+    questionListSchema.parse({
+      title: title,
+      duration: duration,
+      instructions: instructions,
+      credentials: credentials,
+    });
+  } catch (err) {
+    console.error("Error while updating the assessment data: " + err);
+    return undefined;
+  }
+
+  const supabase = CreateServerClient();
+
+  console.log("Fetching authenticated user...");
+
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+
+  if (!userId) {
+    console.error(
+      "Error while publishing the assessment: no authenticated user could be found"
+    );
+    return undefined;
+  }
+
+  console.log("Publishing the assessment of ID " + id + "...");
+
+  const { data, error } = await supabase
+    .from("assessments")
+    .update({
+      title: title,
+      duration: duration,
+      instructions: instructions,
+      credentials: credentials,
+      status: "public",
+    })
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("nano_id");
+
+  if (error) {
+    console.error("Error while updating the assessment rules: ", error.message);
+    return undefined;
+  }
+
+  console.log("Assessment rules updated successfully");
+  return data[0].nano_id as number;
+};

@@ -1,18 +1,19 @@
 "use server";
 
-import { questionSchema } from "@/app/validation/questionValidation";
+import { QuestionType } from "@/app/components/question";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
-import { z } from "zod";
 
 type AssessmentDataType = {
   id: number;
   nano_id: string;
   title: string;
+  status: "private" | "public" | "closed";
   duration: number;
   instructions: string | undefined;
   credentials: string[];
   questions: string;
-  context: string;
+  document_id: string;
+  number_of_chunks: number;
   difficulty_level: number;
   generation_requirements: string | undefined;
   submissions: {
@@ -41,7 +42,7 @@ export default async function getAdminAssessmentData(nanoId: string) {
   const { data, error } = await supabase
     .from("assessments")
     .select(
-      "id, user_id, nano_id, title, questions, duration, instructions, credentials, context, difficulty_level, generation_requirements, submissions:submissions!assessment_id (nano_id, credentials, submission_time, status), modified_at"
+      "id, user_id, nano_id, title, status, questions, document_id, number_of_chunks, duration, instructions, credentials, difficulty_level, generation_requirements, submissions:submissions!assessment_id (nano_id, credentials, submission_time, status), modified_at"
     )
     .eq("nano_id", nanoId)
     .eq("user_id", authenticatedUser?.id)
@@ -65,10 +66,10 @@ export default async function getAdminAssessmentData(nanoId: string) {
 
   console.log("Parsing questions...");
 
-  const schema = questionSchema;
-  const questionsObject: z.infer<typeof schema>[] = JSON.parse(
-    data[0].questions
-  );
+  const questionsObject: QuestionType[] =
+    typeof data[0].questions === "string"
+      ? JSON.parse(data[0].questions)
+      : data[0].questions;
   console.log("Parsed questions successfully!");
 
   console.log("Fetched admin assessment data successfully!");
@@ -77,11 +78,13 @@ export default async function getAdminAssessmentData(nanoId: string) {
     id: data[0].id,
     nanoId: data[0].nano_id,
     title: data[0].title,
+    status: data[0].status,
     duration: data[0].duration,
     instructions: data[0].instructions,
     credentials: data[0].credentials,
     questions: questionsObject,
-    context: data[0].context,
+    documentId: data[0].document_id,
+    numberOfChunks: data[0].number_of_chunks,
     difficultyLevel: data[0].difficulty_level,
     generationRequirements: data[0].generation_requirements,
     submissions: data[0].submissions.map((submission) => ({

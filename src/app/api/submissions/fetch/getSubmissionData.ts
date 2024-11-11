@@ -76,7 +76,7 @@ export async function checkIfCredentialsExists(id: number, credential: string) {
 
   const { data, error } = await supabase
     .from("submissions")
-    .select("id, credentials")
+    .select("id, assessment_id, credentials")
     .eq("assessment_id", id)
     .contains("credentials", [credential])
     .returns<credentialsType>();

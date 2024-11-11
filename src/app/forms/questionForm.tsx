@@ -6,7 +6,7 @@ import { z } from "zod";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MdReplay } from "react-icons/md";
+import { HiOutlineSparkles } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
 import { QuestionType } from "../components/question";
 import GeneratePopover from "./generatePopover";
@@ -22,10 +22,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FiPlus } from "react-icons/fi";
+import { Draggable } from "../components/draggable";
+import Sortable from "../components/sortable";
+import pickRandomChunks from "../api/generate/assessment/pickRandomChunks";
+import { generateSingleQuestion } from "../api/generate/question/generateSingleQuestion";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
 type QuestionFormType = QuestionType & {
-  context: string;
+  documentId: string;
+  numberOfChunks: number;
   difficultyLevel: number;
   requirements: string | undefined;
   onSubmit: (data: QuestionSchemaType) => void;
@@ -48,14 +53,17 @@ export default function QuestionForm(props: QuestionFormType) {
     props.choices ? props.choices : []
   );
   const formRef = useRef<HTMLFormElement | undefined>();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const { toast } = useToast();
+
+  const [draggedId, setDraggedId] = useState<string | undefined>();
 
   useEffect(() => {
     if (formRef.current) {
       formRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  });
+  }, []);
 
   useEffect(() => {
     if (watch("type") === "short-answer" || watch("type") === "long-answer") {
@@ -117,7 +125,12 @@ export default function QuestionForm(props: QuestionFormType) {
     <form
       ref={formRef as any}
       onSubmit={handleSubmit(onSubmit)}
-      className="relative w-full flex flex-col bg-white rounded-xl border border-black/30 overflow-clip"
+      className={
+        (isGenerating
+          ? "animate-pulse duration-1000 pointer-events-none transition-all ease-in-out "
+          : "") +
+        "relative w-full flex flex-col bg-white rounded-xl border border-black/30 overflow-clip"
+      }
     >
       <div className="flex flex-col p-5 gap-3">
         <div className="w-full flex flex-row gap-3 items-center justify-between">
@@ -143,38 +156,38 @@ export default function QuestionForm(props: QuestionFormType) {
           </div>
 
           <GeneratePopover
-            children={
-              <button
-                className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
-                onClick={() => {}}
-              >
-                <MdReplay />
-                Generate with AI
-              </button>
-            }
             onSubmit={async (newRequirement) => {
+              setIsGenerating(true);
               try {
-                const generatedQuestion = await generateQuestion(
-                  watch("content") ? watch("content") : "No question",
-                  watch("type"),
-                  props.context,
-                  props.difficultyLevel,
-                  props.requirements,
-                  newRequirement
-                );
-                setValue("type", generatedQuestion.type);
-                setValue("content", generatedQuestion.content);
-                setValue("marks", generatedQuestion.marks);
-                if (generatedQuestion.type === "multiple-choice") {
-                  setValue("choices", generatedQuestion.choices);
-                  setValue("answer.choices", generatedQuestion.answer.choices);
-                  setChoices(generatedQuestion.choices as string[]);
-                  setValue("answer.content", undefined);
-                } else {
-                  setValue("answer.content", generatedQuestion.answer.content);
-                  setValue("choices", undefined);
-                  setValue("answer.choices", undefined);
-                  setChoices([]);
+                const generatedQuestion = await generateSingleQuestion({
+                  documentId: props.documentId,
+                  type: watch("type"),
+                  marks: watch("marks"),
+                  difficultyLevel: props.difficultyLevel,
+                  numberOfChunks: props.numberOfChunks,
+                  requirements: newRequirement ? newRequirement : "",
+                });
+                if (generatedQuestion) {
+                  setValue("type", generatedQuestion.type);
+                  setValue("content", generatedQuestion.content);
+                  setValue("marks", generatedQuestion.marks);
+                  if (generatedQuestion.type === "multiple-choice") {
+                    setValue("choices", generatedQuestion.choices);
+                    setValue(
+                      "answer.choices",
+                      generatedQuestion.answer.choices
+                    );
+                    setChoices(generatedQuestion.choices as string[]);
+                    setValue("answer.content", undefined);
+                  } else {
+                    setValue(
+                      "answer.content",
+                      generatedQuestion.answer.content
+                    );
+                    setValue("choices", undefined);
+                    setValue("answer.choices", undefined);
+                    setChoices([]);
+                  }
                 }
               } catch (err) {
                 toast({
@@ -184,8 +197,17 @@ export default function QuestionForm(props: QuestionFormType) {
                   variant: "destructive",
                 });
               }
+              setIsGenerating(false);
             }}
-          />
+          >
+            <button
+              className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
+              onClick={() => {}}
+            >
+              <HiOutlineSparkles />
+              Generate
+            </button>
+          </GeneratePopover>
         </div>
 
         <div className="w-full">
@@ -194,6 +216,7 @@ export default function QuestionForm(props: QuestionFormType) {
             onChange={(value) => {
               setValue("content", value as string);
             }}
+            hasFocus={watch("content") === ""}
             isTextArea={false}
             placeholder="Write the question here"
           />
@@ -214,109 +237,121 @@ export default function QuestionForm(props: QuestionFormType) {
       <div className="relative p-3 border-t border-black/30">
         {watch("type") === "multiple-choice" && (
           <ul className="space-y-2 p-3">
-            {choices.map((choice, index) => {
-              return (
-                <div className="flex flex-grow gap-2 items-start" key={choice}>
-                  <Input
-                    type="checkbox"
-                    className="w-5 h-5 mt-1"
-                    checked={watch("answer.choices")?.includes(choice)}
-                    onChange={() => {
-                      if (watch("answer.choices")?.includes(choice)) {
-                        setValue(
-                          "answer.choices",
-                          watch("answer.choices")?.filter(
-                            (answerChoice) => answerChoice !== choice
-                          )
-                        );
-                      } else {
-                        setValue(
-                          "answer.choices",
-                          watch("answer.choices")?.concat(choice)
-                        );
+            {choices.length > 1 && (
+              <p className="w-full text-center text-xs text-black/50 -mt-4">
+                Press and hold to reorder
+              </p>
+            )}
+            <Sortable
+              items={
+                watch("choices")?.map((choice) => {
+                  return { id: choice, choice: choice };
+                }) as any[]
+              }
+              setItems={(items) => {
+                setValue(
+                  "choices",
+                  items.map((item) => item.choice)
+                );
+                setChoices(items.map((item) => item.choice));
+              }}
+              setDraggedId={setDraggedId}
+              hasDelay={true}
+            >
+              {choices.map((choice, index) => {
+                return (
+                  <Draggable id={choice} key={choice}>
+                    <div
+                      className={
+                        (draggedId === choice
+                          ? "z-30 opacity-50 drop-shadow-md"
+                          : "z-0") +
+                        " relative flex flex-grow gap-2 items-start"
                       }
-                    }}
-                  />
-                  <textarea
-                    autoFocus={choice === ""}
-                    defaultValue={choice}
-                    placeholder="Write a choice"
-                    className="w-full p-1 text-sm font-light border-b focus:border focus:rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden"
-                    rows={1}
-                    onFocus={(e) => autoResize(e.currentTarget)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && index === choices.length - 1) {
-                        e.preventDefault();
-                        e.currentTarget.blur();
-                        setTimeout(() => {
-                          document.getElementById("add-choice")?.click();
-                        }, 30);
-                      }
-                    }}
-                    onChange={(e) => {
-                      setValue(
-                        "choices",
-                        choices.map((c, i) =>
-                          i === index ? e.target.value : c
-                        )
-                      );
-                      autoResize(e.target);
-                    }}
-                    onBlur={(e) => {
-                      // If the previous value has already been selected, select the new value, and don't allow it to be selected again
-
-                      if (watch("answer.choices")?.includes(choices[index])) {
-                        const selectedChoice = watch("answer.choices")?.find(
-                          (choice) => choices[index] === choice
-                        );
-
-                        setValue(
-                          "answer.choices",
-                          watch("answer.choices")
-                            ?.filter(
-                              (answerChoice) => answerChoice !== selectedChoice
+                      key={choice}
+                    >
+                      <Input
+                        type="checkbox"
+                        className="w-5 h-5 mt-1"
+                        checked={watch("answer.choices")?.includes(choice)}
+                        onChange={() => {
+                          if (watch("answer.choices")?.includes(choice)) {
+                            setValue(
+                              "answer.choices",
+                              watch("answer.choices")?.filter(
+                                (answerChoice) => answerChoice !== choice
+                              )
+                            );
+                          } else {
+                            setValue(
+                              "answer.choices",
+                              watch("answer.choices")?.concat(choice)
+                            );
+                          }
+                        }}
+                      />
+                      <textarea
+                        autoFocus={choice === ""}
+                        defaultValue={choice}
+                        placeholder="Write a choice"
+                        className="w-full p-1 text-sm font-light border-b focus:border focus:rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden"
+                        rows={1}
+                        onFocus={(e) => autoResize(e.currentTarget)}
+                        onKeyDown={(e) => {
+                          if (
+                            e.key === "Enter" &&
+                            index === choices.length - 1
+                          ) {
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                            setTimeout(() => {
+                              document.getElementById("add-choice")?.click();
+                            }, 30);
+                          }
+                        }}
+                        onChange={(e) => {
+                          setValue(
+                            "choices",
+                            choices.map((c, i) =>
+                              i === index ? e.target.value : c
                             )
-                            .concat(e.target.value)
-                        );
-                      }
+                          );
+                          autoResize(e.target);
+                        }}
+                        onBlur={(e) => {
+                          // If the previous value has already been selected, select the new value, and don't allow it to be selected again
 
-                      setChoices(
-                        choices.map((c, i) =>
-                          i === index ? e.target.value : c
-                        )
-                      );
-                      autoResize(e.target);
-                    }}
-                  />
-                  <button
-                    className="aspect-square rounded-md mt-1"
-                    onClick={(e) => {
-                      e.preventDefault();
+                          if (
+                            watch("answer.choices")?.includes(choices[index])
+                          ) {
+                            const selectedChoice = watch(
+                              "answer.choices"
+                            )?.find((choice) => choices[index] === choice);
 
-                      setValue(
-                        "answer.choices",
-                        watch("answer.choices")?.filter(
-                          (answerChoice) => answerChoice !== choice
-                        )
-                      );
-                      setValue(
-                        "choices",
-                        choices.filter(
-                          (answerChoice) => answerChoice !== choice
-                        )
-                      );
-                      setChoices(
-                        choices.filter(
-                          (answerChoice) => answerChoice !== choice
-                        )
-                      );
-                    }}
-                  >
-                    <IoMdClose className="w-5 h-5 fill-black/50 hover:fill-red-500" />
-                  </button>
-                </div>
-              );
-            })}
+                            setValue(
+                              "answer.choices",
+                              watch("answer.choices")
+                                ?.filter(
+                                  (answerChoice) =>
+                                    answerChoice !== selectedChoice
+                                )
+                                .concat(e.target.value)
+                            );
+                          }
+
+                          setChoices(
+                            choices.map((c, i) =>
+                              i === index ? e.target.value : c
+                            )
+                          );
+                          autoResize(e.target);
+                        }}
+                      />
+                    </div>
+                  </Draggable>
+                );
+              })}
+            </Sortable>
             <button
               id="add-choice"
               className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm gap-1 rounded-full opacity-70 hover:opacity-100 focus:opacity-100 hover:bg-black/5 focus:bg-black/5"
@@ -340,26 +375,17 @@ export default function QuestionForm(props: QuestionFormType) {
           watch("type") === "long-answer") && (
           <div className="flex flex-row justify-end">
             <GeneratePopover
-              children={
-                <button
-                  className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
-                  onClick={() => {}}
-                >
-                  <MdReplay />
-                  Generate with AI
-                </button>
-              }
               onSubmit={async (newRequirement) => {
+                setIsGenerating(true);
                 if (watch("content")) {
-                  const generatedAnswer = await generateAnswer(
-                    watch("answer.content")
-                      ? (watch("answer.content") as string)
-                      : "No answer",
-                    watch("type") as "short-answer" | "long-answer",
-                    watch("content"),
-                    props.context,
-                    newRequirement
-                  );
+                  const generatedAnswer = await generateAnswer({
+                    documentId: props.documentId,
+                    type: watch("type") as "short-answer" | "long-answer",
+                    question: watch("content"),
+                    difficultyLevel: props.difficultyLevel,
+                    requirements: newRequirement,
+                  });
+
                   if (generatedAnswer) {
                     setValue("answer.content", generatedAnswer.answer);
                     setValue("choices", undefined);
@@ -374,9 +400,18 @@ export default function QuestionForm(props: QuestionFormType) {
                       variant: "destructive",
                     });
                   }
+                  setIsGenerating(false);
                 }
               }}
-            />
+            >
+              <button
+                className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
+                onClick={() => {}}
+              >
+                <HiOutlineSparkles />
+                Generate
+              </button>
+            </GeneratePopover>
           </div>
         )}
 
@@ -396,7 +431,9 @@ export default function QuestionForm(props: QuestionFormType) {
       {errorMessages.length > 0 && (
         <div className="p-3 bg-red-100/80 rounded-2xl">
           {errorMessages.map((error) => (
-            <p className="text-red-500 ">{error}</p>
+            <p className="text-red-500 " key={error}>
+              {error}
+            </p>
           ))}
         </div>
       )}

@@ -6,8 +6,24 @@ export const questionSchema = z
     type: z.enum(["short-answer", "long-answer", "multiple-choice"]),
     content: z
       .string()
-      .min(1, "The question cannot be empty")
-      .max(3000, "The question cannot be more than 3000 characters"),
+      .refine(
+        (str) => {
+          const cleanStr = str.replace(/<[^>]*>/g, "");
+          return cleanStr.length > 1;
+        },
+        {
+          message: "The answer cannot be empty",
+        }
+      )
+      .refine(
+        (str) => {
+          const cleanStr = str.replace(/<[^>]*>/g, "");
+          return cleanStr.length <= 3000;
+        },
+        {
+          message: "The answer cannot be more than 3000 characters",
+        }
+      ),
     choices: z.optional(
       z
         .array(z.string().min(1, "Write a valid option"))
@@ -18,8 +34,24 @@ export const questionSchema = z
       content: z.optional(
         z
           .string()
-          .min(1, "The answer cannot be empty")
-          .max(5000, "The answer cannot be more than 5000 characters")
+          .refine(
+            (str) => {
+              const cleanStr = str.replace(/<[^>]*>/g, "");
+              return cleanStr.length > 1;
+            },
+            {
+              message: "The answer cannot be empty",
+            }
+          )
+          .refine(
+            (str) => {
+              const cleanStr = str.replace(/<[^>]*>/g, "");
+              return cleanStr.length <= 5000;
+            },
+            {
+              message: "The answer cannot be more than 5000 characters",
+            }
+          )
       ),
       choices: z.optional(
         z.array(z.string()).min(1, "Select at least one option")

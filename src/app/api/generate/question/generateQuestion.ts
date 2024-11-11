@@ -1,16 +1,17 @@
 "use server";
-import { Document } from "langchain/document";
 import { ChatAnthropic } from "@langchain/anthropic";
-import { loadQAStuffChain } from "langchain/chains";
 import { QuestionType } from "@/app/components/question";
+import { RunnableSequence } from "@langchain/core/runnables";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
+import { questionSchema } from "@/app/validation/questionValidation";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 export const generateQuestion = async (
-  previousQuestion: string,
   type: "short-answer" | "multiple-choice" | "long-answer",
   context: string,
   difficultyLevel: number,
-  requirements: string | undefined,
-  newRequirement: string
+  requirements: string,
+  marks: number
 ) => {
   try {
     // const model = new ChatGroq({
@@ -22,64 +23,113 @@ export const generateQuestion = async (
 
     const model = new ChatAnthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
-      model: "claude-3-haiku-20240307",
-      temperature: 0.2,
+      model: "claude-3-5-haiku-20241022",
+      temperature: 0.4,
       maxTokens: 4096,
     });
 
-    const chain = loadQAStuffChain(model);
+    const parser = StructuredOutputParser.fromZodSchema(questionSchema);
 
     console.log(
       `Starting to generate a question of type "${type}, difficulty level: ${difficultyLevel} and requirements: "${requirements}"`
     );
 
-    const res = await chain.invoke({
-      input_documents: [
-        new Document({
-          pageContent: JSON.stringify(context),
-        }),
-      ],
-      question: `"task": "Generate a question that is different from the previous question, based on the provided text as context.",
-      "outputFormat": "JSON",
-      "previousQuestion": "${previousQuestion}",
-      "questionStructure":
-          {
-            "id": "string", // Unique valid uuid4 identifier for each question
-            "type": "short-answer" | "long-answer" | "multiple-choice", // In this case, it is of type "${type}".
-            "content": "string",  //Content of the question; generate it based on the difficulty and content provided
-            "choices": "[string]", // Only for "multiple-choice" type questions.
-            "marks": "number", // Marks per question. Vary marks according to difficulty and content.
-            "answer": {
-              "content": "string", // Answer to the question for "short-answer" and "long-answer" type questions only. Take in consideration the provided context. If the type is "long-answer", make it very detailed and in-depth, and don't leave out any details.
-              "choices": "[string]" // Correct choices for "multiple-choice" type questions only.
-            }
-          },
-      "guidelines": [
-    "Difficulty level: ${difficultyLevel}% (0% = very easy, 100% = very hard). Adjust marks accordingly.",
-    "Requirements that were used to generate the previous question: ${requirements}",
-    "Newly provided requirements: ${newRequirement}",
-    "Vary marks per question based on difficulty and content; avoid uniform marking.",
-    "Questions and answers must align with the task's purpose.",
-    "Return only the JSON object; no additional text.",
-    "Ensure proper JSON escaping."
-    "DO NOT HALLUCINATE. My puppy will get killed if you do, so please don't, I beg."
-      ],
-      "failureResponse": "Return an empty string if unable to fulfill the task due to conflicting requirements or invalid marks allocation."`,
+    // Create a detailed prompt template
+    const prompt = ChatPromptTemplate.fromTemplate(`
+  You are an expert educator tasked with generating meaningful questions from provided content.
+  Analyze the following context and generate a question that tests different cognitive levels.
+  
+  Format Instructions: {format_instructions}
+
+
+
+
+  Context:
+  {context}
+
+
+
+  
+  Rules to follow:
+  1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema. 
+  2. Don't mention the context anywhere in the question. You are the only one who knows the context, don't assume that anyone else already knows it. Make sure the question is ONLY related to or derived from the context provided. Avoid incomplete questions that lack any useful information at all cost to avoid confusion
+  3. The "choices" array and "answer.choices" array should only be present if the question type is "multiple-choice". The "answer.content" string should only be present if the question type is "short-answer" or "long-answer"
+  4. The "content" and "answer.content" fields must be composed of valid HTML strings, with the following tags ONLY: p, strong, em, u, br, ul, li, ol, span, <pre class="ql-syntax" spellcheck="false"></pre>
+  5. When the type of the question is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer.
+  6. The difficulty level or percentage of difficulty of the question is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the question is appropriate for the difficulty level, a higher difficulty level means a more complex question, and a lower difficulty level means a simpler question
+  6. User-provided requirements (They must be prioritized if not empty): "{requirements}"
+  7. The type of the question must be {type}
+  8. The number of marks for the question is {marks}
+  
+
+
+  Key Guidelines for Question Generation:
+
+  1. Cognitive Engagement
+  - Move beyond factual recall to encourage deep analysis
+  - Design a question that has multiple valid approaches
+  - Promote metacognitive reflection
+  
+
+  2. Creative Thinking Elements
+  - Encourage novel connections and associations
+  - Promote divergent thinking and multiple perspectives
+  - Generate a question that transforms or combines ideas
+  - Foster imagination and innovative problem-solving
+
+  3. Critical Thinking Components
+  - Require evaluation of evidence and arguments
+  - Promote logical reasoning and inference
+  - Include analysis of assumptions and biases
+  - Encourage systematic problem-solving
+
+  4. Question Design Principles
+  - Include real-world applications and connections
+  - Focus on key concepts and important details, and present them in a very fun and engaging way
+  - Anticipate and address common misconceptions
+  - Remember that the questions are for human beings. Remember to make questions engaging and thought-provoking while maintaining educational value
+  
+
+  5. Answer Framework
+  - Explain thinking processes and reasoning
+  - Include alternative perspectives where applicable
+  - Connect to broader concepts and applications
+
+  6. Learning Development
+  - Build from foundational to expert-level thinking
+  - Include metacognitive reflection opportunities
+  - Promote transfer of learning to new contexts
+  - Encourage intellectual risk-taking
+
+  Remember:
+  - The question should provoke curiosity and wonder
+  - The answer should demonstrate multiple thinking pathways
+  - Include opportunities for knowledge transformation
+  - Encourage both divergent and convergent thinking
+  - Promote both analytical and creative problem-solving
+  `);
+
+    const chain = RunnableSequence.from([prompt, model as any, parser]);
+
+    const response = await chain.invoke({
+      context: context,
+      type: type,
+      difficultyLevel: difficultyLevel,
+      requirements: requirements,
+      marks: marks,
+      format_instructions: parser.getFormatInstructions(),
     });
 
-    if (res.text !== "") {
-      const question: QuestionType = JSON.parse(
-        res.text.replaceAll("\n", "").replaceAll("\r", "").replaceAll("\t", "")
-      );
+    const question: QuestionType = JSON.parse(
+      JSON.stringify(response)
+        .replaceAll("\n", "")
+        .replaceAll("\r", "")
+        .replaceAll("\t", "")
+    );
 
-      console.log("Question successfully generated");
+    console.log("Question successfully generated");
 
-      return question;
-    } else {
-      throw new Error(
-        "Error while generating the question. Please change your requirements and try again"
-      );
-    }
+    return question;
   } catch (e) {
     throw new Error(`Error while generating the question, the error is: ${e}`);
   }

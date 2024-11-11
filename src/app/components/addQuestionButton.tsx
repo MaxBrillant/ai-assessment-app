@@ -6,7 +6,8 @@ import { FiPlus } from "react-icons/fi";
 
 export default function AddQuestionButton(props: {
   onAdd: (data: QuestionType) => void;
-  context: string;
+  documentId: string;
+  numberOfChunks: number;
   difficultyLevel: number;
   requirements: string | undefined;
 }) {
@@ -24,7 +25,8 @@ export default function AddQuestionButton(props: {
           answer={{
             content: "",
           }}
-          context={props.context}
+          documentId={props.documentId}
+          numberOfChunks={props.numberOfChunks}
           difficultyLevel={props.difficultyLevel}
           requirements={props.requirements}
           onSubmit={(data) => {

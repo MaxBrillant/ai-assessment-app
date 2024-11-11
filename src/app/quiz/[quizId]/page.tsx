@@ -8,6 +8,8 @@ import StartResubmissionDialog from "./startResubmissionDialog";
 import InstructionsDialog from "./instructionsDialog";
 import getAssessmentData from "@/app/api/assessments/fetch/getAssessmentData";
 import getSubmissionData from "@/app/api/submissions/fetch/getSubmissionData";
+import { RxDotFilled } from "react-icons/rx";
+import { calculateTotalMarks } from "@/utils/calculateTotalMarks";
 
 export default async function Page({
   params,
@@ -34,21 +36,35 @@ export default async function Page({
       {!searchParams.submissionId && (
         <AssessmentOverview
           id={assessmentData.id}
-          creatorEmail={"Tuzobimenya hanyuma"}
+          creatorEmail={assessmentData.userEmail}
           title={assessmentData.title}
           duration={assessmentData.duration}
           instructions={assessmentData.instructions}
           credentials={assessmentData.credentials}
         />
       )}
-      <div className="flex flex-col p-4 border-b border-black">
-        <p className="text-2xl font-semibold">{assessmentData.title}</p>
-        <p>Total marks: 50 marks</p>
-        {assessmentData.instructions ? (
-          <InstructionsDialog instructions={assessmentData.instructions} />
-        ) : (
-          <p>No instructions provided</p>
-        )}
+      <div className="max-w-xl mx-auto flex flex-col px-4 pt-4">
+        <div>
+          <p className="text-lg font-medium">{assessmentData.title}</p>
+          <div className="flex gap-1 items-center">
+            <p className="text-sm">
+              {calculateTotalMarks(
+                assessmentData.questions.map((question) => question.marks)
+              )}{" "}
+              {calculateTotalMarks(
+                assessmentData.questions.map((question) => question.marks)
+              ) !== 1
+                ? "marks"
+                : "mark"}
+            </p>
+            <RxDotFilled className="w-3 h-3 text-black/30" />
+            {assessmentData.instructions ? (
+              <InstructionsDialog instructions={assessmentData.instructions} />
+            ) : (
+              <p className="text-sm">No instructions provided</p>
+            )}
+          </div>
+        </div>
         {submissionData && submissionData.submissionStatus !== "submitted" && (
           <CountdownTimer
             id={submissionData.id}
@@ -71,8 +87,8 @@ export default async function Page({
           <StartResubmissionDialog id={submissionData.id} />
         )}
 
-      {submissionData ? (
-        submissionData.submissionStatus === "resubmission-allowed" ? (
+      {submissionData &&
+        (submissionData.submissionStatus === "resubmission-allowed" ? (
           <AssessmentForm
             id={submissionData.id}
             questions={assessmentData.questions.filter(
@@ -91,15 +107,7 @@ export default async function Page({
             defaultValues={submissionData.answers}
             submissionStatus={submissionData.submissionStatus}
           />
-        )
-      ) : (
-        <div>
-          <p>Please begin the assessment to access the questions</p>
-          <Link href={`/quiz/${assessmentNanoId}`}>
-            <Button>Begin the assessment</Button>
-          </Link>
-        </div>
-      )}
+        ))}
     </div>
   );
 }

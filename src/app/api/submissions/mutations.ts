@@ -112,6 +112,26 @@ export async function submitAssessment(submissionId: number) {
   return data;
 }
 
+export async function deleteSubmission(submissionId: number) {
+  console.log(
+    "Deleting the submission of submission of ID " + submissionId + "..."
+  );
+
+  const { error } = await CreateServerClient()
+    .from("submissions")
+    .delete()
+    .eq("id", submissionId);
+
+  if (error) {
+    console.error("Error while deleting a submission: ", error.message);
+    return undefined;
+  }
+
+  console.log("Submission deleted successfully!");
+
+  return 1;
+}
+
 export async function startResubmission(submissionId: number) {
   console.log(
     "Starting the resubmission of submission of ID " + submissionId + "..."

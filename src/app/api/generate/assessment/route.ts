@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ProcessFile } from "../processFile";
-import { generateAssessment } from "./generateAssessment";
+import { handleFileDataInsertionIntoVectorStore } from "../document/handleFileData";
+import { nanoid } from "nanoid";
+import pickRandomChunks from "./pickRandomChunks";
+import {
+  queryVectorStore,
+  queryVectorStoreFromChunkIndex,
+} from "../document/vectorStore";
+import { QuestionType } from "@/app/components/question";
+import { generateQuestion } from "../question/generateQuestion";
+import { getQuestionTypeAndMarks } from "./getQuestionTypesAndMarks";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,137 +18,131 @@ export async function POST(request: NextRequest) {
     const numberOfQuestions = Number(formData.getAll("questions")[0]);
     const marks = Number(formData.getAll("marks")[0]);
     const difficultyLevel = Number(formData.getAll("difficulty-level")[0]);
-    const requirements = formData.getAll("requirements")[0] as string;
-    const startingFrom: number | undefined = Number(
-      formData.getAll("startingFrom")[0]
-    );
-    const endingAt: number | undefined = Number(formData.getAll("endingAt")[0]);
+    const requirements = formData.getAll("requirements")[0] as
+      | string
+      | undefined;
+
+    const startingFrom = formData.getAll("startingFrom")[0]
+      ? Number(formData.getAll("startingFrom")[0])
+      : undefined;
+    const endingAt = formData.getAll("endingAt")[0]
+      ? Number(formData.getAll("endingAt")[0])
+      : undefined;
+
+    const documentId = nanoid();
 
     console.log(
       `Starting to generate the assessment...(${numberOfQuestions} questions, ${marks} marks, ${difficultyLevel}% difficulty, from Page ${startingFrom} to Page ${endingAt}, requirements: "${requirements}")`
     );
 
-    console.log("Processing file...");
-    const pages = await ProcessFile(file, type);
-    console.log("File processed");
+    console.log("Inserting file data into vector store...");
+    const { title, chunksLength } =
+      await handleFileDataInsertionIntoVectorStore(
+        documentId,
+        file,
+        type,
+        startingFrom,
+        endingAt
+      );
 
-    console.log("Picking context pages...");
+    console.log(
+      `File data inserted into vector store. Assessment title: "${title}"`
+    );
 
-    const randomPages = getRandomPages(
-      startingFrom && endingAt
-        ? pages.slice(startingFrom - 1, endingAt)
-        : pages,
+    const contextChunks: {
+      content: string | undefined;
+      chunkIndexes: number[] | undefined;
+    }[] = [];
+
+    if (requirements) {
+      console.log("Getting prioritized chunks...");
+
+      const prioritizedChunks = await queryVectorStore(
+        documentId,
+        requirements,
+        numberOfQuestions
+      );
+
+      for (let i = 0; i < prioritizedChunks.length; i += 1) {
+        contextChunks.push({
+          content: prioritizedChunks[i].pageContent,
+          chunkIndexes: [prioritizedChunks[i].metadata.chunkIndex],
+        });
+      }
+    }
+
+    if (numberOfQuestions > contextChunks.length) {
+      console.log("Picking random chunks...");
+      const randomlyPickedChunks = await pickRandomChunks(
+        chunksLength,
+        numberOfQuestions - contextChunks.length,
+        difficultyLevel
+      );
+
+      await Promise.all(
+        randomlyPickedChunks.map(async (chunk) => {
+          const pageContent = await queryVectorStoreFromChunkIndex(
+            documentId,
+            chunk
+          );
+
+          contextChunks.push({
+            content: pageContent.pageContent,
+            chunkIndexes: [chunk],
+          });
+        })
+      );
+    }
+
+    console.log(
+      "Getting question type and marks for each question based on difficulty level..."
+    );
+    const questionTypeAndMarks = getQuestionTypeAndMarks(
       numberOfQuestions,
+      marks,
       difficultyLevel
     );
 
-    console.log(
-      `Generating assessment from pages: ${randomPages.pages.join(", ")} ...`
-    );
-    const assessment = await generateAssessment(
-      numberOfQuestions,
-      randomPages.content,
-      marks,
-      difficultyLevel,
-      requirements
-    );
+    console.log("Generating questions and answers...");
 
-    console.log(assessment);
+    const questions: QuestionType[] = [];
 
-    if (assessment !== "") {
-      JSON.parse(
-        JSON.stringify(
-          assessment
-            .replaceAll("\n", "")
-            .replaceAll("\r", "")
-            .replaceAll("\t", "")
-        )
-      );
-      console.log("Assessment successfully generated");
+    let i = 0;
+    while (i < numberOfQuestions) {
+      const questionRequests = contextChunks
+        .slice(i, i + 10)
+        .map(async (chunk) => {
+          return await generateQuestion(
+            questionTypeAndMarks[i].type,
+            chunk.content ?? "",
+            difficultyLevel,
+            requirements ?? "",
+            questionTypeAndMarks[i].marks
+          );
+        });
 
-      return new NextResponse(
-        JSON.stringify({
-          assessment: assessment
-            .replaceAll("\n", "")
-            .replaceAll("\r", "")
-            .replaceAll("\t", ""),
-          context: randomPages.content
-            .join("           ")
-            .replaceAll("\n", "")
-            .replaceAll("\r", "")
-            .replaceAll("\t", ""),
-        })
-      );
-    } else {
-      throw new Error(
-        "Error while generating questions and answers. Please change your requirements and try again"
-      );
+      const questionResponses = await Promise.all(questionRequests);
+
+      questions.push(...questionResponses);
+
+      i += 10;
     }
+    console.log("Successfully generated the assessment");
+
+    return new NextResponse(
+      JSON.stringify({
+        title: title,
+        questions: questions.map((question) => ({
+          ...question,
+          id: crypto.randomUUID(),
+        })),
+        documentId: documentId,
+        numberOfChunks: chunksLength,
+      })
+    );
   } catch (e) {
     throw new Error(
-      `Error while generating questions and answers, the error is: ${e}`
+      `Error while generating the assessment, the error is: ${e}`
     );
   }
 }
-
-const getRandomPages = (
-  pages: string[],
-  numberOfQuestions: number,
-  difficultyLevel: number
-) => {
-  let pageNumbers: number[] = [];
-  let pageContent: string[] = [];
-
-  for (let i = 0; i < numberOfQuestions; i++) {
-    const difficultyPercentage = difficultyLevel / 100;
-    const pagesLength = pages.length;
-    const firstTwentyPercent = Math.floor(pagesLength * 0.2);
-    const secondTwentyPercent = Math.floor(pagesLength * 0.4);
-    const thirdTwentyPercent = Math.floor(pagesLength * 0.6);
-    const fourthTwentyPercent = Math.floor(pagesLength * 0.8);
-
-    let randomPageIndex;
-    if (difficultyPercentage < 0.2) {
-      randomPageIndex = Math.floor(Math.random() * firstTwentyPercent);
-    } else if (difficultyPercentage < 0.4) {
-      randomPageIndex = Math.floor(
-        Math.random() * (secondTwentyPercent - firstTwentyPercent) +
-          firstTwentyPercent
-      );
-    } else if (difficultyPercentage < 0.6) {
-      randomPageIndex = Math.floor(
-        Math.random() * (thirdTwentyPercent - secondTwentyPercent) +
-          secondTwentyPercent
-      );
-    } else if (difficultyPercentage < 0.8) {
-      randomPageIndex = Math.floor(
-        Math.random() * (fourthTwentyPercent - thirdTwentyPercent) +
-          thirdTwentyPercent
-      );
-    } else {
-      randomPageIndex = Math.floor(
-        Math.random() * (pagesLength - fourthTwentyPercent) +
-          fourthTwentyPercent
-      );
-    }
-
-    if (
-      !pageNumbers.includes(randomPageIndex) &&
-      !pageNumbers.includes(randomPageIndex + 1)
-    ) {
-      pageNumbers.push(randomPageIndex);
-      pageNumbers.push(randomPageIndex + 1);
-      pageContent.push(`PAGE NUMBER ${randomPageIndex}: 
-    
-    ${pages[randomPageIndex]}`);
-      pageContent.push(`PAGE NUMBER ${randomPageIndex + 1}: 
-    
-    ${pages[randomPageIndex + 1]}`);
-    }
-  }
-
-  return {
-    pages: pageNumbers,
-    content: pageContent,
-  };
-};

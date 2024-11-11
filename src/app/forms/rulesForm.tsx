@@ -3,9 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { MdDeleteOutline } from "react-icons/md";
 import { z } from "zod";
 import { assessmentSchema } from "../validation/assessmentValidation";
 import {
@@ -15,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { IoMdClose } from "react-icons/io";
+import { FiPlus } from "react-icons/fi";
 
 const rulesSchema = assessmentSchema.pick({
   title: true,
@@ -63,7 +63,7 @@ export default function RulesForm(props: propsType) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-8 p-5 max-w-sm mx-auto"
+      className="flex flex-col gap-8 p-5 max-w-md"
     >
       <div className="flex flex-col">
         <label htmlFor="title" className="font-medium">
@@ -120,62 +120,81 @@ export default function RulesForm(props: propsType) {
       </div>
       <div className="flex flex-col gap-1">
         <p className="font-medium">Credentials</p>
-        {props.mode === "update" && (
-          <p className="text-sm font-light">
+        {props.mode === "update" ? (
+          <p className="text-xs text-black/70">
             You cannot edit or delete credentials once the assessment is created
           </p>
+        ) : (
+          <p className="text-xs text-black/70">
+            Define the information you need from participants before they begin
+            the assessment. These details will be requested at the start of each
+            submission. Credentials can only be set up once.
+          </p>
         )}
-        {watch("credentials")?.map((credential, index) => {
-          return (
-            <div className="flex flex-row justify-between" key={index}>
-              <Input
-                value={credential}
-                autoFocus={credential === ""}
-                placeholder="Enter a credential"
-                disabled={props.mode === "update"}
-                onChange={(e) =>
-                  setValue(
-                    "credentials",
-                    watch("credentials")?.map((c, i) =>
-                      i === index ? e.target.value : c
-                    )
-                  )
-                }
-              />
-              {props.mode === "create" && (
-                <Button
-                  size={"icon"}
-                  variant={"outline"}
-                  className="aspect-square"
-                  onClick={() =>
+        <div className="flex flex-col gap-2 my-2">
+          {watch("credentials")?.map((credential, index) => {
+            return (
+              <div
+                className="flex flex-row justify-between items-center gap-2"
+                key={index}
+              >
+                {index === 0 && <p className="text-xs font-medium">Unique</p>}
+                <Input
+                  value={credential}
+                  autoFocus={credential === ""}
+                  placeholder="Enter a credential"
+                  disabled={props.mode === "update"}
+                  onChange={(e) =>
                     setValue(
                       "credentials",
-                      watch("credentials")?.filter((_, i) => i !== index)
+                      watch("credentials")?.map((c, i) =>
+                        i === index ? e.target.value : c
+                      )
                     )
                   }
-                >
-                  <MdDeleteOutline className="w-6 h-6" />
-                </Button>
-              )}
-            </div>
-          );
-        })}
+                />
+                {props.mode === "create" && (
+                  <Button
+                    size={"icon"}
+                    variant={"outline"}
+                    className="aspect-square"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setValue(
+                        "credentials",
+                        watch("credentials")?.filter((_, i) => i !== index)
+                      );
+                    }}
+                  >
+                    <IoMdClose className="w-5 h-5 fill-black/50 hover:fill-red-500" />
+                  </Button>
+                )}
+              </div>
+            );
+          })}
+        </div>
         {props.mode === "create" && (
-          <Button
-            variant={"outline"}
-            onClick={() =>
-              setValue("credentials", [...watch("credentials"), ""])
-            }
+          <button
+            className="w-full flex flex-row px-2 py-1 items-center text-center text-sm gap-1 rounded-full opacity-70 hover:opacity-100 focus:opacity-100 hover:bg-black/5 focus:bg-black/5"
+            onClick={(e) => {
+              e.preventDefault();
+              setValue("credentials", [...watch("credentials"), ""]);
+            }}
           >
+            <span>
+              <FiPlus className="w-5 h-5" />
+            </span>
             Add a credential
-          </Button>
+          </button>
         )}
       </div>
 
       {errorMessages.length > 0 && (
         <div className="p-3 bg-red-100/80 rounded-2xl">
           {errorMessages.map((error) => (
-            <p className="text-red-500 ">{error}</p>
+            <p className="text-red-500 " key={error}>
+              {error}
+            </p>
           ))}
         </div>
       )}
@@ -183,7 +202,8 @@ export default function RulesForm(props: propsType) {
         type="submit"
         disabled={
           errorMessages.length > 0 ||
-          (props.defaultValues.title === watch("title") &&
+          (props.mode === "update" &&
+            props.defaultValues.title === watch("title") &&
             props.defaultValues.instructions === watch("instructions") &&
             props.defaultValues.duration === watch("duration"))
         }

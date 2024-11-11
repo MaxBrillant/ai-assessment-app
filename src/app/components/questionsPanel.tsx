@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Question from "./question";
 import AddQuestionButton from "./addQuestionButton";
+import Sortable from "./sortable"; // React
+import { motion } from "framer-motion";
 
 export type QuestionListType = {
   id: string;
@@ -17,7 +19,8 @@ export type QuestionListType = {
 }[];
 export default function QuestionPanel(props: {
   defaultQuestions: QuestionListType;
-  context: string;
+  documentId: string;
+  numberOfChunks: number;
   difficultyLevel: number;
   requirements: string | undefined;
   onChange: (data: QuestionListType) => void;
@@ -25,73 +28,90 @@ export default function QuestionPanel(props: {
   const [questions, setQuestions] = useState<QuestionListType>(
     props.defaultQuestions
   );
+  const [draggedId, setDraggedId] = useState<string | undefined>();
 
   useEffect(() => {
     props.onChange(questions);
   }, [questions]);
 
   return (
-    <div className="w-full flex flex-col p-5 items-center bg-black/5">
-      {questions.map((question, index) => {
-        return (
-          <div className="w-full max-w-md flex flex-col">
-            <Question
-              key={index + 1}
-              position={index + 1}
-              id={question.id}
-              type={
-                question.type as
-                  | "short-answer"
-                  | "long-answer"
-                  | "multiple-choice"
-              }
-              content={question.content}
-              choices={question.choices}
-              marks={question.marks}
-              answer={{
-                content: question.answer.content,
-                choices: question.answer.choices,
-              }}
-              context={props.context}
-              difficultyLevel={props.difficultyLevel}
-              requirements={props.requirements}
-              onEdit={(data) => {
-                questions[index] = data;
-                setQuestions([...questions]);
-              }}
-              onDelete={() => {
-                questions.splice(index, 1);
-                setQuestions([...questions]);
-              }}
-              onMoveUp={() => {
-                if (index > 0) {
-                  const temp = questions[index - 1];
-                  questions[index - 1] = questions[index];
-                  questions[index] = temp;
-                  setQuestions([...questions]);
-                }
-              }}
-              onMoveDown={() => {
-                if (index < questions.length - 1) {
-                  const temp = questions[index + 1];
-                  questions[index + 1] = questions[index];
-                  questions[index] = temp;
-                  setQuestions([...questions]);
-                }
-              }}
-            />
-            <AddQuestionButton
-              onAdd={(data) => {
-                questions.splice(index + 1, 0, data);
-                setQuestions([...questions]);
-              }}
-              context={props.context}
-              difficultyLevel={props.difficultyLevel}
-              requirements={props.requirements}
-            />
-          </div>
-        );
-      })}
-    </div>
+    <motion.div layout>
+      <Sortable
+        items={questions}
+        setItems={(items) => {
+          const scrollBarHeight = window.scrollY;
+          setQuestions(items);
+          window.scrollTo(0, scrollBarHeight);
+        }}
+        setDraggedId={setDraggedId}
+      >
+        <div className="relative w-full flex flex-col p-5 items-center bg-black/5">
+          {questions.map((question, index) => {
+            return (
+              <div className={"w-full max-w-md flex flex-col"} key={index}>
+                <Question
+                  position={index + 1}
+                  id={question.id}
+                  type={
+                    question.type as
+                      | "short-answer"
+                      | "long-answer"
+                      | "multiple-choice"
+                  }
+                  content={question.content}
+                  choices={question.choices}
+                  marks={question.marks}
+                  answer={{
+                    content: question.answer.content,
+                    choices: question.answer.choices,
+                  }}
+                  documentId={props.documentId}
+                  numberOfChunks={props.numberOfChunks}
+                  difficultyLevel={props.difficultyLevel}
+                  requirements={props.requirements}
+                  onEdit={(data) => {
+                    questions[index] = data;
+                    setQuestions([...questions]);
+                  }}
+                  onDelete={() => {
+                    questions.splice(index, 1);
+                    setQuestions([...questions]);
+                  }}
+                  onMoveUp={() => {
+                    if (index > 0) {
+                      const temp = questions[index - 1];
+                      questions[index - 1] = questions[index];
+                      questions[index] = temp;
+                      setQuestions([...questions]);
+                    }
+                  }}
+                  onMoveDown={() => {
+                    if (index < questions.length - 1) {
+                      const temp = questions[index + 1];
+                      questions[index + 1] = questions[index];
+                      questions[index] = temp;
+                      setQuestions([...questions]);
+                    }
+                  }}
+                  isDragging={draggedId === question.id.toString()}
+                />
+                {!draggedId && (
+                  <AddQuestionButton
+                    onAdd={(data) => {
+                      questions.splice(index + 1, 0, data);
+                      setQuestions([...questions]);
+                    }}
+                    documentId={props.documentId}
+                    numberOfChunks={props.numberOfChunks}
+                    difficultyLevel={props.difficultyLevel}
+                    requirements={props.requirements}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </Sortable>
+    </motion.div>
   );
 }

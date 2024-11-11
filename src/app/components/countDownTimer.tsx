@@ -8,7 +8,11 @@ type timerPropsType = {
   id: number;
   assessmentCreationTime: Date;
   assessmentDuration: number;
-  submissionStatus: "pending-submission" | "submitted" | "resubmission-allowed" | "graded";
+  submissionStatus:
+    | "pending-submission"
+    | "submitted"
+    | "resubmission-allowed"
+    | "graded";
 };
 
 const getRemainingTime = (creationTime: Date, duration: number) => {
@@ -57,26 +61,44 @@ const CountdownTimer = (props: timerPropsType) => {
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
     const seconds = timeInSeconds % 60;
 
-    return `${hours} hour${hours !== 1 ? "s" : ""} ${minutes} minute${
-      minutes !== 1 ? "s" : ""
-    } ${seconds} second${seconds !== 1 ? "s" : ""}`;
+    const hoursString = hours > 0 ? `${hours} hr.` : "";
+    const minutesString = minutes > 0 ? `${minutes} min.` : "";
+    const secondsString = `${seconds} sec.`;
+
+    return [hoursString, minutesString, secondsString]
+      .filter((str) => str !== "")
+      .join(" ");
   };
 
   return (
-    <div className="flex flex-col items-center hey max-w-md">
+    <div className="flex flex-col items-center">
       <Dialog open={timeUp}>
         <DialogContent>
-          <h1 className="text-3xl font-bold">Time's up!</h1>
+          <p className="text-2xl font-bold">Time is up!</p>
           <p>
-            You have completed your assessment! It will be automatically
+            Thank you for taking this assessment. It will be automatically
             submitted for you
           </p>
         </DialogContent>
       </Dialog>
-      <p>Time remaining: {formatTime(remainingTime)}</p>
-      <Progress
-        value={(remainingTime * 100) / props.assessmentDuration}
-      ></Progress>
+      <div className="flex flex-col w-full items-end">
+        <p
+          className={`${
+            (remainingTime === props.assessmentDuration * 0.1 ||
+              remainingTime === props.assessmentDuration * 0.25 ||
+              remainingTime === props.assessmentDuration * 0.5 ||
+              [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(remainingTime)) &&
+            "text-red-500 font-bold animate-bounce duration-300"
+          } text-lg font-medium`}
+        >
+          {formatTime(remainingTime)}{" "}
+          <span className="text-xs text-black/70">remaining</span>
+        </p>
+        <Progress
+          className="w-full"
+          value={(remainingTime * 100) / props.assessmentDuration}
+        ></Progress>
+      </div>
     </div>
   );
 };

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import GradingForm from "./gradingForm";
 import { FiEdit3 } from "react-icons/fi";
+import SafeHTMLRenderer from "@/utils/htmlRenderer";
 
 type submittedAnswerProps = {
   position: number;
@@ -41,7 +42,9 @@ export default function SubmittedAnswer(props: submittedAnswerProps) {
               : "Short Answer"}
           </span>
         </p>
-        <p className="font-medium">{props.question.content}</p>
+        <p className="font-medium">
+          <SafeHTMLRenderer htmlContent={props.question.content} />
+        </p>
       </div>
 
       <div className={"relative p-3 border-t border-black/30"}>
@@ -120,9 +123,7 @@ export default function SubmittedAnswer(props: submittedAnswerProps) {
           </ul>
         ) : (
           !props.question.answer.content && (
-            <p className="text-sm font-light">
-              No choices have been submitted yet
-            </p>
+            <p className="text-sm font-light">No choices have been submitted</p>
           )
         )}
       </div>
