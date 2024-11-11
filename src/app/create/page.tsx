@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import GenerationForm from "../forms/generationForm";
 import LoginForm from "../login/loginForm";
@@ -14,6 +14,10 @@ import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import { useToast } from "@/hooks/use-toast";
 import { createAssessment } from "../api/assessments/mutations";
 import { RiLoader3Fill } from "react-icons/ri";
+import {
+  AssessmentContext,
+  AssessmentProvider,
+} from "../context/assessmentContext";
 
 type assessmentType = {
   document: File | undefined;
@@ -36,19 +40,8 @@ type GeneratedTestType = {
   numberOfChunks: number;
 };
 export default function Create() {
-  const [assessmentData, setAssessmentData] = useState<assessmentType>({
-    document: undefined,
-    numberOfQuestions: 0,
-    totalMarks: 0,
-    numberOfChunks: 0,
-    requirements: undefined,
-    title: "",
-    questions: [],
-    duration: "60",
-    instructions: undefined,
-    credentials: ["Email address", "Full name"],
-    difficultyLevel: 0,
-  });
+  const assessmentContext = useContext(AssessmentContext);
+  const [uploadedDocument, setUploadedDocument] = useState<File | undefined>();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const urlSearchParams = useSearchParams();
   const { push } = useRouter();
@@ -57,24 +50,27 @@ export default function Create() {
   useEffect(() => {
     const generateAssessmentAndSaveToDB = async () => {
       const formData = new FormData();
-      formData.append("file", assessmentData.document as File);
+      formData.append("file", assessmentContext.document as File);
       formData.append(
         "type",
-        assessmentData.document?.type === "application/pdf"
+        assessmentContext.document?.type === "application/pdf"
           ? "pdf"
-          : assessmentData.document?.type ===
+          : assessmentContext.document?.type ===
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           ? "docx"
           : "pptx"
       );
-      formData.append("questions", String(assessmentData.numberOfQuestions));
-      formData.append("marks", String(assessmentData.totalMarks));
+      formData.append("questions", String(assessmentContext.numberOfQuestions));
+      formData.append("marks", String(assessmentContext.totalMarks));
       formData.append(
         "difficulty-level",
-        String(assessmentData.difficultyLevel)
+        String(assessmentContext.difficultyLevel)
       );
-      if (assessmentData.requirements) {
-        formData.append("requirements", assessmentData.requirements as string);
+      if (assessmentContext.requirements) {
+        formData.append(
+          "requirements",
+          assessmentContext.requirements as string
+        );
       }
       try {
         const data = await fetch("/api/generate/assessment", {
@@ -88,7 +84,7 @@ export default function Create() {
           {
             title: assessmentObject.title,
             questions: assessmentObject.questions,
-            duration: assessmentData.duration as
+            duration: assessmentContext.duration as
               | "15"
               | "30"
               | "45"
@@ -97,10 +93,10 @@ export default function Create() {
               | "120"
               | "150"
               | "180",
-            instructions: assessmentData.instructions,
-            credentials: assessmentData.credentials,
-            difficultyLevel: assessmentData.difficultyLevel,
-            generationRequirements: assessmentData.requirements,
+            instructions: assessmentContext.instructions,
+            credentials: assessmentContext.credentials,
+            difficultyLevel: assessmentContext.difficultyLevel,
+            generationRequirements: assessmentContext.requirements,
           },
           assessmentObject.documentId,
           assessmentObject.numberOfChunks
@@ -135,9 +131,9 @@ export default function Create() {
 
     if (param && param === "true") {
       if (
-        !assessmentData.document ||
-        !assessmentData.numberOfQuestions ||
-        assessmentData.difficultyLevel == undefined
+        !assessmentContext.document ||
+        !assessmentContext.numberOfQuestions ||
+        assessmentContext.difficultyLevel == undefined
         // !authenticatedUser
       ) {
         push("/create");
@@ -148,38 +144,35 @@ export default function Create() {
   }, [urlSearchParams]);
 
   return urlSearchParams.get("assessment") !== "true" ? (
-    <div>
-      {assessmentData.document ? (
+    <AssessmentProvider>
+      {uploadedDocument ? (
         <div className="max-w-md mx-auto p-5 flex flex-col gap-4 items-center justify-center">
           <div
             className={
-              (assessmentData.document.type === "application/pdf"
+              (uploadedDocument.type === "application/pdf"
                 ? "bg-red-50"
-                : assessmentData.document.type ===
+                : uploadedDocument.type ===
                   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 ? "bg-blue-50"
                 : "bg-orange-50") +
               " relative flex flex-col gap-2 items-center mx-auto text-center w-fit max-w-full p-6 border border-black/30 rounded-xl"
             }
           >
-            {assessmentData.document.type === "application/pdf" ? (
+            {uploadedDocument.type === "application/pdf" ? (
               <FaFilePdf className="w-16 h-16 fill-red-500" />
-            ) : assessmentData.document.type ===
+            ) : uploadedDocument.type ===
               "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ? (
               <FaFileWord className="w-16 h-16 fill-blue-500" />
             ) : (
               <FaFilePowerpoint className="w-16 h-16 fill-orange-500" />
             )}
             <p className="text-sm max-w-full truncate">
-              {assessmentData.document.name}
+              {uploadedDocument.name}
             </p>
             <button
               className="absolute bottom-[-0.7rem] mx-auto w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-gray-100 border border-black/30 rounded-full"
               onClick={() => {
-                setAssessmentData({
-                  ...assessmentData,
-                  document: undefined,
-                });
+                setUploadedDocument(undefined);
                 setTimeout(() => {
                   document.getElementById("doc")?.click();
                 }, 100);
@@ -191,15 +184,12 @@ export default function Create() {
           </div>
 
           <GenerationForm
-            uploadedDocument={assessmentData.document}
+            uploadedDocument={uploadedDocument}
             onSubmit={(data) => {
-              setAssessmentData({
-                ...assessmentData,
-                numberOfQuestions: data.numberOfQuestions,
-                totalMarks: data.totalMarks,
-                difficultyLevel: data.difficultyLevel,
-                requirements: data.requirements,
-              });
+              assessmentContext.numberOfQuestions = data.numberOfQuestions;
+              assessmentContext.totalMarks = data.totalMarks;
+              assessmentContext.difficultyLevel = data.difficultyLevel;
+              assessmentContext.requirements = data.requirements;
               setIsLoginOpen(true);
             }}
           />
@@ -216,10 +206,8 @@ export default function Create() {
             </h1>
             <DropZone
               onFileUpload={(file) => {
-                setAssessmentData({
-                  ...assessmentData,
-                  document: file,
-                });
+                setUploadedDocument(file);
+                assessmentContext.document = file;
               }}
             />
             <Input
@@ -229,10 +217,8 @@ export default function Create() {
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                setAssessmentData({
-                  ...assessmentData,
-                  document: file,
-                });
+                setUploadedDocument(file);
+                assessmentContext.document = file;
                 e.target.value = "";
                 e.target.files = null;
               }}
@@ -251,7 +237,7 @@ export default function Create() {
           </DialogContent>
         </Dialog>
       )}
-    </div>
+    </AssessmentProvider>
   ) : (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-white opacity-30">
       <RiLoader3Fill className="w-20 h-20 animate-spin" />

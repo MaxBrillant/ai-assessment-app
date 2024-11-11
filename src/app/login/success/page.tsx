@@ -3,6 +3,7 @@
 import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Login from "../page";
 
 export default function Success() {
   const { push } = useRouter();
@@ -16,15 +17,11 @@ export default function Success() {
 
       if (authenticatedUser) {
         window.close();
-      }else{
+      } else {
         push("/login");
       }
     };
     checkForUser();
   });
-  return (
-    <div className="flex h-screen w-full flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold">Checking for User Authentication</h1>
-    </div>
-  );
+  return <Login />;
 }
