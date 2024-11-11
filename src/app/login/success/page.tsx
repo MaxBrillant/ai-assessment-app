@@ -1,9 +1,9 @@
 "use client";
 
+import Loading from "@/app/loading";
 import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Login from "../page";
 
 export default function Success() {
   const { push } = useRouter();
@@ -23,5 +23,5 @@ export default function Success() {
     };
     checkForUser();
   });
-  return <Login />;
+  return <Loading />;
 }
