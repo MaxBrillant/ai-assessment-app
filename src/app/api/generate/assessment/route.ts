@@ -112,13 +112,22 @@ export async function POST(request: NextRequest) {
       const questionRequests = contextChunks
         .slice(i, i + 10)
         .map(async (chunk) => {
-          return await generateQuestion(
-            questionTypeAndMarks[i].type,
-            chunk.content ?? "",
-            difficultyLevel,
-            requirements ?? "",
-            questionTypeAndMarks[i].marks
-          );
+          try {
+            return await generateQuestion(
+              questionTypeAndMarks[i].type,
+              chunk.content ?? "",
+              difficultyLevel,
+              requirements ?? "",
+              questionTypeAndMarks[i].marks
+            );
+          } catch (e) {
+            i += 1;
+            console.error(
+              `Error while generating question number ${
+                i + 1
+              }, the error is: ${e}`
+            );
+          }
         });
 
       const questionResponses = await Promise.all(questionRequests);

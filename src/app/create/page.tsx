@@ -45,7 +45,7 @@ export default function Create() {
   >();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const urlSearchParams = useSearchParams();
-  const { push } = useRouter();
+  const { push, replace } = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function Create() {
             title: "Assessment created successfully",
           });
           assessmentContext.document = undefined;
-          push(`/quizzes/${newAssessmentNanoId}`);
+          replace(`/quizzes/${newAssessmentNanoId}`);
         } else {
           toast({
             description: "Something went wrong while creating the assessment",
@@ -116,7 +116,7 @@ export default function Create() {
             variant: "destructive",
           });
           setIsLoginOpen(false);
-          push("/create");
+          replace("/create");
         }
       } catch (err) {
         console.log(err);
@@ -126,7 +126,7 @@ export default function Create() {
           variant: "destructive",
         });
         setIsLoginOpen(false);
-        push("/create");
+        replace("/create");
       }
     };
 
@@ -147,7 +147,7 @@ export default function Create() {
         assessmentContext.difficultyLevel == undefined
         // !authenticatedUser
       ) {
-        push("/create");
+        replace("/create");
       } else {
         if (isLoginOpen) {
           setIsLoginOpen(false);
