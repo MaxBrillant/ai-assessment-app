@@ -130,14 +130,14 @@ export default function Create() {
       }
     };
 
-    const getAssessmentInfo = async () => {
-      try {
-        const data = await getTenAssessmentsInfo();
-        setAssessmentsInfo(data);
-      } catch (err) {
-        console.log("Error fetching assessments info");
-      }
-    };
+    // const getAssessmentInfo = async () => {
+    //   try {
+    //     const data = await getTenAssessmentsInfo();
+    //     setAssessmentsInfo(data);
+    //   } catch (err) {
+    //     console.log("Error fetching assessments info");
+    //   }
+    // };
     const param = urlSearchParams.get("assessment");
 
     if (param && param === "true") {
@@ -154,8 +154,6 @@ export default function Create() {
           generateAssessmentAndSaveToDB();
         }
       }
-    } else {
-      getAssessmentInfo();
     }
   }, [urlSearchParams]);
 
