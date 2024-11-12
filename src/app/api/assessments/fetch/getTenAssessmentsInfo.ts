@@ -24,7 +24,7 @@ export default async function getTenAssessmentsInfo() {
     .limit(10)
     .returns<AssessmentDataType>();
 
-  if (error || data.length === 0) {
+  if (error) {
     console.error(
       "Error while getting the assessment data: " + error
         ? error?.message
