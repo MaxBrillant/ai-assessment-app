@@ -18,6 +18,12 @@ import {
   AssessmentContext,
   AssessmentProvider,
 } from "../context/assessmentContext";
+import "./paper.css";
+import { Source_Serif_4 } from "next/font/google";
+import getTenAssessmentsInfo from "../api/assessments/fetch/getTenAssessmentsInfo";
+import Link from "next/link";
+
+const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 
 type GeneratedTestType = {
   title: string;
@@ -28,6 +34,15 @@ type GeneratedTestType = {
 export default function Create() {
   const assessmentContext = useContext(AssessmentContext);
   const [uploadedDocument, setUploadedDocument] = useState<File | undefined>();
+  const [assessmentsInfo, setAssessmentsInfo] = useState<
+    {
+      nanoId: string;
+      title: string;
+      duration: number;
+      numberOfQuestions: number;
+      difficultyLevel: number;
+    }[]
+  >();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const urlSearchParams = useSearchParams();
   const { push } = useRouter();
@@ -114,6 +129,15 @@ export default function Create() {
         push("/create");
       }
     };
+
+    const getAssessmentInfo = async () => {
+      try {
+        const data = await getTenAssessmentsInfo();
+        setAssessmentsInfo(data);
+      } catch (err) {
+        console.log("Error fetching assessments info");
+      }
+    };
     const param = urlSearchParams.get("assessment");
 
     if (param && param === "true") {
@@ -131,6 +155,8 @@ export default function Create() {
         }
       }
     }
+
+    getAssessmentInfo();
   }, [urlSearchParams]);
 
   return urlSearchParams.get("assessment") !== "true" ? (
@@ -185,57 +211,106 @@ export default function Create() {
           />
         </div>
       ) : (
-        <div className="w-screen h-screen flex items-center justify-center">
-          <div className="max-w-md flex flex-col gap-8 p-10">
-            <h1 className="text-xl font-bold text-center">
-              Create insightful and well-crafted assessment questions from any{" "}
-              <span className="text-red-500 font-bold">PDF</span>,{" "}
-              <span className="text-blue-500 font-bold">Word • Docs</span> or{" "}
-              <span className="text-orange-500 font-bold">PowerPoint</span> file
-            </h1>
-            <p className="text-center -mt-4 text-black/70">
-              Just bring your notes and let us handle the rest
-            </p>
-            <DropZone
-              onFileUpload={(file) => {
-                if ((file?.size as number) > 20000000) {
-                  toast({
-                    description:
-                      "The file is too large, please choose a file smaller than 20MB",
-                    title: "Error",
-                    variant: "destructive",
-                  });
-                  return;
-                } else {
-                  setUploadedDocument(file);
-                  assessmentContext.document = file;
-                }
-              }}
-            />
-            <Input
-              id="doc"
-              type="file"
-              accept=".pdf,.docx,.pptx"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if ((file?.size as number) > 20000000) {
-                  toast({
-                    description:
-                      "The file is too large, please choose a file smaller than 20MB",
-                    title: "Error",
-                    variant: "destructive",
-                  });
-                  return;
-                } else {
-                  setUploadedDocument(file);
-                  assessmentContext.document = file;
-                  e.target.value = "";
-                  e.target.files = null;
-                }
-              }}
-            />
+        <div className="flex flex-col items-center gap-10">
+          <div className="w-full flex items-center justify-center pt-10">
+            <div className="w-full max-w-md flex flex-col gap-8 p-10">
+              <h1 className="text-xl font-bold text-center ">
+                Create insightful and well-crafted assessment questions from any{" "}
+                <span className="text-red-500 font-bold">PDF</span>,{" "}
+                <span className="text-blue-500 font-bold">Word • Docs</span> or{" "}
+                <span className="text-orange-500 font-bold">PowerPoint</span>{" "}
+                file
+              </h1>
+              <p className="text-center -mt-4 text-black/70">
+                Just bring your notes and let us handle the rest
+              </p>
+              <DropZone
+                onFileUpload={(file) => {
+                  if ((file?.size as number) > 20000000) {
+                    toast({
+                      description:
+                        "The file is too large, please choose a file smaller than 20MB",
+                      title: "Error",
+                      variant: "destructive",
+                    });
+                    return;
+                  } else {
+                    setUploadedDocument(file);
+                    assessmentContext.document = file;
+                  }
+                }}
+              />
+              <Input
+                id="doc"
+                type="file"
+                accept=".pdf,.docx,.pptx"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if ((file?.size as number) > 20000000) {
+                    toast({
+                      description:
+                        "The file is too large, please choose a file smaller than 20MB",
+                      title: "Error",
+                      variant: "destructive",
+                    });
+                    return;
+                  } else {
+                    setUploadedDocument(file);
+                    assessmentContext.document = file;
+                    e.target.value = "";
+                    e.target.files = null;
+                  }
+                }}
+              />
+            </div>
           </div>
+          {assessmentsInfo && (
+            <div className="w-full flex flex-col mb-20">
+              <p className="text-2xl font-bold px-8 text-black/70">
+                See what others have created
+              </p>
+              <div
+                className="flex flex-row gap-16 p-12 py-8 w-full overflow-x-auto"
+                style={{ scrollBehavior: "smooth", scrollbarWidth: "none" }}
+              >
+                {assessmentsInfo.map((assessment) => (
+                  <Link href={"/quiz/" + assessment.nanoId}>
+                    <div className="relative w-fit hover:scale-110 transition-all duration-300 cursor-pointer">
+                      <section className="blokken"></section>
+                      <p
+                        className={
+                          "absolute top-8 left-4 font-medium leading-8 text-black/70 " +
+                          sourceSerif.className
+                        }
+                      >
+                        <p className="text-lg text-wrap line-clamp-2 leading-8">
+                          {assessment.title}
+                        </p>
+                        <p className="text-sm leading-8 font-normal text-black/50">
+                          • {assessment.numberOfQuestions} question
+                          {assessment.numberOfQuestions > 1 ? "s" : ""}
+                        </p>
+                        <p className="text-sm leading-8 font-normal text-black/50">
+                          • {assessment.duration} minutes
+                        </p>
+                        <p className="text-sm leading-8 font-normal text-black/50">
+                          •{" "}
+                          {assessment.difficultyLevel <= 25
+                            ? "Very easy"
+                            : assessment.difficultyLevel <= 50
+                            ? "Medium easy"
+                            : assessment.difficultyLevel <= 75
+                            ? "Medium hard"
+                            : "Very Hard"}
+                        </p>
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

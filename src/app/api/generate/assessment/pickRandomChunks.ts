@@ -50,7 +50,10 @@ export default async function pickRandomChunks(
           );
         }
 
-        while (chunkIndexes.includes(randomChunkIndex)) {
+        if (
+          chunkIndexes.includes(randomChunkIndex) &&
+          MaxNumberOfChunks > maxQuestions
+        ) {
           randomChunkIndex = Math.floor(Math.random() * MaxNumberOfChunks);
         }
 

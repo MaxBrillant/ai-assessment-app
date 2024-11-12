@@ -15,7 +15,6 @@ export const generationSchema = z.object({
     .max(100, "The difficulty level cannot be more than 100"),
   requirements: z
     .string()
-    .min(10, "The requirements should be at least 10 characters")
     .max(5000, "The requirements cannot be more than 5000 characters")
     .optional(),
 });

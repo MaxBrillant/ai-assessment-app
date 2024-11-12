@@ -14,29 +14,40 @@ export async function generateSingleQuestion(props: {
   difficultyLevel: number;
   numberOfChunks: number;
   requirements: string;
+  previousQuestion: string;
 }) {
   try {
     let context = "";
 
-    const similarChunk = await queryVectorStore(
+    const similarToRequirementChunk = await queryVectorStore(
       props.documentId,
       props.requirements,
       1
     );
-    if (similarChunk.length > 0) {
-      context = similarChunk[0].pageContent;
+    if (similarToRequirementChunk.length > 0) {
+      context = similarToRequirementChunk[0].pageContent;
     } else {
-      const randomChunkId = await pickRandomChunks(
-        props.numberOfChunks,
-        1,
-        props.difficultyLevel
+      const similarToPreviousQuestionChunk = await queryVectorStore(
+        props.documentId,
+        props.previousQuestion,
+        1
       );
 
-      const randomChunk = await queryVectorStoreFromChunkIndex(
-        props.documentId,
-        randomChunkId[0]
-      );
-      context = randomChunk.pageContent;
+      if (similarToPreviousQuestionChunk.length > 0) {
+        context = similarToPreviousQuestionChunk[0].pageContent;
+      } else {
+        const randomChunkId = await pickRandomChunks(
+          props.numberOfChunks,
+          1,
+          props.difficultyLevel
+        );
+
+        const randomChunk = await queryVectorStoreFromChunkIndex(
+          props.documentId,
+          randomChunkId[0]
+        );
+        context = randomChunk.pageContent;
+      }
     }
 
     const question = await generateQuestion(

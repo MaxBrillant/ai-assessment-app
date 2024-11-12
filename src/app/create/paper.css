@@ -1,0 +1,41 @@
+.blokken {
+  position: relative;
+  background-color: #fffcd9;
+  min-height: 12rem;
+  height: 100%;
+  width: 15rem;
+  box-shadow: -0.5rem 0.5rem 1rem rgba(100, 100, 100, 0.1);
+  font-size: 2rem;
+  background-image: linear-gradient(
+    to bottom,
+    #f4f4f4 calc(1em - 1px),
+    #ccc calc(1em - 1px),
+    #ccc 1em,
+    #f4f4f4 1em
+  );
+  background-position: 0% 1em;
+  background-size: 100% 1em;
+  background-repeat: repeat-y;
+
+  &:before,
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -0.5rem 0.5rem 1rem rgba(60, 60, 60, 0.1);
+  }
+
+  &:before {
+    transform: rotate(-5deg);
+    z-index: -1;
+  }
+
+  &:after {
+    transform: rotate(3deg);
+    z-index: -2;
+  }
+}

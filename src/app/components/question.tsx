@@ -160,6 +160,7 @@ export default function Question(props: PropsType) {
                   difficultyLevel: props.difficultyLevel,
                   numberOfChunks: props.numberOfChunks,
                   requirements: newRequirement ? newRequirement : "",
+                  previousQuestion: props.content,
                 });
                 if (generatedQuestion) {
                   props.onEdit(generatedQuestion);

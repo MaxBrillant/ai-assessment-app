@@ -74,7 +74,6 @@ export default function TextEditor(props: EditorProps) {
         bottom: 0%;
         background-color: white;
         width: 100%;
-        z-index: 10;
         height: 0;
         opacity: 0;
         overflow: hidden;

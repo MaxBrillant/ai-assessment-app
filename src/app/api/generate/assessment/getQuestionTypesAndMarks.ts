@@ -51,27 +51,27 @@ const getQuestionTypeByDifficultyLevel = (
 
   if (difficultyLevel < 25) {
     weights = {
-      "multiple-choice": 0.8,
-      "short-answer": 0.2,
+      "multiple-choice": 0.7,
+      "short-answer": 0.3,
       "long-answer": 0,
     };
   } else if (difficultyLevel < 50) {
     weights = {
-      "multiple-choice": 0.45,
-      "short-answer": 0.45,
+      "multiple-choice": 0.65,
+      "short-answer": 0.35,
       "long-answer": 0.1,
     };
   } else if (difficultyLevel < 75) {
     weights = {
       "multiple-choice": 0.1,
-      "short-answer": 0.45,
-      "long-answer": 0.45,
+      "short-answer": 0.35,
+      "long-answer": 0.65,
     };
   } else {
     weights = {
       "multiple-choice": 0,
-      "short-answer": 0.2,
-      "long-answer": 0.8,
+      "short-answer": 0.3,
+      "long-answer": 0.7,
     };
   }
 

@@ -48,7 +48,6 @@ export const generateQuestion = async (
   {context}
 
 
-
   
   Rules to follow:
   1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema. 
@@ -58,9 +57,8 @@ export const generateQuestion = async (
   5. When the type of the question is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer.
   6. The difficulty level or percentage of difficulty of the question is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the question is appropriate for the difficulty level, a higher difficulty level means a more complex question, and a lower difficulty level means a simpler question
   6. User-provided requirements (They must be prioritized if not empty): "{requirements}"
-  7. The type of the question must be {type}
+  7. The type of the question must be {type}, unless the user-provided requirements recommend a different type, which you must prioritize
   8. The number of marks for the question is {marks}
-  
 
 
   Key Guidelines for Question Generation:
@@ -78,9 +76,7 @@ export const generateQuestion = async (
   - Foster imagination and innovative problem-solving
 
   3. Critical Thinking Components
-  - Require evaluation of evidence and arguments
   - Promote logical reasoning and inference
-  - Include analysis of assumptions and biases
   - Encourage systematic problem-solving
 
   4. Question Design Principles
@@ -96,9 +92,7 @@ export const generateQuestion = async (
   - Connect to broader concepts and applications
 
   6. Learning Development
-  - Build from foundational to expert-level thinking
   - Include metacognitive reflection opportunities
-  - Promote transfer of learning to new contexts
   - Encourage intellectual risk-taking
 
   Remember:

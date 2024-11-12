@@ -23,7 +23,7 @@ export default async function getAssessmentData(nanoId: string) {
   const { data, error } = await supabase
     .from("assessments")
     .select(
-      "id, nano_id, user_email, title, status, questions, number_of_chunks, duration, instructions, credentials, modified_at"
+      "id, nano_id, user_email, title, status, questions, duration, instructions, credentials, modified_at"
     )
     .eq("nano_id", nanoId)
     .eq("status", "public")

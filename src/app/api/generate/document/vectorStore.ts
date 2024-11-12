@@ -33,7 +33,7 @@ export async function addToVectorStore(data: Document[], documentId: string) {
       return {
         ...doc,
         metadata: {
-          ...doc.metadata,
+          ...(doc.metadata ? doc.metadata : {}),
           documentId,
           chunkIndex: index,
         },

@@ -166,6 +166,7 @@ export default function QuestionForm(props: QuestionFormType) {
                   difficultyLevel: props.difficultyLevel,
                   numberOfChunks: props.numberOfChunks,
                   requirements: newRequirement ? newRequirement : "",
+                  previousQuestion: watch("content"),
                 });
                 if (generatedQuestion) {
                   setValue("type", generatedQuestion.type);
