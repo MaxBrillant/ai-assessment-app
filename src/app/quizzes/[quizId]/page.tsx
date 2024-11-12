@@ -32,7 +32,7 @@ export default async function Assessment({
       <div className="w-full mx-auto flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4 px-5 pt-4 pb-2 sm:pb-4">
         <div>
           <p className="max-w-sm truncate text-lg">
-            {adminAssessmentData.title}``
+            {adminAssessmentData.title}
           </p>
 
           <p className="text-sm text-black/70">
