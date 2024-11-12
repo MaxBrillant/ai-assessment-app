@@ -275,7 +275,10 @@ export default function Create() {
                 style={{ scrollBehavior: "smooth", scrollbarWidth: "none" }}
               >
                 {assessmentsInfo.map((assessment) => (
-                  <Link href={"/quiz/" + assessment.nanoId}>
+                  <Link
+                    href={"/quiz/" + assessment.nanoId}
+                    key={assessment.nanoId}
+                  >
                     <div className="relative w-fit hover:scale-110 transition-all duration-300 cursor-pointer">
                       <section className="blokken"></section>
                       <p
