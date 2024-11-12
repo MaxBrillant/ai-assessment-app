@@ -8,12 +8,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FiEdit3 } from "react-icons/fi";
 import DropZone from "./dropzone";
 import { FaFilePdf, FaFilePowerpoint, FaFileWord } from "react-icons/fa6";
-import { QuestionType } from "../components/question";
-import { useRouter, useSearchParams } from "next/navigation";
-import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import { useToast } from "@/hooks/use-toast";
-import { createAssessment } from "../api/assessments/mutations";
-import { RiLoader3Fill } from "react-icons/ri";
 import {
   AssessmentContext,
   AssessmentProvider,
@@ -25,12 +20,6 @@ import Link from "next/link";
 
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 
-type GeneratedTestType = {
-  title: string;
-  questions: QuestionType[];
-  documentId: string;
-  numberOfChunks: number;
-};
 export default function Create() {
   const assessmentContext = useContext(AssessmentContext);
   const [uploadedDocument, setUploadedDocument] = useState<File | undefined>();
@@ -44,120 +33,25 @@ export default function Create() {
     }[]
   >();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const urlSearchParams = useSearchParams();
-  const { push, replace } = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
-    const generateAssessmentAndSaveToDB = async () => {
-      const formData = new FormData();
-      formData.append("file", assessmentContext.document as File);
-      formData.append(
-        "type",
-        assessmentContext.document?.type === "application/pdf"
-          ? "pdf"
-          : assessmentContext.document?.type ===
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          ? "docx"
-          : "pptx"
-      );
-      formData.append("questions", String(assessmentContext.numberOfQuestions));
-      formData.append("marks", String(assessmentContext.totalMarks));
-      formData.append(
-        "difficulty-level",
-        String(assessmentContext.difficultyLevel)
-      );
-      if (assessmentContext.requirements) {
-        formData.append(
-          "requirements",
-          assessmentContext.requirements as string
-        );
-      }
-      try {
-        const data = await fetch("/api/generate/assessment", {
-          method: "POST",
-          body: formData,
-        });
-        const assessmentJson = await data.json();
-        const assessmentObject: GeneratedTestType = assessmentJson;
-
-        const newAssessmentNanoId = await createAssessment(
-          {
-            title: assessmentObject.title,
-            questions: assessmentObject.questions,
-            duration: assessmentContext.duration as
-              | "15"
-              | "30"
-              | "45"
-              | "60"
-              | "90"
-              | "120"
-              | "150"
-              | "180",
-            instructions: assessmentContext.instructions,
-            credentials: assessmentContext.credentials,
-            difficultyLevel: assessmentContext.difficultyLevel,
-            generationRequirements: assessmentContext.requirements,
-          },
-          assessmentObject.documentId,
-          assessmentObject.numberOfChunks
-        );
-
-        if (newAssessmentNanoId) {
-          toast({
-            title: "Assessment created successfully",
-          });
-          assessmentContext.document = undefined;
-          replace(`/quizzes/${newAssessmentNanoId}`);
-        } else {
-          toast({
-            description: "Something went wrong while creating the assessment",
-            title: "Error",
-            variant: "destructive",
-          });
-          setIsLoginOpen(false);
-          replace("/create");
+    const timeoutId = setTimeout(async () => {
+      const getAssessmentInfo = async () => {
+        try {
+          const data = await getTenAssessmentsInfo();
+          setAssessmentsInfo(data);
+        } catch (err) {
+          console.log("Error fetching assessments info");
         }
-      } catch (err) {
-        console.log(err);
-        toast({
-          description: "Something went wrong while generating the assessment",
-          title: "Error",
-          variant: "destructive",
-        });
-        setIsLoginOpen(false);
-        replace("/create");
-      }
-    };
+      };
 
-    // const getAssessmentInfo = async () => {
-    //   try {
-    //     const data = await getTenAssessmentsInfo();
-    //     setAssessmentsInfo(data);
-    //   } catch (err) {
-    //     console.log("Error fetching assessments info");
-    //   }
-    // };
-    const param = urlSearchParams.get("assessment");
+      getAssessmentInfo();
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, []);
 
-    if (param && param === "true") {
-      if (
-        !assessmentContext.document ||
-        !assessmentContext.numberOfQuestions ||
-        assessmentContext.difficultyLevel == undefined
-        // !authenticatedUser
-      ) {
-        replace("/create");
-      } else {
-        if (isLoginOpen) {
-          setIsLoginOpen(false);
-          generateAssessmentAndSaveToDB();
-        }
-      }
-    }
-  }, [urlSearchParams]);
-
-  return urlSearchParams.get("assessment") !== "true" ? (
+  return (
     <AssessmentProvider>
       {uploadedDocument ? (
         <div className="max-w-md mx-auto p-5 flex flex-col gap-4 items-center justify-center">
@@ -320,19 +214,11 @@ export default function Create() {
           <DialogContent>
             <LoginForm
               heading="One last thing before we can start generating questions"
-              redirectUrl="/create?assessment=true"
+              redirectUrl="/create/generate"
             />
           </DialogContent>
         </Dialog>
       )}
     </AssessmentProvider>
-  ) : (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-white opacity-30">
-      <RiLoader3Fill className="w-20 h-20 animate-spin" />
-      <p className="text-lg font-medium">Generating questions...</p>
-      {(assessmentContext.document?.size as number) > 10000000 && (
-        <p className="text-sm">The bigger the file, the longer it will take</p>
-      )}
-    </div>
   );
 }

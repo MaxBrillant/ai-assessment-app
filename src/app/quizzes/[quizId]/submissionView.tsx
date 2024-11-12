@@ -49,22 +49,26 @@ export default function SubmissionView(props: {
   const { toast } = useToast();
 
   useEffect(() => {
-    const getSubmission = async () => {
-      const data = await getSubmissionData(
-        props.assessmentId,
-        props.submissionNanoId
-      );
-      if (data) {
-        setSubmissionData(data);
-      } else {
-        toast({
-          description: "Something went wrong while getting the submission data",
-          title: "Error",
-          variant: "destructive",
-        });
-      }
-    };
-    getSubmission();
+    const timeoutId = setTimeout(async () => {
+      const getSubmission = async () => {
+        const data = await getSubmissionData(
+          props.assessmentId,
+          props.submissionNanoId
+        );
+        if (data) {
+          setSubmissionData(data);
+        } else {
+          toast({
+            description:
+              "Something went wrong while getting the submission data",
+            title: "Error",
+            variant: "destructive",
+          });
+        }
+      };
+      getSubmission();
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, []);
   return submissionData ? (
     <div>
