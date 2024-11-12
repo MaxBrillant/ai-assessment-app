@@ -154,9 +154,9 @@ export default function Create() {
           generateAssessmentAndSaveToDB();
         }
       }
+    } else {
+      getAssessmentInfo();
     }
-
-    getAssessmentInfo();
   }, [urlSearchParams]);
 
   return urlSearchParams.get("assessment") !== "true" ? (
@@ -265,7 +265,7 @@ export default function Create() {
               />
             </div>
           </div>
-          {assessmentsInfo && (
+          {assessmentsInfo && assessmentsInfo.length > 0 && (
             <div className="w-full flex flex-col mb-20">
               <p className="text-2xl font-bold px-8 text-black/70">
                 See what others have created
