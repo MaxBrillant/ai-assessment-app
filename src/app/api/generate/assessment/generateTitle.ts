@@ -4,8 +4,8 @@ export async function generateTitle(content: string) {
     const model = new ChatAnthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
       model: "claude-3-5-haiku-20241022",
-      temperature: 0.7,
-      maxTokens: 4096,
+      temperature: 0.2,
+      maxTokens: 2000,
     });
 
     const result = await model.invoke([

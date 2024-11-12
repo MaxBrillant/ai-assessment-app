@@ -26,7 +26,7 @@ export default function GenerationForm(props: {
     mode: "onChange",
     reValidateMode: "onChange",
     defaultValues: {
-      difficultyLevel: 40,
+      difficultyLevel: 50,
       requirements: undefined,
     },
   });
@@ -90,7 +90,7 @@ export default function GenerationForm(props: {
           <Slider
             defaultValue={[watch("difficultyLevel")]}
             max={100}
-            step={20}
+            step={25}
             onValueChange={(value) => setValue("difficultyLevel", value[0])}
           />
         </div>

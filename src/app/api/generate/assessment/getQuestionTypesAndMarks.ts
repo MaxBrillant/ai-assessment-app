@@ -3,34 +3,11 @@ export const getQuestionTypeAndMarks = (
   maxMarks: number,
   difficultyLevel: number
 ) => {
-  const types = ["multiple-choice", "short-answer", "long-answer"];
-  const questions = [];
   let remainingMarks = maxMarks;
+  const questions = [];
 
   for (let i = 0; i < numberOfQuestions; i++) {
-    const type =
-      difficultyLevel > 70
-        ? (types[Math.floor(Math.random() * 2) + 1.5] as
-            | "multiple-choice"
-            | "short-answer"
-            | "long-answer")
-        : // Higher difficulty, less probable to get a short-answer question
-        difficultyLevel > 50
-        ? (types[Math.floor(Math.random() * 2)] as
-            | "multiple-choice"
-            | "short-answer"
-            | "long-answer")
-        : // Higher difficulty, lower probability of getting a multiple-choice question
-        difficultyLevel < 25
-        ? (types[Math.floor(Math.random() * 2)] as
-            | "multiple-choice"
-            | "short-answer"
-            | "long-answer")
-        : // Lower difficulty, more probable to get short-answer and multiple-choice questions
-          (types[i % types.length] as
-            | "multiple-choice"
-            | "short-answer"
-            | "long-answer"); // Alternate between types, lower difficulty, less probable to get a long-answer question
+    const type = getQuestionTypeByDifficultyLevel(difficultyLevel);
 
     let marks =
       type === "long-answer"
@@ -56,4 +33,61 @@ export const getQuestionTypeAndMarks = (
   }
 
   return questions;
+};
+
+const getQuestionTypeByDifficultyLevel = (
+  difficultyLevel: number
+): "multiple-choice" | "short-answer" | "long-answer" => {
+  // Validate input
+  if (difficultyLevel < 0 || difficultyLevel > 100) {
+    throw new Error("Difficulty level must be between 0 and 100");
+  }
+
+  // Define weights for each difficulty range
+  let weights: Record<
+    "multiple-choice" | "short-answer" | "long-answer",
+    number
+  >;
+
+  if (difficultyLevel < 25) {
+    weights = {
+      "multiple-choice": 0.8,
+      "short-answer": 0.2,
+      "long-answer": 0,
+    };
+  } else if (difficultyLevel < 50) {
+    weights = {
+      "multiple-choice": 0.45,
+      "short-answer": 0.45,
+      "long-answer": 0.1,
+    };
+  } else if (difficultyLevel < 75) {
+    weights = {
+      "multiple-choice": 0.1,
+      "short-answer": 0.45,
+      "long-answer": 0.45,
+    };
+  } else {
+    weights = {
+      "multiple-choice": 0,
+      "short-answer": 0.2,
+      "long-answer": 0.8,
+    };
+  }
+
+  // Generate random number between 0 and 1
+  const random = Math.random();
+
+  // Calculate cumulative probabilities and select type
+  let cumulativeProbability = 0;
+
+  for (const [type, weight] of Object.entries(weights)) {
+    cumulativeProbability += weight;
+    if (random <= cumulativeProbability) {
+      return type as "multiple-choice" | "short-answer" | "long-answer";
+    }
+  }
+
+  // Fallback (should never reach here due to cumulative probabilities adding to 1)
+  return "short-answer";
 };

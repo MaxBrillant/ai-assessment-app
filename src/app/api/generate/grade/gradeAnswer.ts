@@ -14,8 +14,8 @@ export const gradeAnswer = async (
   try {
     const model = new ChatAnthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
-      model: "claude-3-haiku-20240307",
-      temperature: 0.2,
+      model: "claude-3-5-haiku-20241022",
+      temperature: 0.4,
       maxTokens: 4096,
     });
 

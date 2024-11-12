@@ -15,13 +15,21 @@ export async function handleFileDataInsertionIntoVectorStore(
   endingAt: number | undefined
 ) {
   try {
+    console.log("Extracting document data...");
     const docs = await getDocumentData(fileBlob, type, startingFrom, endingAt);
 
+    console.log("Splitting document content into chunks...");
     const chunks = await Promise.all(
       docs.map(async (doc) => await splitDocumentContentIntoChunks(doc))
     );
 
+    console.log("Inserting document data into vector store...");
+
     await addToVectorStore(chunks, documentId);
+
+    console.log("Data inserted into vector store...");
+
+    console.log("Generating title...");
 
     const title = await generateTitle(
       chunks[0].pageContent.slice(
@@ -30,6 +38,7 @@ export async function handleFileDataInsertionIntoVectorStore(
       )
     );
 
+    console.log("Title generated");
     return { title: title, chunksLength: chunks.length };
   } catch (e) {
     throw new Error(
@@ -47,16 +56,16 @@ async function getDocumentData(
   try {
     if (type === "pdf") {
       const loader = new PDFLoader(fileBlob);
-      const docs = await loader.load();
-      return docs.slice(startingFrom ?? 0, endingAt ?? 100).map((doc) => doc);
+      const docs = await loader.load().then((docs) => docs.slice(0, 100));
+      return docs;
     } else if (type === "docx") {
       const loader = new DocxLoader(fileBlob);
-      const docs = await loader.load();
-      return docs.slice(startingFrom ?? 0, endingAt ?? 100).map((doc) => doc);
+      const docs = await loader.load().then((docs) => docs.slice(0, 100));
+      return docs;
     } else {
       const loader = new PPTXLoader(fileBlob);
-      const docs = await loader.load();
-      return docs.slice(startingFrom ?? 0, endingAt ?? 100).map((doc) => doc);
+      const docs = await loader.load().then((docs) => docs.slice(0, 100));
+      return docs;
     }
   } catch (e) {
     throw new Error(`Error while processing the file, the error is: ${e}`);

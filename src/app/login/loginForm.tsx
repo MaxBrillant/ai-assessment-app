@@ -9,6 +9,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import { useToast } from "@/hooks/use-toast";
 import { FcGoogle } from "react-icons/fc";
+import Loading from "../loading";
 
 export default function LoginForm(props: {
   heading: string;
@@ -17,6 +18,7 @@ export default function LoginForm(props: {
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [otp, setOTP] = useState<string | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const { push } = useRouter();
@@ -29,6 +31,7 @@ export default function LoginForm(props: {
 
   useEffect(() => {
     const checkForAuthenticatedUser = async () => {
+      setIsLoading(true);
       const supabase = await CreateBrowserClient();
 
       const authenticatedUser = await supabase.auth
@@ -38,18 +41,22 @@ export default function LoginForm(props: {
       if (authenticatedUser) {
         push(redirectUrl as string);
       }
+
+      setIsLoading(false);
     };
     checkForAuthenticatedUser();
   }, []);
 
   return (
     <div className="flex flex-col gap-5 mx-auto items-center max-w-sm p-7">
-      <p className="text-2xl font-bold">{props.heading}</p>
+      <p className="text-lg font-bold">{props.heading}</p>
       <button
         className="p-4 bg-black/5 rounded-lg flex gap-2 items-center justify-center text-black/80 hover:bg-black/10"
         onClick={async () => {
           if (redirectUrl) {
+            setIsLoading(true);
             const url = await loginWithGoogle(redirectUrl).catch((error) => {
+              setIsLoading(false);
               toast({
                 description:
                   "Something went wrong while logging in with Google",
@@ -59,6 +66,7 @@ export default function LoginForm(props: {
             });
 
             if (url) {
+              setIsLoading(true);
               const newWindow = window.open("", "_blank");
               if (newWindow) {
                 newWindow.location.href = url;
@@ -72,6 +80,7 @@ export default function LoginForm(props: {
                     .then((user) => user.data.user);
 
                   if (authenticatedUser) {
+                    setIsLoading(false);
                     clearInterval(intervalId);
                     push(redirectUrl as string);
                   }
@@ -88,6 +97,7 @@ export default function LoginForm(props: {
         <FcGoogle className="w-5 h-5" />
         Continue with Google
       </button>
+      {isLoading && <Loading />}
       {/* <p>or</p>
       <label htmlFor="email">Email Address</label>
       <Input

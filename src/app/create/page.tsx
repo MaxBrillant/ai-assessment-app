@@ -19,20 +19,6 @@ import {
   AssessmentProvider,
 } from "../context/assessmentContext";
 
-type assessmentType = {
-  document: File | undefined;
-  numberOfQuestions: number;
-  totalMarks: number;
-  numberOfChunks: number;
-  requirements: string | undefined;
-  title: string;
-  questions: QuestionType[];
-  duration: string;
-  instructions: string | undefined;
-  credentials: string[];
-  difficultyLevel: number;
-};
-
 type GeneratedTestType = {
   title: string;
   questions: QuestionType[];
@@ -106,6 +92,7 @@ export default function Create() {
           toast({
             title: "Assessment created successfully",
           });
+          assessmentContext.document = undefined;
           push(`/quizzes/${newAssessmentNanoId}`);
         } else {
           toast({
@@ -138,7 +125,10 @@ export default function Create() {
       ) {
         push("/create");
       } else {
-        generateAssessmentAndSaveToDB();
+        if (isLoginOpen) {
+          setIsLoginOpen(false);
+          generateAssessmentAndSaveToDB();
+        }
       }
     }
   }, [urlSearchParams]);
@@ -196,18 +186,30 @@ export default function Create() {
         </div>
       ) : (
         <div className="w-screen h-screen flex items-center justify-center">
-          <div className="max-w-md flex flex-col gap-8 p-4">
-            <h1 className="text-xl font-medium text-center">
-              Create insightful and well-crafted questions for your next
-              assessment from any{" "}
+          <div className="max-w-md flex flex-col gap-8 p-10">
+            <h1 className="text-xl font-bold text-center">
+              Create insightful and well-crafted assessment questions from any{" "}
               <span className="text-red-500 font-bold">PDF</span>,{" "}
               <span className="text-blue-500 font-bold">Word • Docs</span> or{" "}
               <span className="text-orange-500 font-bold">PowerPoint</span> file
             </h1>
+            <p className="text-center -mt-4 text-black/70">
+              Just bring your notes and let us handle the rest
+            </p>
             <DropZone
               onFileUpload={(file) => {
-                setUploadedDocument(file);
-                assessmentContext.document = file;
+                if ((file?.size as number) > 20000000) {
+                  toast({
+                    description:
+                      "The file is too large, please choose a file smaller than 20MB",
+                    title: "Error",
+                    variant: "destructive",
+                  });
+                  return;
+                } else {
+                  setUploadedDocument(file);
+                  assessmentContext.document = file;
+                }
               }}
             />
             <Input
@@ -217,10 +219,20 @@ export default function Create() {
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                setUploadedDocument(file);
-                assessmentContext.document = file;
-                e.target.value = "";
-                e.target.files = null;
+                if ((file?.size as number) > 20000000) {
+                  toast({
+                    description:
+                      "The file is too large, please choose a file smaller than 20MB",
+                    title: "Error",
+                    variant: "destructive",
+                  });
+                  return;
+                } else {
+                  setUploadedDocument(file);
+                  assessmentContext.document = file;
+                  e.target.value = "";
+                  e.target.files = null;
+                }
               }}
             />
           </div>
@@ -231,7 +243,7 @@ export default function Create() {
         <Dialog open onOpenChange={setIsLoginOpen}>
           <DialogContent>
             <LoginForm
-              heading="One last thing before we can create your assessment"
+              heading="One last thing before we can start generating questions"
               redirectUrl="/create?assessment=true"
             />
           </DialogContent>
@@ -241,7 +253,10 @@ export default function Create() {
   ) : (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-white opacity-30">
       <RiLoader3Fill className="w-20 h-20 animate-spin" />
-      <p className="text-lg font-medium">Cooking...</p>
+      <p className="text-lg font-medium">Generating questions...</p>
+      {(assessmentContext.document?.size as number) > 10000000 && (
+        <p className="text-sm">The bigger the file, the longer it will take</p>
+      )}
     </div>
   );
 }

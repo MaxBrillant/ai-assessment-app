@@ -29,18 +29,28 @@ export async function addToVectorStore(data: Document[], documentId: string) {
         collectionName: "documents",
       }
     );
-    const documentsWithMetadata = data.map((doc, index) => {
-      const chunkIndex = index;
+    const chunks = data.map((doc, index) => {
       return {
         ...doc,
         metadata: {
           ...doc.metadata,
           documentId,
-          chunkIndex,
+          chunkIndex: index,
         },
       };
     });
-    await vectorStore.addDocuments(documentsWithMetadata);
+
+    await Promise.all(
+      chunks
+        .reduce((acc, _, i) => {
+          if (i % 20 === 0) acc.push(chunks.slice(i, i + 20));
+          return acc;
+        }, [] as Document[][])
+        .map((chunkSlice) => {
+          console.log("Adding slice of to vector store");
+          return vectorStore.addDocuments(chunkSlice);
+        })
+    );
   } catch (e) {
     throw new Error(`Error while adding to vector store, the error is: ${e}`);
   }

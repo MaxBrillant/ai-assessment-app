@@ -42,19 +42,18 @@ export default function AssessmentTabs(props: {
 
   return (
     <Tabs defaultValue="questions" className="w-full h-full">
-      <TabsList className="w-full bg-white">
-        <TabsTrigger value="questions">
-          Questions ({props.questions.length})
-        </TabsTrigger>
-        {props.status !== "private" && (
+      {props.status !== "private" && (
+        <TabsList className="w-full bg-white">
+          <TabsTrigger value="questions">
+            Questions ({props.questions.length})
+          </TabsTrigger>
           <TabsTrigger value="submissions">
             Submissions ({props.submissions.length})
           </TabsTrigger>
-        )}
-        {props.status !== "private" && (
+
           <TabsTrigger value="settings">Settings</TabsTrigger>
-        )}
-      </TabsList>
+        </TabsList>
+      )}
       <TabsContent value="questions" className="m-0">
         <QuestionPanel
           defaultQuestions={props.questions}
