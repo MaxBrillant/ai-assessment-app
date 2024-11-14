@@ -81,7 +81,7 @@ const CountdownTimer = (props: timerPropsType) => {
           </p>
         </DialogContent>
       </Dialog>
-      <div className="flex flex-col w-full items-end">
+      <div className="flex flex-col w-full items-center bg-black/5 border rounded-md mt-2">
         <p
           className={`${
             (remainingTime === props.assessmentDuration * 0.1 ||
@@ -89,7 +89,7 @@ const CountdownTimer = (props: timerPropsType) => {
               remainingTime === props.assessmentDuration * 0.5 ||
               [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(remainingTime)) &&
             "text-red-500 font-bold animate-bounce duration-300"
-          } text-lg font-medium`}
+          } text-lg font-medium mx-2 my-1`}
         >
           {formatTime(remainingTime)}{" "}
           <span className="text-xs text-black/70">remaining</span>

@@ -70,8 +70,6 @@ export default function TextEditor(props: EditorProps) {
       // }
 
       .${id} .ql-toolbar {
-        position: sticky;
-        bottom: 0%;
         background-color: white;
         width: 100%;
         height: 0;

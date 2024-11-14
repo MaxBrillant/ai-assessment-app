@@ -140,6 +140,13 @@ export default function AssessmentOverview(props: assessmentProps) {
                     />
                   </div>
                 ))}
+
+              {props.credentials.length > 0 && (
+                <p className="text-xs -mb-6">
+                  These credentials are requested by the creator of this
+                  assessment
+                </p>
+              )}
               <Button type="submit" className="mt-4">
                 Begin the assessment
               </Button>

@@ -447,7 +447,7 @@ export default function QuestionForm(props: QuestionFormType) {
         </div>
       )}
 
-      <div className="w-full grid grid-cols-2 jfad gap-2 p-3">
+      <div className="w-full grid grid-cols-2 gap-2 p-3">
         <Button
           variant={"secondary"}
           onClick={(e) => {

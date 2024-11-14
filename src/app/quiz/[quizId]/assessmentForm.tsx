@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import SafeHTMLRenderer from "@/utils/htmlRenderer";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 
 type AssessmentFormProps = {
   id: number;
@@ -132,12 +133,12 @@ export default function AssessmentForm(props: AssessmentFormProps) {
   return props.questions.length === 0 ||
     props.submissionStatus === "submitted" ? (
     props.questions.length === 0 ? (
-      <p className="text-center max-w-md mx-auto p-4 font-medium">
+      <p className="text-center max-w-md mx-auto p-4 py-20 font-medium">
         No questions found
       </p>
     ) : (
-      <p className="text-center max-w-md mx-auto p-4 font-medium">
-        Your answers have been submitted
+      <p className="text-center max-w-md mx-auto p-4 py-20 font-medium">
+        Your answers have been successfully submitted
       </p>
     )
   ) : (
@@ -147,7 +148,7 @@ export default function AssessmentForm(props: AssessmentFormProps) {
     >
       <div>
         <div className="flex flex-col gap-3">
-          <p className="mx-auto">
+          <p className="mx-auto text-black/70 underline underline-offset-4">
             Question {currentQuestion + 1} out of {props.questions.length}
           </p>
           <p className="font-medium">
@@ -190,60 +191,81 @@ export default function AssessmentForm(props: AssessmentFormProps) {
             </div>
           )}
 
-          <ul className="flex flex-col gap-3 p-3">
-            {props.questions[currentQuestion].choices?.map((choice, index) => (
-              <li
-                key={currentQuestion + "-" + index}
-                className="text-sm flex flex-row gap-1 items-start"
-              >
-                <input
-                  type="checkbox"
-                  className="mr-2 mt-1"
-                  id={"choice-" + currentQuestion + "-" + index}
-                  checked={watch(
-                    `submission.${currentQuestion}.choices`
-                  )?.includes(choice)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setValue(`submission.${currentQuestion}.choices`, [
-                        ...(watch(`submission.${currentQuestion}.choices`) ||
-                          []),
-                        choice,
-                      ]);
-                    } else {
-                      setValue(
-                        `submission.${currentQuestion}.choices`,
-                        watch(`submission.${currentQuestion}.choices`) &&
-                          watch(`submission.${currentQuestion}.choices`)!
-                            .length > 2
-                          ? watch(
-                              `submission.${currentQuestion}.choices`
-                            )?.filter((c) => c !== choice)
-                          : undefined
-                      );
+          {props.questions[currentQuestion].type === "multiple-choice" && (
+            <ul className="flex flex-col divide-y divide-black/20 border border-black/20 rounded-lg overflow-hidden">
+              {props.questions[currentQuestion].choices?.map(
+                (choice, index) => (
+                  <li
+                    key={currentQuestion + "-" + index}
+                    className={
+                      (watch(`submission.${currentQuestion}.choices`)?.includes(
+                        choice
+                      )
+                        ? "bg-blue-500 font-semibold text-white "
+                        : "") +
+                      "flex text-sm text-black/70 gap-1 py-3 px-3 items-center"
                     }
-                  }}
-                />
-                <label htmlFor={"choice-" + currentQuestion + "-" + index}>
-                  {choice}
-                </label>
-              </li>
-            ))}
-            {errors.submission &&
-              errors.submission[currentQuestion]?.choices && (
-                <div className="p-3 bg-red-100/80 rounded-2xl">
-                  <p className="text-red-500 ">
-                    {errors.submission[currentQuestion]?.choices?.message}
-                  </p>
-                </div>
+                    onClick={() => {
+                      document
+                        .getElementById(
+                          "choice-" + currentQuestion + "-" + index
+                        )
+                        ?.click();
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      className="hidden"
+                      id={"choice-" + currentQuestion + "-" + index}
+                      checked={watch(
+                        `submission.${currentQuestion}.choices`
+                      )?.includes(choice)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setValue(`submission.${currentQuestion}.choices`, [
+                            ...(watch(
+                              `submission.${currentQuestion}.choices`
+                            ) || []),
+                            choice,
+                          ]);
+                        } else {
+                          setValue(
+                            `submission.${currentQuestion}.choices`,
+                            watch(`submission.${currentQuestion}.choices`) &&
+                              watch(`submission.${currentQuestion}.choices`)!
+                                .length > 1
+                              ? watch(
+                                  `submission.${currentQuestion}.choices`
+                                )?.filter((c) => c !== choice)
+                              : undefined
+                          );
+                        }
+                      }}
+                    />
+                    <p className="flex items-center justify-center w-8 h-8 p-3 border border-black/20 rounded-full bg-black/5 mr-2">
+                      {String.fromCharCode(65 + index).toUpperCase()}
+                    </p>
+                    <p className="flex-grow text-sm text-left">{choice}</p>
+                  </li>
+                )
               )}
-          </ul>
+              {errors.submission &&
+                errors.submission[currentQuestion]?.choices && (
+                  <div className="p-3 bg-red-100/80 rounded-2xl">
+                    <p className="text-red-500 ">
+                      {errors.submission[currentQuestion]?.choices?.message}
+                    </p>
+                  </div>
+                )}
+            </ul>
+          )}
         </div>
       </div>
 
       <div className="flex flex-wrap gap-3 mt-4">
         {currentQuestion > 0 && (
           <Button
+            variant={"outline"}
             onClick={(e) => {
               e.preventDefault();
               if (currentQuestion > 0) {
