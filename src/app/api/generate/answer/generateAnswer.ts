@@ -4,7 +4,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
-import { queryVectorStore } from "../document/vectorStore";
+import { queryVectorStore } from "../../document/vectorStore";
 
 export const generateAnswer = async (props: {
   documentId: string;

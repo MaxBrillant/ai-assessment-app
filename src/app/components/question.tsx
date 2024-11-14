@@ -95,7 +95,7 @@ export default function Question(props: PropsType) {
         (isGenerating
           ? "animate-pulse duration-1000 pointer-events-none transition-all ease-in-out "
           : "") +
-        "relative w-full flex flex-col bg-white rounded-xl border border-black/30 overflow-clip"
+        "relative w-full flex flex-col bg-[#f5f3f2] rounded-xl border border-black/30 overflow-clip"
       }
       ref={setNodeRef}
       style={style}

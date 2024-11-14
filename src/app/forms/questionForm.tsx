@@ -7,11 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { HiOutlineSparkles } from "react-icons/hi2";
-import { IoMdClose } from "react-icons/io";
 import { QuestionType } from "../components/question";
 import GeneratePopover from "./generatePopover";
 import { useToast } from "@/hooks/use-toast";
-import { generateQuestion } from "../api/generate/question/generateQuestion";
 import { generateAnswer } from "../api/generate/answer/generateAnswer";
 import TextEditor from "../components/textEditor";
 import {
@@ -377,30 +375,40 @@ export default function QuestionForm(props: QuestionFormType) {
           <div className="flex flex-row justify-end">
             <GeneratePopover
               onSubmit={async (newRequirement) => {
-                setIsGenerating(true);
-                if (watch("content")) {
-                  const generatedAnswer = await generateAnswer({
-                    documentId: props.documentId,
-                    type: watch("type") as "short-answer" | "long-answer",
-                    question: watch("content"),
-                    difficultyLevel: props.difficultyLevel,
-                    requirements: newRequirement,
-                  });
-
-                  if (generatedAnswer) {
-                    setValue("answer.content", generatedAnswer.answer);
-                    setValue("choices", undefined);
-                    setValue("answer.choices", undefined);
-                    setChoices([]);
-                    setValue("marks", generatedAnswer.marks);
-                  } else {
-                    toast({
-                      description:
-                        "Something went wrong while generating the answer",
-                      title: "Error",
-                      variant: "destructive",
+                try {
+                  setIsGenerating(true);
+                  if (watch("content")) {
+                    const generatedAnswer = await generateAnswer({
+                      documentId: props.documentId,
+                      type: watch("type") as "short-answer" | "long-answer",
+                      question: watch("content"),
+                      difficultyLevel: props.difficultyLevel,
+                      requirements: newRequirement,
                     });
+
+                    if (generatedAnswer) {
+                      setValue("answer.content", generatedAnswer.answer);
+                      setValue("choices", undefined);
+                      setValue("answer.choices", undefined);
+                      setChoices([]);
+                      setValue("marks", generatedAnswer.marks);
+                    } else {
+                      toast({
+                        description:
+                          "Something went wrong while generating the answer",
+                        title: "Error",
+                        variant: "destructive",
+                      });
+                    }
+                    setIsGenerating(false);
                   }
+                } catch (e) {
+                  toast({
+                    description:
+                      "Something went wrong while generating the answer",
+                    title: "Error",
+                    variant: "destructive",
+                  });
                   setIsGenerating(false);
                 }
               }}

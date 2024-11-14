@@ -46,7 +46,21 @@ export default function QuestionPanel(props: {
         setDraggedId={setDraggedId}
         hasDelay={true}
       >
-        <div className="relative w-full flex flex-col p-5 items-center bg-black/5">
+        <div className="relative w-full flex flex-col p-5 items-center bg-white">
+          {!draggedId && (
+            <div className="w-full max-w-md">
+              <AddQuestionButton
+                onAdd={(data) => {
+                  questions.splice(0, 0, data);
+                  setQuestions([...questions]);
+                }}
+                documentId={props.documentId}
+                numberOfChunks={props.numberOfChunks}
+                difficultyLevel={props.difficultyLevel}
+                requirements={props.requirements}
+              />
+            </div>
+          )}
           {questions.map((question, index) => {
             return (
               <div className={"w-full max-w-md flex flex-col"} key={index}>

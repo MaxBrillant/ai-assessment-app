@@ -8,7 +8,6 @@ export const assessmentSchema = z.object({
     .max(70, "The title cannot be more than 70 characters"),
   questions: z
     .array(questionSchema)
-    .min(1, "The questions array cannot be empty")
     .max(40, "The questions array cannot be more than 40 questions"),
   duration: z.enum(["15", "30", "45", "60", "90", "120", "150", "180"]),
   instructions: z

@@ -4,7 +4,7 @@ import pickRandomChunks from "../assessment/pickRandomChunks";
 import {
   queryVectorStore,
   queryVectorStoreFromChunkIndex,
-} from "../document/vectorStore";
+} from "../../document/vectorStore";
 import { generateQuestion } from "./generateQuestion";
 
 export async function generateSingleQuestion(props: {
@@ -55,7 +55,8 @@ export async function generateSingleQuestion(props: {
       context,
       props.difficultyLevel,
       props.requirements,
-      props.marks
+      props.marks,
+      props.previousQuestion
     );
 
     return question;

@@ -1,4 +1,5 @@
-export const getQuestionTypeAndMarks = (
+"use server";
+export const getQuestionTypeAndMarks = async (
   numberOfQuestions: number,
   maxMarks: number,
   difficultyLevel: number
@@ -6,11 +7,14 @@ export const getQuestionTypeAndMarks = (
   let remainingMarks = maxMarks;
   const questions = [];
 
-  for (let i = 0; i < numberOfQuestions; i++) {
-    const type = getQuestionTypeByDifficultyLevel(difficultyLevel);
+  const types = await getQuestionTypeByDifficultyLevel(
+    difficultyLevel,
+    numberOfQuestions
+  );
 
+  for (let i = 0; i < numberOfQuestions; i++) {
     let marks =
-      type === "long-answer"
+      types[i] === "long-answer"
         ? Math.max(
             Math.floor(maxMarks / numberOfQuestions),
             // Allocate more marks to long-answer questions, but
@@ -29,65 +33,101 @@ export const getQuestionTypeAndMarks = (
 
     remainingMarks -= marks;
 
-    questions.push({ type, marks });
+    questions.push({ type: types[i], marks });
   }
 
   return questions;
 };
 
-const getQuestionTypeByDifficultyLevel = (
-  difficultyLevel: number
-): "multiple-choice" | "short-answer" | "long-answer" => {
-  // Validate input
-  if (difficultyLevel < 0 || difficultyLevel > 100) {
-    throw new Error("Difficulty level must be between 0 and 100");
-  }
-
-  // Define weights for each difficulty range
-  let weights: Record<
-    "multiple-choice" | "short-answer" | "long-answer",
-    number
-  >;
-
-  if (difficultyLevel < 25) {
-    weights = {
-      "multiple-choice": 0.7,
-      "short-answer": 0.3,
-      "long-answer": 0,
-    };
-  } else if (difficultyLevel < 50) {
-    weights = {
-      "multiple-choice": 0.65,
-      "short-answer": 0.35,
-      "long-answer": 0.1,
-    };
-  } else if (difficultyLevel < 75) {
-    weights = {
-      "multiple-choice": 0.1,
-      "short-answer": 0.35,
-      "long-answer": 0.65,
-    };
-  } else {
-    weights = {
-      "multiple-choice": 0,
-      "short-answer": 0.3,
-      "long-answer": 0.7,
-    };
-  }
-
-  // Generate random number between 0 and 1
-  const random = Math.random();
-
-  // Calculate cumulative probabilities and select type
-  let cumulativeProbability = 0;
-
-  for (const [type, weight] of Object.entries(weights)) {
-    cumulativeProbability += weight;
-    if (random <= cumulativeProbability) {
-      return type as "multiple-choice" | "short-answer" | "long-answer";
+const getQuestionTypeByDifficultyLevel = async (
+  difficultyLevel: number,
+  numberOfQuestions: number
+) => {
+  const allQuestionTypes: (
+    | "multiple-choice"
+    | "short-answer"
+    | "long-answer"
+  )[] = [];
+  for (let i = 0; i < numberOfQuestions; i++) {
+    // Validate input
+    if (difficultyLevel < 0 || difficultyLevel > 100) {
+      throw new Error("Difficulty level must be between 0 and 100");
     }
+
+    // Define weights for each difficulty range
+    let weights: Record<
+      "multiple-choice" | "short-answer" | "long-answer",
+      number
+    >;
+
+    if (difficultyLevel < 15) {
+      weights = {
+        "multiple-choice": 0.7,
+        "short-answer": 0.3,
+        "long-answer": 0,
+      };
+    } else if (difficultyLevel <= 25) {
+      weights = {
+        "multiple-choice": 0.55,
+        "short-answer": 0.45,
+        "long-answer": 0,
+      };
+    } else if (difficultyLevel <= 50) {
+      weights = {
+        "multiple-choice": 0.3,
+        "short-answer": 0.35,
+        "long-answer": 0.35,
+      };
+    } else if (difficultyLevel <= 75) {
+      weights = {
+        "multiple-choice": 0.1,
+        "short-answer": 0.35,
+        "long-answer": 0.55,
+      };
+    } else {
+      weights = {
+        "multiple-choice": 0,
+        "short-answer": 0.3,
+        "long-answer": 0.7,
+      };
+    }
+
+    // Normalize weights to ensure they sum to 1
+    const totalWeight = Object.values(weights).reduce(
+      (sum, weight) => sum + weight,
+      0
+    );
+    const normalizedWeights = Object.fromEntries(
+      Object.entries(weights).map(([type, weight]) => [
+        type,
+        weight / totalWeight,
+      ])
+    ) as typeof weights;
+
+    // Generate an array of question types based on the normalized weights
+    const questionTypes: Array<
+      "multiple-choice" | "short-answer" | "long-answer"
+    > = [];
+    for (const [type, weight] of Object.entries(normalizedWeights)) {
+      questionTypes.push(
+        ...new Array(Math.floor(weight * 100)).fill(
+          type as "multiple-choice" | "short-answer" | "long-answer"
+        )
+      );
+    }
+
+    // Shuffle the array of question types
+    for (let i = questionTypes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [questionTypes[i], questionTypes[j]] = [
+        questionTypes[j],
+        questionTypes[i],
+      ];
+    }
+
+    // Return the first question type from the shuffled array
+    allQuestionTypes.push(questionTypes[0]);
   }
 
-  // Fallback (should never reach here due to cumulative probabilities adding to 1)
-  return "short-answer";
+  return allQuestionTypes;
 };

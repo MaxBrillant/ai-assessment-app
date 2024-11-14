@@ -1,3 +1,4 @@
+"use server";
 export default async function pickRandomChunks(
   MaxNumberOfChunks: number,
   maxQuestions: number,

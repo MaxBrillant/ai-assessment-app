@@ -17,6 +17,8 @@ import "./paper.css";
 import { Source_Serif_4 } from "next/font/google";
 import getTenAssessmentsInfo from "../api/assessments/fetch/getTenAssessmentsInfo";
 import Link from "next/link";
+import { handleFileDataInsertionIntoVectorStore } from "../api/document/handleFileData";
+import Loading from "../loading";
 
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 
@@ -32,6 +34,7 @@ export default function Create() {
       difficultyLevel: number;
     }[]
   >();
+  const [isUploading, setIsUploading] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { toast } = useToast();
 
@@ -117,7 +120,7 @@ export default function Create() {
                 Just bring your notes and let us handle the rest
               </p>
               <DropZone
-                onFileUpload={(file) => {
+                onFileUpload={async (file) => {
                   if ((file?.size as number) > 20000000) {
                     toast({
                       description:
@@ -127,8 +130,35 @@ export default function Create() {
                     });
                     return;
                   } else {
-                    setUploadedDocument(file);
-                    assessmentContext.document = file;
+                    setIsUploading(true);
+                    const formData = new FormData();
+                    formData.append("file", file);
+
+                    try {
+                      const { documentId, title, chunksLength } =
+                        await handleFileDataInsertionIntoVectorStore(
+                          formData,
+                          file.type === "application/pdf"
+                            ? "pdf"
+                            : file.type ===
+                              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            ? "docx"
+                            : "pptx"
+                        );
+                      assessmentContext.documentId = documentId;
+                      assessmentContext.title = title;
+                      assessmentContext.numberOfChunks = chunksLength;
+                      setUploadedDocument(file);
+                      setIsUploading(false);
+                    } catch (err) {
+                      toast({
+                        title: "Error",
+                        description:
+                          "Something went wrong while uploading the file, check your file and try again",
+                        variant: "destructive",
+                      });
+                      setIsUploading(false);
+                    }
                   }
                 }}
               />
@@ -137,7 +167,7 @@ export default function Create() {
                 type="file"
                 accept=".pdf,.docx,.pptx"
                 className="hidden"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if ((file?.size as number) > 20000000) {
                     toast({
@@ -147,9 +177,37 @@ export default function Create() {
                       variant: "destructive",
                     });
                     return;
-                  } else {
-                    setUploadedDocument(file);
-                    assessmentContext.document = file;
+                  } else if (file) {
+                    setIsUploading(true);
+                    const formData = new FormData();
+                    formData.append("file", file);
+
+                    try {
+                      const { documentId, title, chunksLength } =
+                        await handleFileDataInsertionIntoVectorStore(
+                          formData,
+                          file.type === "application/pdf"
+                            ? "pdf"
+                            : file?.type ===
+                              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            ? "docx"
+                            : "pptx"
+                        );
+                      assessmentContext.documentId = documentId;
+                      assessmentContext.title = title;
+                      assessmentContext.numberOfChunks = chunksLength;
+                      setUploadedDocument(file);
+                      setIsUploading(false);
+                    } catch (err) {
+                      toast({
+                        title: "Error",
+                        description:
+                          "Something went wrong while uploading the file, check your file and try again",
+                        variant: "destructive",
+                      });
+                      setIsUploading(false);
+                    }
+
                     e.target.value = "";
                     e.target.files = null;
                   }
@@ -206,6 +264,7 @@ export default function Create() {
               </div>
             </div>
           )}
+          {isUploading && <Loading message="Uploading your document..." />}
         </div>
       )}
 
@@ -214,7 +273,7 @@ export default function Create() {
           <DialogContent>
             <LoginForm
               heading="One last thing before we can start generating questions"
-              redirectUrl="/create/generate"
+              redirectUrl="/create/quiz"
             />
           </DialogContent>
         </Dialog>

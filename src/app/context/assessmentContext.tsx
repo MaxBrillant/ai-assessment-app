@@ -4,7 +4,7 @@ import { z } from "zod";
 import { QuestionType } from "../components/question";
 
 type AssessmentContextType = {
-  document: File | undefined;
+  documentId: string | undefined;
   numberOfQuestions: number;
   totalMarks: number;
   numberOfChunks: number;
@@ -17,7 +17,7 @@ type AssessmentContextType = {
   difficultyLevel: number;
 };
 const AssessmentContext = createContext<AssessmentContextType>({
-  document: undefined,
+  documentId: undefined,
   numberOfQuestions: 0,
   totalMarks: 0,
   numberOfChunks: 0,
@@ -32,7 +32,7 @@ const AssessmentContext = createContext<AssessmentContextType>({
 
 const AssessmentProvider = ({ children }: any) => {
   const [assessment, setAssessment] = useState<AssessmentContextType>({
-    document: undefined,
+    documentId: undefined,
     numberOfQuestions: 0,
     totalMarks: 0,
     numberOfChunks: 0,

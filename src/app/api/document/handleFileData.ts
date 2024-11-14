@@ -4,19 +4,20 @@ import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import type { Document } from "@langchain/core/documents";
-import { generateTitle } from "../assessment/generateTitle";
+import { generateTitle } from "../generate/assessment/generateTitle";
 import { addToVectorStore } from "./vectorStore";
+import { nanoid } from "nanoid";
 
 export async function handleFileDataInsertionIntoVectorStore(
-  documentId: string,
-  fileBlob: Blob,
-  type: "pdf" | "docx" | "pptx",
-  startingFrom: number | undefined,
-  endingAt: number | undefined
+  formData: FormData,
+  type: "pdf" | "docx" | "pptx"
 ) {
   try {
+    const documentId = nanoid();
+
+    const fileBlob = formData.get("file") as File;
     console.log("Extracting document data...");
-    const docs = await getDocumentData(fileBlob, type, startingFrom, endingAt);
+    const docs = await getDocumentData(fileBlob, type);
 
     console.log("Splitting document content into chunks...");
     const chunks = await Promise.all(
@@ -39,7 +40,11 @@ export async function handleFileDataInsertionIntoVectorStore(
     );
 
     console.log("Title generated");
-    return { title: title, chunksLength: chunks.length };
+    return {
+      documentId: documentId,
+      title: title,
+      chunksLength: chunks.length,
+    };
   } catch (e) {
     throw new Error(
       `Error while inserting file data into vector store, the error is: ${e}`
@@ -47,12 +52,7 @@ export async function handleFileDataInsertionIntoVectorStore(
   }
 }
 
-async function getDocumentData(
-  fileBlob: Blob,
-  type: "pdf" | "docx" | "pptx",
-  startingFrom?: number | undefined,
-  endingAt?: number | undefined
-) {
+async function getDocumentData(fileBlob: Blob, type: "pdf" | "docx" | "pptx") {
   try {
     if (type === "pdf") {
       const loader = new PDFLoader(fileBlob);

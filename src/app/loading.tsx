@@ -1,8 +1,10 @@
+import { ReactNode } from "react";
 import { RiLoader3Fill } from "react-icons/ri";
-export default function Loading() {
+export default function Loading(props: { message?: string }) {
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/70 pointer-events-none z-[9999]">
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/70 pointer-events-none z-[9999] backdrop-blur-sm">
       <RiLoader3Fill className="w-20 h-20 animate-spin opacity-30" />
+      {props.message && <p className="text-lg font-medium">{props.message}</p>}
     </div>
   );
 }
