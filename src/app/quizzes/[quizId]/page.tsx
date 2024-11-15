@@ -1,7 +1,6 @@
 import { CreateServerClient } from "@/utils/supabase/serverClient";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import AssessmentTabs from "./assessmentTabs";
-import getAdminAssessmentData from "@/app/api/assessments/fetch/getAdminAssessmentData";
 import { calculateTotalMarks } from "@/utils/calculateTotalMarks";
 import { Button } from "@/components/ui/button";
 import { IoShareOutline } from "react-icons/io5";
@@ -9,6 +8,7 @@ import ExportAssessment from "./exportAssessment";
 import PublishingPopup from "./publishingPopup";
 import SharePopup from "./sharePopup";
 import Link from "next/link";
+import { getAdminAssessmentData } from "@/app/api/assessments/fetch/getAdminAssessmentData";
 
 export default async function Assessment({
   params,
@@ -25,9 +25,11 @@ export default async function Assessment({
   }
 
   const assessmentNanoId = params.quizId;
-  const adminAssessmentData = await getAdminAssessmentData(assessmentNanoId);
+  const adminAssessmentData = await getAdminAssessmentData(
+    assessmentNanoId
+  ).catch(() => notFound());
 
-  return adminAssessmentData ? (
+  return (
     <div>
       <div className="w-full mx-auto flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4 px-5 pt-4 pb-2 sm:pb-4">
         <div>
@@ -87,13 +89,6 @@ export default async function Assessment({
         difficultyLevel={adminAssessmentData.difficultyLevel}
         requirements={adminAssessmentData.generationRequirements}
       />
-    </div>
-  ) : (
-    <div>
-      <p>
-        There was an error while fetching this assessment. Try refreshing the
-        page.
-      </p>
     </div>
   );
 }

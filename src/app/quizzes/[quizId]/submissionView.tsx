@@ -45,19 +45,20 @@ export default function SubmissionView(props: {
   const [submissionData, setSubmissionData] = useState<
     SubmissionType | undefined
   >();
+  const [isAiGrading, setIsAiGrading] = useState(false);
   const { refresh } = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
       const getSubmission = async () => {
-        const data = await getSubmissionData(
-          props.assessmentId,
-          props.submissionNanoId
-        );
-        if (data) {
+        try {
+          const data = await getSubmissionData(
+            props.assessmentId,
+            props.submissionNanoId
+          );
           setSubmissionData(data);
-        } else {
+        } catch (e) {
           toast({
             description:
               "Something went wrong while getting the submission data",
@@ -93,18 +94,18 @@ export default function SubmissionView(props: {
           <Button
             onClick={async (e) => {
               e.preventDefault();
-              const grade = await gradeSubmission(
-                props.submissionNanoId,
-                props.questions,
-                submissionData.answers
-              );
-
-              if (grade) {
+              setIsAiGrading(true);
+              try {
+                const grade = await gradeSubmission(
+                  props.submissionNanoId,
+                  props.questions,
+                  submissionData.answers
+                );
                 toast({
                   title: "AI Grading completed successfully",
                 });
                 refresh();
-              } else {
+              } catch (e) {
                 toast({
                   description:
                     "Something went wrong while grading the submission",
@@ -112,10 +113,12 @@ export default function SubmissionView(props: {
                   variant: "destructive",
                 });
               }
+              setIsAiGrading(false);
             }}
           >
             Grade with AI
           </Button>
+          {isAiGrading && <Loading message="Grading the submission..." />}
           <ExportSubmission
             fileName={props.credentials.join("-")}
             questions={props.questions}
@@ -139,16 +142,13 @@ export default function SubmissionView(props: {
                 <Button
                   variant={"destructive"}
                   onClick={async () => {
-                    const deletedSubmission = await deleteSubmission(
-                      submissionData.id
-                    );
-
-                    if (deletedSubmission) {
+                    try {
+                      await deleteSubmission(submissionData.id);
                       toast({
                         title: "Submission deleted successfully",
                       });
                       refresh();
-                    } else {
+                    } catch (e) {
                       toast({
                         description:
                           "Something went wrong while deleting resubmission",

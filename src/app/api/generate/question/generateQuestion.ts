@@ -1,5 +1,5 @@
 "use server";
-import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatGroq } from "@langchain/groq";
 import { QuestionType } from "@/app/components/question";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
@@ -15,19 +15,19 @@ export const generateQuestion = async (
   previousQuestion: string
 ) => {
   try {
-    // const model = new ChatGroq({
-    //   apiKey: process.env.GROQ_API_KEY,
-    //   model: "llama-3.1-70b-veratile",
-    //   temperature: 0.2,
-    //   maxTokens: 8000,
-    // });
-
-    const model = new ChatAnthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-      model: "claude-3-5-haiku-20241022",
+    const model = new ChatGroq({
+      apiKey: process.env.GROQ_API_KEY,
+      model: "llama-3.2-90b-text-preview",
       temperature: 0.5,
       maxTokens: 4096,
     });
+
+    // const model = new ChatAnthropic({
+    //   apiKey: process.env.ANTHROPIC_API_KEY,
+    //   model: "claude-3-5-haiku-20241022",
+    //   temperature: 0.5,
+    //   maxTokens: 4096,
+    // });
 
     const parser = StructuredOutputParser.fromZodSchema(questionSchema);
 
@@ -56,7 +56,7 @@ export const generateQuestion = async (
   
   Rules to follow:
   1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema. 
-  2. Don't mention the context anywhere in the question. You are the only one who knows the context, don't assume that anyone else already knows it. Make sure the question is ONLY related to or derived from the context provided. Avoid incomplete questions that lack any useful information at all cost to avoid confusion
+  2. Don't mention the context anywhere in the question. You are the only one who knows the context, don't assume that anyone else already knows it. Make sure the question is ONLY related to or derived from the context provided, don't make up a question or rely on your own knowledge. Avoid incomplete questions that lack any useful information at all cost to avoid confusion
   3. The "choices" array and "answer.choices" array should only be present if the question type is "multiple-choice". The "answer.content" string should only be present if the question type is "short-answer" or "long-answer"
   4. The "content" and "answer.content" fields must be composed of valid HTML strings, with the following tags ONLY: p, strong, em, u, br, ul, li, ol, span, <pre class="ql-syntax" spellcheck="false"></pre>. Don't include any HTML tags anywhere else except for "content" and "answer.content" fields only. Never in "choices" or "answer.choices", no matter what
   5. When the type of the question is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer.
@@ -130,7 +130,7 @@ export const generateQuestion = async (
 
     console.log("Question successfully generated");
 
-    return question;
+    return { ...question, id: crypto.randomUUID() };
   } catch (e) {
     throw new Error(`Error while generating the question, the error is: ${e}`);
   }

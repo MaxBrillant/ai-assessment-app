@@ -1,9 +1,9 @@
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import getAllUserAssessments from "../api/assessments/fetch/getAllUserAssessments";
 import { Button } from "@/components/ui/button";
 import { FiPlus } from "react-icons/fi";
+import { getAllUserAssessments } from "../api/assessments/fetch/getAllUserAssessments";
 
 export default async function Assessments() {
   const supabase = CreateServerClient();
@@ -33,7 +33,9 @@ export default async function Assessments() {
 
       {allUserAssessments ? (
         allUserAssessments.length === 0 ? (
-          <p>You have not created any assessments...yet</p>
+          <p className="text-center font-medium p-4 py-20">
+            You have not created any assessments...yet
+          </p>
         ) : (
           <div className="flex flex-col divide-y max-w-lg mx-auto">
             {allUserAssessments.map((assessment) => (
@@ -57,9 +59,6 @@ export default async function Assessments() {
             There was an error while fetching your assessments. Try refreshing
             this page.
           </p>
-          <Link href="/quizzes">
-            <Button>Refresh</Button>
-          </Link>
         </div>
       )}
     </div>

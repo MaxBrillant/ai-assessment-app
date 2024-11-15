@@ -136,22 +136,22 @@ export default function SubmittedAnswer(props: submittedAnswerProps) {
               (answer) => answer.questionId === props.question.id
             )}
             onSubmit={async (data) => {
-              props.submissionData.answers.find(
-                (answer) => answer.questionId === props.question.id
-              )!.marks = data.marks;
-              props.submissionData.answers.find(
-                (answer) => answer.questionId === props.question.id
-              )!.comment = data.comment;
+              try {
+                props.submissionData.answers.find(
+                  (answer) => answer.questionId === props.question.id
+                )!.marks = data.marks;
+                props.submissionData.answers.find(
+                  (answer) => answer.questionId === props.question.id
+                )!.comment = data.comment;
 
-              const updateAnswers = await updateSubmissionAnswers(
-                props.submissionData.id,
-                props.submissionData.answers
-              );
+                await updateSubmissionAnswers(
+                  props.submissionData.id,
+                  props.submissionData.answers
+                );
 
-              if (updateAnswers) {
                 setIsGrading(false);
                 refresh();
-              } else {
+              } catch (e) {
                 toast({
                   description: "Something went wrong while updating the marks",
                   title: "Error",

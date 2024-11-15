@@ -4,39 +4,43 @@ export const getQuestionTypeAndMarks = async (
   maxMarks: number,
   difficultyLevel: number
 ) => {
-  let remainingMarks = maxMarks;
-  const questions = [];
+  try {
+    let remainingMarks = maxMarks;
+    const questions = [];
 
-  const types = await getQuestionTypeByDifficultyLevel(
-    difficultyLevel,
-    numberOfQuestions
-  );
+    const types = await getQuestionTypeByDifficultyLevel(
+      difficultyLevel,
+      numberOfQuestions
+    );
 
-  for (let i = 0; i < numberOfQuestions; i++) {
-    let marks =
-      types[i] === "long-answer"
-        ? Math.max(
-            Math.floor(maxMarks / numberOfQuestions),
-            // Allocate more marks to long-answer questions, but
-            // don't over-allocate to prevent other questions from
-            // getting too few marks. The factor of 1.5 is arbitrary,
-            // but is intended to make long-answer questions worth
-            // more than other types of questions
-            Math.floor((remainingMarks / (numberOfQuestions - i)) * 1.5)
-          )
-        : Math.max(1, Math.floor(remainingMarks / (numberOfQuestions - i)));
+    for (let i = 0; i < numberOfQuestions; i++) {
+      let marks =
+        types[i] === "long-answer"
+          ? Math.max(
+              Math.floor(maxMarks / numberOfQuestions),
+              // Allocate more marks to long-answer questions, but
+              // don't over-allocate to prevent other questions from
+              // getting too few marks. The factor of 1.5 is arbitrary,
+              // but is intended to make long-answer questions worth
+              // more than other types of questions
+              Math.floor((remainingMarks / (numberOfQuestions - i)) * 1.5)
+            )
+          : Math.max(1, Math.floor(remainingMarks / (numberOfQuestions - i)));
 
-    // Ensure that the sum of all the marks must be equal to maxMarks
-    if (i === numberOfQuestions - 1) {
-      marks = maxMarks - questions.reduce((acc, cur) => acc + cur.marks, 0);
+      // Ensure that the sum of all the marks must be equal to maxMarks
+      if (i === numberOfQuestions - 1) {
+        marks = maxMarks - questions.reduce((acc, cur) => acc + cur.marks, 0);
+      }
+
+      remainingMarks -= marks;
+
+      questions.push({ type: types[i], marks });
     }
 
-    remainingMarks -= marks;
-
-    questions.push({ type: types[i], marks });
+    return questions;
+  } catch (err) {
+    throw new Error("Error while getting question types and marks: " + err);
   }
-
-  return questions;
 };
 
 const getQuestionTypeByDifficultyLevel = async (

@@ -73,9 +73,17 @@ export default function AssessmentForm(props: AssessmentFormProps) {
       }
     });
 
-    const update = async () =>
-      await updateSubmissionAnswers(props.id, watch(`submission`));
-
+    const update = async () => {
+      try {
+        await updateSubmissionAnswers(props.id, watch(`submission`));
+      } catch (e) {
+        toast({
+          description: "Something went wrong while saving your answer",
+          title: "Error",
+          variant: "destructive",
+        });
+      }
+    };
     if (props.defaultValues.length === 0) {
       update();
     }
@@ -85,22 +93,23 @@ export default function AssessmentForm(props: AssessmentFormProps) {
     console.log(data);
 
     if (props.submissionStatus === "resubmission-allowed") {
-      const updateAnswers = await updateSubmissionAnswers(
-        props.id,
-        [...props.defaultValues, ...watch(`submission`)].filter(
-          (answer, index, self) =>
-            index === self.findIndex((t) => t.questionId === answer.questionId)
-        )
-      );
+      try {
+        await updateSubmissionAnswers(
+          props.id,
+          [...props.defaultValues, ...watch(`submission`)].filter(
+            (answer, index, self) =>
+              index ===
+              self.findIndex((t) => t.questionId === answer.questionId)
+          )
+        );
 
-      const submit = await submitAssessment(props.id);
+        await submitAssessment(props.id);
 
-      if (submit) {
         toast({
           title: "Assessment submitted successfully",
         });
         refresh();
-      } else {
+      } catch (e) {
         toast({
           description: "Something went wrong while submitting the assessment",
           title: "Error",
@@ -108,19 +117,16 @@ export default function AssessmentForm(props: AssessmentFormProps) {
         });
       }
     } else {
-      const updateAnswers = await updateSubmissionAnswers(
-        props.id,
-        watch(`submission`)
-      );
+      try {
+        await updateSubmissionAnswers(props.id, watch(`submission`));
 
-      const submit = await submitAssessment(props.id);
+        await submitAssessment(props.id);
 
-      if (submit) {
         toast({
           title: "Assessment submitted successfully",
         });
         refresh();
-      } else {
+      } catch (e) {
         toast({
           description: "Something went wrong while submitting the assessment",
           title: "Error",
@@ -203,7 +209,7 @@ export default function AssessmentForm(props: AssessmentFormProps) {
                       )
                         ? "bg-blue-500 font-semibold text-white "
                         : "") +
-                      "flex text-sm text-black/70 gap-1 py-3 px-3 items-center"
+                      "flex text-sm text-black/70 gap-1 py-3 px-3 items-center cursor-pointer"
                     }
                     onClick={() => {
                       document
@@ -294,10 +300,19 @@ export default function AssessmentForm(props: AssessmentFormProps) {
                 setTimeout(async () => {
                   if (props.submissionStatus === "resubmission-allowed") {
                   } else {
-                    const updateAnswers = await updateSubmissionAnswers(
-                      props.id,
-                      watch(`submission`)
-                    );
+                    try {
+                      await updateSubmissionAnswers(
+                        props.id,
+                        watch(`submission`)
+                      );
+                    } catch (e) {
+                      toast({
+                        description:
+                          "Something went wrong while saving your answer",
+                        title: "Error",
+                        variant: "destructive",
+                      });
+                    }
                   }
                 }, 100);
               }

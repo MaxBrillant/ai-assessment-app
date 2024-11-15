@@ -17,107 +17,111 @@ export async function generateAssessmentQuestions(
   requirements: string | undefined,
   chunksLength: number
 ) {
-  console.log(
-    `Starting to generate the assessment questions...(${numberOfQuestions} questions, ${totalMarks} marks, ${difficultyLevel}% difficulty, requirements: "${requirements}")`
-  );
-
-  const contextChunks: {
-    content: string | undefined;
-    chunkIndexes: number[] | undefined;
-  }[] = [];
-
-  if (requirements) {
-    console.log("Getting prioritized chunks...");
-
-    const prioritizedChunks = await queryVectorStore(
-      documentId,
-      requirements,
-      numberOfQuestions
+  try {
+    console.log(
+      `Starting to generate the assessment questions...(${numberOfQuestions} questions, ${totalMarks} marks, ${difficultyLevel}% difficulty, requirements: "${requirements}")`
     );
 
-    for (let i = 0; i < prioritizedChunks.length; i += 1) {
-      contextChunks.push({
-        content: prioritizedChunks[i].pageContent,
-        chunkIndexes: [prioritizedChunks[i].metadata.chunkIndex],
-      });
-    }
-  }
+    const contextChunks: {
+      content: string | undefined;
+      chunkIndexes: number[] | undefined;
+    }[] = [];
 
-  if (numberOfQuestions > contextChunks.length) {
-    console.log("Picking random chunks...");
-    const randomlyPickedChunks = await pickRandomChunks(
-      chunksLength,
-      numberOfQuestions - contextChunks.length,
+    if (requirements) {
+      console.log("Getting prioritized chunks...");
+
+      const prioritizedChunks = await queryVectorStore(
+        documentId,
+        requirements,
+        numberOfQuestions
+      );
+
+      for (let i = 0; i < prioritizedChunks.length; i += 1) {
+        contextChunks.push({
+          content: prioritizedChunks[i].pageContent,
+          chunkIndexes: [prioritizedChunks[i].metadata.chunkIndex],
+        });
+      }
+    }
+
+    if (numberOfQuestions > contextChunks.length) {
+      console.log("Picking random chunks...");
+      const randomlyPickedChunks = await pickRandomChunks(
+        chunksLength,
+        numberOfQuestions - contextChunks.length,
+        difficultyLevel
+      );
+
+      await Promise.all(
+        randomlyPickedChunks.map(async (chunk) => {
+          const pageContent = await queryVectorStoreFromChunkIndex(
+            documentId,
+            chunk
+          );
+
+          contextChunks.push({
+            content: pageContent.pageContent,
+            chunkIndexes: [chunk],
+          });
+        })
+      );
+    }
+
+    console.log(
+      "Getting question type and marks for each question based on difficulty level..."
+    );
+    const questionTypeAndMarks = await getQuestionTypeAndMarks(
+      numberOfQuestions,
+      totalMarks,
       difficultyLevel
     );
 
-    await Promise.all(
-      randomlyPickedChunks.map(async (chunk) => {
-        const pageContent = await queryVectorStoreFromChunkIndex(
-          documentId,
-          chunk
-        );
+    console.log("Generating questions and answers...");
 
-        contextChunks.push({
-          content: pageContent.pageContent,
-          chunkIndexes: [chunk],
+    const questions: QuestionType[] = [];
+
+    let i = 0;
+    while (i < numberOfQuestions) {
+      const questionRequests = contextChunks
+        .slice(i, i + 20)
+        .map(async (chunk, index) => {
+          try {
+            return await generateQuestion(
+              questionTypeAndMarks[index].type,
+              chunk.content ?? "",
+              difficultyLevel,
+              requirements ?? "",
+              questionTypeAndMarks[index].marks,
+              ""
+            );
+          } catch (e) {
+            i += 1;
+            console.error(
+              `Error while generating question number ${
+                i + 1
+              }, the error is: ${e}`
+            );
+          }
         });
-      })
-    );
+
+      const questionResponses = await Promise.all(questionRequests);
+
+      questions.push(
+        ...questionResponses.filter((response) => response !== undefined)
+      );
+
+      i += 20;
+    }
+
+    if (questions.length === 0) {
+      throw new Error(
+        "Error while generating the assessment questions: not enough questions could be generated"
+      );
+    }
+
+    console.log("Successfully generated the assessment questions!");
+    return questions;
+  } catch (e) {
+    throw new Error(`Error while generating the assessment questions: ${e}`);
   }
-
-  console.log(
-    "Getting question type and marks for each question based on difficulty level..."
-  );
-  const questionTypeAndMarks = await getQuestionTypeAndMarks(
-    numberOfQuestions,
-    totalMarks,
-    difficultyLevel
-  );
-
-  console.log("Generating questions and answers...");
-
-  const questions: QuestionType[] = [];
-
-  let i = 0;
-  while (i < numberOfQuestions) {
-    const questionRequests = contextChunks
-      .slice(i, i + 5)
-      .map(async (chunk, index) => {
-        try {
-          return await generateQuestion(
-            questionTypeAndMarks[index].type,
-            chunk.content ?? "",
-            difficultyLevel,
-            requirements ?? "",
-            questionTypeAndMarks[index].marks,
-            ""
-          );
-        } catch (e) {
-          i += 1;
-          console.error(
-            `Error while generating question number ${
-              i + 1
-            }, the error is: ${e}`
-          );
-        }
-      });
-
-    const questionResponses = await Promise.all(questionRequests);
-
-    questions.push(
-      ...questionResponses.filter((response) => response !== undefined)
-    );
-
-    i += 5;
-  }
-
-  if (questions.length === 0) {
-    console.error(
-      "Error while generating the assessment questions: not enough questions could be generated"
-    );
-  }
-
-  console.log("Successfully generated the assessment questions!");
-  return questions;
 }

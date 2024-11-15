@@ -1,9 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
 import AssessmentForm from "./assessmentForm";
 import CountdownTimer from "@/app/components/countDownTimer";
 import AssessmentOverview from "./assessmentOverview";
-import Link from "next/link";
 import StartResubmissionDialog from "./startResubmissionDialog";
 import InstructionsDialog from "./instructionsDialog";
 import getAssessmentData from "@/app/api/assessments/fetch/getAssessmentData";
@@ -20,16 +18,14 @@ export default async function Page({
 }) {
   const assessmentNanoId = params.quizId;
 
-  const assessmentData = await getAssessmentData(assessmentNanoId);
+  const assessmentData = await getAssessmentData(assessmentNanoId).catch(() =>
+    notFound()
+  );
 
   const submissionData =
     assessmentData && searchParams.submissionId
       ? await getSubmissionData(assessmentData?.id, searchParams.submissionId)
       : undefined;
-
-  if (!assessmentData) {
-    return notFound();
-  }
 
   return (
     <div>

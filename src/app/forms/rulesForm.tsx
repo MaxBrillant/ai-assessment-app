@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { IoMdClose } from "react-icons/io";
 import { FiPlus } from "react-icons/fi";
+import { useTransition } from "react";
 
 const rulesSchema = assessmentSchema.pick({
   title: true,
@@ -46,6 +47,7 @@ export default function RulesForm(props: propsType) {
     mode: "onChange",
     reValidateMode: "onChange",
   });
+  const [isPending, startTransition] = useTransition();
 
   const errorMessages = Object.values(errors).flatMap((error: any) => {
     if (Array.isArray(error)) {
@@ -56,9 +58,10 @@ export default function RulesForm(props: propsType) {
     }
   });
 
-  const onSubmit = (data: RulesSchemaType) => {
-    props.onSubmit(data);
-  };
+  const onSubmit = (data: RulesSchemaType) =>
+    startTransition(async () => {
+      props.onSubmit(data);
+    });
 
   return (
     <form
@@ -201,6 +204,7 @@ export default function RulesForm(props: propsType) {
       <Button
         type="submit"
         disabled={
+          isPending ||
           errorMessages.length > 0 ||
           (props.mode === "update" &&
             props.defaultValues.title === watch("title") &&

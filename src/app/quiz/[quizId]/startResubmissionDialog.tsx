@@ -24,14 +24,13 @@ export default function StartResubmissionDialog(props: { id: number }) {
         <Button
           onClick={async (e) => {
             e.preventDefault();
-
-            const resubmission = await startResubmission(props.id);
-
-            if (resubmission) {
+            try {
+              await startResubmission(props.id);
               refresh();
-            } else {
+            } catch (e) {
               toast({
-                description: "Something went wrong while starting the resubmission",
+                description:
+                  "Something went wrong while starting the resubmission",
                 title: "Error",
                 variant: "destructive",
               });

@@ -31,7 +31,9 @@ export default function QuestionPanel(props: {
   const [draggedId, setDraggedId] = useState<string | undefined>();
 
   useEffect(() => {
-    props.onChange(questions);
+    if (questions !== props.defaultQuestions) {
+      props.onChange(questions);
+    }
   }, [questions]);
 
   return (

@@ -22,7 +22,6 @@ import {
 import { FiPlus } from "react-icons/fi";
 import { Draggable } from "../components/draggable";
 import Sortable from "../components/sortable";
-import pickRandomChunks from "../api/generate/assessment/pickRandomChunks";
 import { generateSingleQuestion } from "../api/generate/question/generateSingleQuestion";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
@@ -166,27 +165,19 @@ export default function QuestionForm(props: QuestionFormType) {
                   requirements: newRequirement ? newRequirement : "",
                   previousQuestion: watch("content"),
                 });
-                if (generatedQuestion) {
-                  setValue("type", generatedQuestion.type);
-                  setValue("content", generatedQuestion.content);
-                  setValue("marks", generatedQuestion.marks);
-                  if (generatedQuestion.type === "multiple-choice") {
-                    setValue("choices", generatedQuestion.choices);
-                    setValue(
-                      "answer.choices",
-                      generatedQuestion.answer.choices
-                    );
-                    setChoices(generatedQuestion.choices as string[]);
-                    setValue("answer.content", undefined);
-                  } else {
-                    setValue(
-                      "answer.content",
-                      generatedQuestion.answer.content
-                    );
-                    setValue("choices", undefined);
-                    setValue("answer.choices", undefined);
-                    setChoices([]);
-                  }
+                setValue("type", generatedQuestion.type);
+                setValue("content", generatedQuestion.content);
+                setValue("marks", generatedQuestion.marks);
+                if (generatedQuestion.type === "multiple-choice") {
+                  setValue("choices", generatedQuestion.choices);
+                  setValue("answer.choices", generatedQuestion.answer.choices);
+                  setChoices(generatedQuestion.choices as string[]);
+                  setValue("answer.content", undefined);
+                } else {
+                  setValue("answer.content", generatedQuestion.answer.content);
+                  setValue("choices", undefined);
+                  setValue("answer.choices", undefined);
+                  setChoices([]);
                 }
               } catch (err) {
                 toast({
@@ -375,8 +366,8 @@ export default function QuestionForm(props: QuestionFormType) {
           <div className="flex flex-row justify-end">
             <GeneratePopover
               onSubmit={async (newRequirement) => {
+                setIsGenerating(true);
                 try {
-                  setIsGenerating(true);
                   if (watch("content")) {
                     const generatedAnswer = await generateAnswer({
                       documentId: props.documentId,
@@ -385,22 +376,11 @@ export default function QuestionForm(props: QuestionFormType) {
                       difficultyLevel: props.difficultyLevel,
                       requirements: newRequirement,
                     });
-
-                    if (generatedAnswer) {
-                      setValue("answer.content", generatedAnswer.answer);
-                      setValue("choices", undefined);
-                      setValue("answer.choices", undefined);
-                      setChoices([]);
-                      setValue("marks", generatedAnswer.marks);
-                    } else {
-                      toast({
-                        description:
-                          "Something went wrong while generating the answer",
-                        title: "Error",
-                        variant: "destructive",
-                      });
-                    }
-                    setIsGenerating(false);
+                    setValue("answer.content", generatedAnswer.answer);
+                    setValue("choices", undefined);
+                    setValue("answer.choices", undefined);
+                    setChoices([]);
+                    setValue("marks", generatedAnswer.marks);
                   }
                 } catch (e) {
                   toast({
@@ -409,8 +389,8 @@ export default function QuestionForm(props: QuestionFormType) {
                     title: "Error",
                     variant: "destructive",
                   });
-                  setIsGenerating(false);
                 }
+                setIsGenerating(false);
               }}
             >
               <button

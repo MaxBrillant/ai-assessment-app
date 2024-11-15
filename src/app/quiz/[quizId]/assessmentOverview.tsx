@@ -7,7 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { FiClock, FiUser } from "react-icons/fi";
 import { IoIosArrowBack } from "react-icons/io";
 
@@ -27,25 +27,24 @@ export default function AssessmentOverview(props: assessmentProps) {
   const { push } = useRouter();
   const { toast } = useToast();
 
-  const onSubmit = async (e: any) => {
-    e.preventDefault();
-    const credentialsExist = await checkIfCredentialsExists(
-      props.id,
-      credentials[0]
-    );
+  const [isPending, startTransition] = useTransition();
 
-    if (credentialsExist == undefined) {
-      toast({
-        description: "Something went wrong while checking credentials",
-        title: "Error",
-        variant: "destructive",
-      });
-    } else {
+  const onSubmit = (e: any) =>
+    startTransition(async () => {
+      e.preventDefault();
+      const credentialsExist = await checkIfCredentialsExists(
+        props.id,
+        credentials[0]
+      );
+
       if (credentialsExist === false) {
-        const submissionNanoId = await createSubmission(props.id, credentials);
-        if (submissionNanoId) {
+        try {
+          const submissionNanoId = await createSubmission(
+            props.id,
+            credentials
+          );
           push(location.href + "?submissionId=" + submissionNanoId);
-        } else {
+        } catch (e) {
           toast({
             description: "Something went wrong while creating your submission",
             title: "Error",
@@ -59,8 +58,7 @@ export default function AssessmentOverview(props: assessmentProps) {
           variant: "destructive",
         });
       }
-    }
-  };
+    });
 
   return (
     <Dialog open={true}>
@@ -147,7 +145,7 @@ export default function AssessmentOverview(props: assessmentProps) {
                   assessment
                 </p>
               )}
-              <Button type="submit" className="mt-4">
+              <Button type="submit" className="mt-4" disabled={isPending}>
                 Begin the assessment
               </Button>
             </form>

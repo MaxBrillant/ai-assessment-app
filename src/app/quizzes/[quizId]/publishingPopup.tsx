@@ -34,20 +34,23 @@ export default function PublishingPopup(props: { id: number; title: string }) {
             }}
             mode="create"
             onSubmit={async (data) => {
-              const publishedAssessment = await publishAssessment(
-                props.id,
-                data.title,
-                data.duration,
-                data.instructions,
-                data.credentials
-              );
-              if (publishedAssessment) {
+              try {
+                const publishedAssessment = await publishAssessment(
+                  props.id,
+                  data.title,
+                  data.duration,
+                  data.instructions,
+                  data.credentials
+                );
                 setIsRulesOpen(false);
+                toast({
+                  title: "Your assessment has been published",
+                });
                 push(`/quizzes/${publishedAssessment}?share=true`);
-              } else {
+              } catch (err) {
                 toast({
                   description:
-                    "Something went wrong while publishing the assessment",
+                    "Something went wrong while publishing your assessment",
                   title: "Error",
                   variant: "destructive",
                 });

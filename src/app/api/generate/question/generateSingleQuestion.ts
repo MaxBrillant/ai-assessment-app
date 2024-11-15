@@ -61,6 +61,6 @@ export async function generateSingleQuestion(props: {
 
     return question;
   } catch (e) {
-    console.error("Error while generating single question: " + e);
+    throw new Error("Error while generating single question: " + e);
   }
 }

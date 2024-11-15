@@ -162,9 +162,7 @@ export default function Question(props: PropsType) {
                   requirements: newRequirement ? newRequirement : "",
                   previousQuestion: props.content,
                 });
-                if (generatedQuestion) {
-                  props.onEdit(generatedQuestion);
-                }
+                props.onEdit(generatedQuestion);
               } catch (err) {
                 toast({
                   description:

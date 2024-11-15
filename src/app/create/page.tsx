@@ -15,10 +15,10 @@ import {
 } from "../context/assessmentContext";
 import "./paper.css";
 import { Source_Serif_4 } from "next/font/google";
-import getTenAssessmentsInfo from "../api/assessments/fetch/getTenAssessmentsInfo";
 import Link from "next/link";
 import { handleFileDataInsertionIntoVectorStore } from "../api/document/handleFileData";
 import Loading from "../loading";
+import { getPublicAssessmentsInfo } from "../api/assessments/fetch/getTenAssessmentsInfo";
 
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 
@@ -42,7 +42,7 @@ export default function Create() {
     const timeoutId = setTimeout(async () => {
       const getAssessmentInfo = async () => {
         try {
-          const data = await getTenAssessmentsInfo();
+          const data = await getPublicAssessmentsInfo();
           setAssessmentsInfo(data);
         } catch (err) {
           console.log("Error fetching assessments info");

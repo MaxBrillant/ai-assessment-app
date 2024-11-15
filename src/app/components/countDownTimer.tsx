@@ -29,10 +29,11 @@ const CountdownTimer = (props: timerPropsType) => {
 
   useEffect(() => {
     const endAssessment = async () => {
-      const submit = await submitAssessment(props.id);
-
-      if (submit) {
+      try {
+        await submitAssessment(props.id);
         setTimeUp(true);
+      } catch (e) {
+        console.log("Error while submitting the assessment");
       }
     };
     if (remainingTime === 0) {

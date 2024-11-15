@@ -62,17 +62,15 @@ export default function AssessmentTabs(props: {
           difficultyLevel={props.difficultyLevel}
           requirements={props.requirements}
           onChange={async (data) => {
-            const updateQuestions = await updateAssessmentQuestions(
-              props.id,
-              data
-            );
-
-            if (updateQuestions) {
-              refresh();
-            } else {
+            try {
+              await updateAssessmentQuestions(props.id, data);
               toast({
-                description:
-                  "Something went wrong while updating the assessment questions",
+                title: "Changes saved successfully",
+              });
+              refresh();
+            } catch (err) {
+              toast({
+                description: "Something went wrong while saving your changes",
                 title: "Error",
                 variant: "destructive",
               });
@@ -91,7 +89,8 @@ export default function AssessmentTabs(props: {
           >
             <div
               className={`w-full sm:max-w-sm flex flex-col mx-auto max-h-[90vh] overflow-y-auto ${
-                selectedSubmission && "hidden sm:w-[40vw] sm:flex sm:flex-col"
+                selectedSubmission &&
+                "hidden sm:min-w-[20vw] sm:flex sm:flex-col"
               }`}
             >
               {props.submissions.filter(
@@ -196,7 +195,7 @@ export default function AssessmentTabs(props: {
               )}
             </div>
             {selectedSubmission && (
-              <div className="relative flex-grow max-h-[90vh] overflow-y-auto">
+              <div className="relative flex-grow overflow-y-auto">
                 <button
                   className="absolute sm:hidden z-10 top-4 right-4 rounded-full p-2 bg-black/10"
                   onClick={() => setSelectedSubmission(undefined)}
@@ -238,19 +237,19 @@ export default function AssessmentTabs(props: {
             }}
             mode="update"
             onSubmit={async (data) => {
-              const updateRules = await updateAssessmentRules(
-                props.id,
-                data.title,
-                data.duration,
-                data.instructions
-              );
+              try {
+                await updateAssessmentRules(
+                  props.id,
+                  data.title,
+                  data.duration,
+                  data.instructions
+                );
 
-              if (updateRules) {
                 toast({
                   title: "Assessment details updated successfully",
                 });
                 refresh();
-              } else {
+              } catch (err) {
                 toast({
                   description:
                     "Something went wrong while updating the assessment details",

@@ -4,17 +4,25 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
+import { ChatGroq } from "@langchain/groq";
 export async function generateTitle(content: string) {
   const titleSchema = assessmentSchema.pick({
     title: true,
   });
   try {
-    const model = new ChatAnthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-      model: "claude-3-5-haiku-20241022",
+    const model = new ChatGroq({
+      apiKey: process.env.GROQ_API_KEY,
+      model: "llama-3.2-90b-text-preview",
       temperature: 0.2,
       maxTokens: 1000,
     });
+
+    // const model = new ChatAnthropic({
+    //   apiKey: process.env.ANTHROPIC_API_KEY,
+    //   model: "claude-3-5-haiku-20241022",
+    //   temperature: 0.2,
+    //   maxTokens: 1000,
+    // });
 
     const parser = StructuredOutputParser.fromZodSchema(titleSchema);
 

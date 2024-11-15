@@ -162,18 +162,17 @@ const getExportContent = (
                     ))}
 
                   {answers.find((answer) => answer.questionId === question.id)
-                    ?.marks && (
+                    ?.marks != undefined && (
                     <div>
                       <p style={{ textDecoration: "underline" }}>
                         Received marks:
                       </p>
                       <h6 className="text-md font-medium">
-                        {
-                          answers.find(
-                            (answer) => answer.questionId === question.id
-                          )?.marks
-                        }
-                        {" out of " + question.marks}
+                        {answers.find(
+                          (answer) => answer.questionId === question.id
+                        )?.marks +
+                          " out of " +
+                          question.marks}
                       </h6>
                     </div>
                   )}

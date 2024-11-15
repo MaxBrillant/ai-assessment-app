@@ -5,6 +5,7 @@ import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
 import { queryVectorStore } from "../../document/vectorStore";
+import { ChatGroq } from "@langchain/groq";
 
 export const generateAnswer = async (props: {
   documentId: string;
@@ -13,15 +14,21 @@ export const generateAnswer = async (props: {
   difficultyLevel: number;
   requirements: string;
 }) => {
-  const context = await queryVectorStore(props.documentId, props.question, 1);
-
   try {
-    const model = new ChatAnthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-      model: "claude-3-5-haiku-20241022",
-      temperature: 0.4,
+    const context = await queryVectorStore(props.documentId, props.question, 1);
+
+    const model = new ChatGroq({
+      apiKey: process.env.GROQ_API_KEY,
+      model: "llama-3.2-90b-text-preview",
+      temperature: 0.5,
       maxTokens: 4096,
     });
+    // const model = new ChatAnthropic({
+    //   apiKey: process.env.ANTHROPIC_API_KEY,
+    //   model: "claude-3-5-haiku-20241022",
+    //   temperature: 0.4,
+    //   maxTokens: 4096,
+    // });
 
     const answerSchema = z.object({
       type: z.enum(["short-answer", "long-answer"]),
@@ -53,11 +60,11 @@ export const generateAnswer = async (props: {
     
       
       Rules to follow:
-      1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema. 
+      1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema
       2. Don't mention the context anywhere in the answer. You are the only one who knows the context, don't assume that anyone else already knows it. Make sure the answer is ONLY related to or derived from the context provided. Avoid incomplete answers that lack any useful information at all cost to avoid confusion
       3. The "answer" field must be composed of valid HTML strings, with the following tags ONLY: p, strong, em, u, br, ul, li, ol, span, <pre class="ql-syntax" spellcheck="false"></pre>
       4. The "answer" field must have less than 2000 characters
-      4. When the type of the answer is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer.
+      4. When the type of the answer is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer
       5. The difficulty level or percentage of difficulty of the answer is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the answer is appropriate for the difficulty level, a higher difficulty level means a more complex answer, and a lower difficulty level means a simpler answer
       6. User-provided requirements (They must be prioritized if not empty): "{requirements}"
       7. The type of the answer must be {type}
