@@ -17,7 +17,7 @@ export const generateQuestion = async (
   try {
     const model = new ChatGroq({
       apiKey: process.env.GROQ_API_KEY,
-      model: "llama-3.2-90b-text-preview",
+      model: "llama-3.1-70b-versatile",
       temperature: 0.5,
       maxTokens: 4096,
     });
