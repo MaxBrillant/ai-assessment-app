@@ -107,9 +107,9 @@ export default function Create() {
         </div>
       ) : (
         <div className="flex flex-col items-center gap-10">
-          <div className="w-full flex items-center justify-center pt-10">
+          <div className="w-full flex items-center justify-center pt-10 bg-gradient-to-br from-red-100 to-orange-50">
             <div className="w-full max-w-md flex flex-col gap-8 p-10">
-              <h1 className="text-xl font-bold text-center ">
+              <h1 className="text-xl font-bold text-center text-orange-950/90">
                 Create insightful and well-crafted assessment questions from any{" "}
                 <span className="text-red-500 font-bold">PDF</span>,{" "}
                 <span className="text-blue-500 font-bold">Word • Docs</span> or{" "}

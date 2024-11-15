@@ -4,7 +4,7 @@ export const generationSchema = z.object({
   numberOfQuestions: z
     .number()
     .min(1, "The number of questions cannot be less than 1")
-    .max(6, "You can only generate up to 6 questions at a time"),
+    .max(5, "You can only generate up to 5 questions at a time"),
   totalMarks: z
     .number()
     .min(5, "The total marks cannot be less than 5")
