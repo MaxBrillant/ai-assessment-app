@@ -38,7 +38,6 @@ export default function GeneratePopover(props: {
           />
           <Button
             type="submit"
-            disabled={!newRequirement}
             onClick={(e) => {
               e.preventDefault();
               onSubmit();
@@ -46,7 +45,7 @@ export default function GeneratePopover(props: {
               setNewRequirement(undefined);
             }}
           >
-            Generate
+            {newRequirement ? "Generate" : "Retry again"}
           </Button>
         </form>
       </PopoverContent>

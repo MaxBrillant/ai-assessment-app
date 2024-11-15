@@ -7,7 +7,7 @@ type AssessmentDataType = {
   nano_id: string;
   title: string;
   duration: number;
-  questions: string;
+  questions: QuestionType[];
   difficulty_level: number;
 }[];
 export async function getPublicAssessmentsInfo() {
@@ -39,8 +39,7 @@ export async function getPublicAssessmentsInfo() {
         title: assessment.title,
         duration: assessment.duration,
         difficultyLevel: assessment.difficulty_level,
-        numberOfQuestions: (JSON.parse(assessment.questions) as QuestionType[])
-          .length,
+        numberOfQuestions: assessment.questions.length,
       };
     });
   } catch (err) {

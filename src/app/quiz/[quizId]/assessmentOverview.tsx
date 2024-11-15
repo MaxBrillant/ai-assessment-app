@@ -106,7 +106,7 @@ export default function AssessmentOverview(props: assessmentProps) {
               <p className="font-medium">
                 {props.credentials.length > 0
                   ? "Enter the following credentials to proceed"
-                  : "This assessment does not require any credentials, you are good to go"}
+                  : "This assessment does not require any credentials to begin"}
               </p>
 
               {props.credentials.length > 0 &&

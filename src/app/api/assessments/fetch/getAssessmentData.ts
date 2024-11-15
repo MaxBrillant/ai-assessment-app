@@ -1,5 +1,6 @@
 "use server";
 
+import { QuestionType } from "@/app/components/question";
 import { questionSchema } from "@/app/validation/questionValidation";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { z } from "zod";
@@ -12,7 +13,7 @@ type AssessmentDataType = {
   duration: number;
   instructions: string | undefined;
   credentials: string[];
-  questions: string;
+  questions: QuestionType[];
   modified_at: Date;
 }[];
 export default async function getAssessmentData(nanoId: string) {
@@ -38,14 +39,7 @@ export default async function getAssessmentData(nanoId: string) {
       );
     }
 
-    console.log("Parsing questions...");
-
-    const schema = questionSchema;
-    const questionsObject: z.infer<typeof schema>[] = JSON.parse(
-      data[0].questions
-    );
-
-    const questionsWithoutAnswers = questionsObject.map((question) => {
+    const questionsWithoutAnswers = data[0].questions.map((question) => {
       const { answer, ...questionWithoutAnswer } = question;
       return questionWithoutAnswer;
     });

@@ -21,6 +21,7 @@ import SafeHTMLRenderer from "@/utils/htmlRenderer";
 import GeneratePopover from "../forms/generatePopover";
 import { generateSingleQuestion } from "../api/generate/question/generateSingleQuestion";
 import { useToast } from "@/hooks/use-toast";
+import { RiSparkling2Line } from "react-icons/ri";
 
 export type QuestionType = QuestionListType[0];
 export type PropsType = {
@@ -178,7 +179,7 @@ export default function Question(props: PropsType) {
               className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
               onClick={() => {}}
             >
-              <HiOutlineSparkles />
+              <RiSparkling2Line />
               Improve
             </button>
           </GeneratePopover>

@@ -23,6 +23,7 @@ import { FiPlus } from "react-icons/fi";
 import { Draggable } from "../components/draggable";
 import Sortable from "../components/sortable";
 import { generateSingleQuestion } from "../api/generate/question/generateSingleQuestion";
+import { RiSparkling2Line } from "react-icons/ri";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
 type QuestionFormType = QuestionType & {
@@ -194,7 +195,7 @@ export default function QuestionForm(props: QuestionFormType) {
               className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
               onClick={() => {}}
             >
-              <HiOutlineSparkles />
+              <RiSparkling2Line />
               Generate
             </button>
           </GeneratePopover>
@@ -397,7 +398,7 @@ export default function QuestionForm(props: QuestionFormType) {
                 className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
                 onClick={() => {}}
               >
-                <HiOutlineSparkles />
+                <RiSparkling2Line />
                 Generate
               </button>
             </GeneratePopover>
