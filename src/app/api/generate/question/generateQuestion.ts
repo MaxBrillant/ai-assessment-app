@@ -62,7 +62,7 @@ export const generateQuestion = async (
   4. The "content" and "answer.content" fields must be composed of valid HTML strings, with the following tags ONLY: p, strong, em, u, br, ul, li, ol, span, <pre class="ql-syntax" spellcheck="false"></pre>. Don't include any HTML tags anywhere else except for "content" and "answer.content" fields only. Never in "choices" or "answer.choices", no matter what
   5. When the type of the question is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer.
   6. The difficulty level or percentage of difficulty of the question is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the question is appropriate for the difficulty level, a higher difficulty level means a more complex question, and a lower difficulty level means a simpler question
-  6. User-provided requirements (They must be prioritized if not empty): "{requirements}"
+  6. User-provided requirements (They must be prioritized if not empty, but only when they are in accordance or related to the context): "{requirements}"
   7. Make sure to generate a question that is different from the previous question, in one way or another. Unless the user-provided requirements recommend otherwise, the question must be different from the previous question
   8. The type of the question must be {type}, unless the user-provided requirements recommend a different type, which you must prioritize
   9. The number of marks for the question is {marks}

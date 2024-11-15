@@ -66,7 +66,7 @@ export const generateAnswer = async (props: {
       4. The "answer" field must have less than 2000 characters
       4. When the type of the answer is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer
       5. The difficulty level or percentage of difficulty of the answer is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the answer is appropriate for the difficulty level, a higher difficulty level means a more complex answer, and a lower difficulty level means a simpler answer
-      6. User-provided requirements (They must be prioritized if not empty): "{requirements}"
+      6. User-provided requirements (They must be prioritized if not empty, but only when they are in accordance or related to the context): "{requirements}"
       7. The type of the answer must be {type}
       
     
