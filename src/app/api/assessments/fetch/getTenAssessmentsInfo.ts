@@ -1,13 +1,15 @@
 "use server";
 
 import { QuestionType } from "@/app/components/question";
+import { questionSchema } from "@/app/validation/questionValidation";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
+import { z } from "zod";
 
 type AssessmentDataType = {
   nano_id: string;
   title: string;
   duration: number;
-  questions: QuestionType[];
+  questions: string;
   difficulty_level: number;
 }[];
 export async function getPublicAssessmentsInfo() {
@@ -22,6 +24,7 @@ export async function getPublicAssessmentsInfo() {
         "id, nano_id, title, status, questions, duration, difficulty_level"
       )
       .eq("status", "public")
+      .order("modified_at", { ascending: false })
       .limit(10)
       .returns<AssessmentDataType>();
 
@@ -39,7 +42,8 @@ export async function getPublicAssessmentsInfo() {
         title: assessment.title,
         duration: assessment.duration,
         difficultyLevel: assessment.difficulty_level,
-        numberOfQuestions: assessment.questions.length,
+        numberOfQuestions: (JSON.parse(assessment.questions) as QuestionType[])
+          .length,
       };
     });
   } catch (err) {
