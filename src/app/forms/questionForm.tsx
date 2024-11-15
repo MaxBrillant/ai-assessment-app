@@ -24,6 +24,7 @@ import { Draggable } from "../components/draggable";
 import Sortable from "../components/sortable";
 import { generateSingleQuestion } from "../api/generate/question/generateSingleQuestion";
 import { RiSparkling2Line } from "react-icons/ri";
+import { nanoid } from "nanoid";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
 type QuestionFormType = QuestionType & {
@@ -113,7 +114,7 @@ export default function QuestionForm(props: QuestionFormType) {
       (data.answer.content !== props.answer.content ||
         data.answer.choices !== props.answer.choices)
     ) {
-      const uuid = crypto.randomUUID();
+      const uuid = nanoid();
       data.id = uuid;
     }
     props.onSubmit(data);

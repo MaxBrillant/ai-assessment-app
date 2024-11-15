@@ -4,10 +4,10 @@ import CountdownTimer from "@/app/components/countDownTimer";
 import AssessmentOverview from "./assessmentOverview";
 import StartResubmissionDialog from "./startResubmissionDialog";
 import InstructionsDialog from "./instructionsDialog";
-import getAssessmentData from "@/app/api/assessments/fetch/getAssessmentData";
 import getSubmissionData from "@/app/api/submissions/fetch/getSubmissionData";
 import { RxDotFilled } from "react-icons/rx";
 import { calculateTotalMarks } from "@/utils/calculateTotalMarks";
+import { getAssessmentData } from "@/app/api/assessments/fetch/getAssessmentData";
 
 export default async function Page({
   params,

@@ -5,6 +5,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { questionSchema } from "@/app/validation/questionValidation";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { nanoid } from "nanoid";
 
 export const generateQuestion = async (
   type: "short-answer" | "multiple-choice" | "long-answer",
@@ -130,7 +131,7 @@ export const generateQuestion = async (
 
     console.log("Question successfully generated");
 
-    return { ...question, id: crypto.randomUUID() };
+    return { ...question, id: nanoid() };
   } catch (e) {
     throw new Error(`Error while generating the question, the error is: ${e}`);
   }

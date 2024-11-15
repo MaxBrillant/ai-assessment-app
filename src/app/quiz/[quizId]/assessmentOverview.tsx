@@ -24,7 +24,7 @@ export default function AssessmentOverview(props: assessmentProps) {
   const [credentials, setCredentials] = useState<string[]>(
     props.credentials.map(() => "")
   );
-  const { push } = useRouter();
+  const { replace } = useRouter();
   const { toast } = useToast();
 
   const [isPending, startTransition] = useTransition();
@@ -43,7 +43,7 @@ export default function AssessmentOverview(props: assessmentProps) {
             props.id,
             credentials
           );
-          push(location.href + "?submissionId=" + submissionNanoId);
+          replace(location.href + "?submissionId=" + submissionNanoId);
         } catch (e) {
           toast({
             description: "Something went wrong while creating your submission",
