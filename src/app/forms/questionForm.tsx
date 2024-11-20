@@ -25,6 +25,7 @@ import Sortable from "../components/sortable";
 import { generateSingleQuestion } from "../api/generate/question/generateSingleQuestion";
 import { RiSparkling2Line } from "react-icons/ri";
 import { nanoid } from "nanoid";
+import { IoMdClose } from "react-icons/io";
 
 type QuestionSchemaType = z.infer<typeof questionSchema>;
 type QuestionFormType = QuestionType & {
@@ -73,7 +74,11 @@ export default function QuestionForm(props: QuestionFormType) {
       setValue("choices", choices);
       setValue(
         "answer.choices",
-        watch("answer.choices") ? watch("answer.choices") : props.answer.choices
+        watch("answer.choices")
+          ? watch("answer.choices")
+          : props.answer.choices
+          ? props.answer.choices
+          : []
       );
     }
   }, [watch("type")]);
@@ -234,116 +239,157 @@ export default function QuestionForm(props: QuestionFormType) {
                 Press and hold to reorder
               </p>
             )}
-            <Sortable
-              items={
-                watch("choices")?.map((choice) => {
-                  return { id: choice, choice: choice };
-                }) as any[]
-              }
-              setItems={(items) => {
-                setValue(
-                  "choices",
-                  items.map((item) => item.choice)
-                );
-                setChoices(items.map((item) => item.choice));
-              }}
-              setDraggedId={setDraggedId}
-              hasDelay={true}
-            >
-              {choices.map((choice, index) => {
-                return (
-                  <Draggable id={choice} key={choice}>
-                    <div
-                      className={
-                        (draggedId === choice
-                          ? "z-30 opacity-50 drop-shadow-md"
-                          : "z-0") +
-                        " relative flex flex-grow gap-2 items-start"
-                      }
-                      key={choice}
-                    >
-                      <Input
-                        type="checkbox"
-                        className="w-5 h-5 mt-1"
-                        checked={watch("answer.choices")?.includes(choice)}
-                        onChange={() => {
-                          if (watch("answer.choices")?.includes(choice)) {
+            {choices && choices?.length > 0 && (
+              <Sortable
+                key={JSON.stringify(choices)}
+                onDragStart={() => {
+                  if (choices.length > 0) {
+                    choices.map((item) => {
+                      const input = document.getElementById(
+                        "input-" + item
+                      ) as HTMLInputElement;
+                      input?.blur();
+                    });
+                  }
+                }}
+                items={
+                  choices.map((choice) => {
+                    return { id: choice, choice: choice };
+                  }) as any[]
+                }
+                setItems={(items) => {
+                  setValue(
+                    "choices",
+                    items.map((item) => item.choice)
+                  );
+                  setChoices(items.map((item) => item.choice));
+                }}
+                setDraggedId={setDraggedId}
+                hasDelay={true}
+              >
+                {choices.map((choice, index) => {
+                  return (
+                    <Draggable id={choice} key={choice}>
+                      <div
+                        className={
+                          (draggedId === choice
+                            ? "z-30 opacity-50 drop-shadow-md"
+                            : "z-0") +
+                          " relative flex flex-grow gap-2 items-start"
+                        }
+                        key={choice}
+                      >
+                        <Input
+                          type="checkbox"
+                          className="w-5 h-5 mt-1"
+                          checked={watch("answer.choices")?.includes(choice)}
+                          onChange={() => {
+                            if (watch("answer.choices")?.includes(choice)) {
+                              setValue(
+                                "answer.choices",
+                                watch("answer.choices")?.filter(
+                                  (answerChoice) => answerChoice !== choice
+                                )
+                              );
+                            } else {
+                              setValue(
+                                "answer.choices",
+                                watch("answer.choices")?.concat(choice)
+                              );
+                            }
+                          }}
+                        />
+                        <textarea
+                          id={"input-" + choice}
+                          autoFocus={choice === ""}
+                          defaultValue={choice}
+                          placeholder="Write a choice"
+                          className="w-full p-1 text-sm font-light border-b focus:border focus:rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden"
+                          rows={1}
+                          onFocus={(e) => autoResize(e.currentTarget)}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "Enter" &&
+                              index === choices.length - 1
+                            ) {
+                              e.preventDefault();
+                              e.currentTarget.blur();
+                              setTimeout(() => {
+                                document.getElementById("add-choice")?.click();
+                              }, 30);
+                            }
+                          }}
+                          onChange={(e) => {
+                            setValue(
+                              "choices",
+                              choices.map((c, i) =>
+                                i === index ? e.target.value : c
+                              )
+                            );
+                            autoResize(e.target);
+                          }}
+                          onBlur={(e) => {
+                            // If the previous value has already been selected, select the new value, and don't allow it to be selected again
+
+                            if (
+                              watch("answer.choices")?.includes(choices[index])
+                            ) {
+                              const selectedChoice = watch(
+                                "answer.choices"
+                              )?.find((choice) => choices[index] === choice);
+
+                              setValue(
+                                "answer.choices",
+                                watch("answer.choices")
+                                  ?.filter(
+                                    (answerChoice) =>
+                                      answerChoice !== selectedChoice
+                                  )
+                                  .concat(e.target.value)
+                              );
+                            }
+
+                            setChoices(
+                              choices.map((c, i) =>
+                                i === index ? e.target.value : c
+                              )
+                            );
+                            autoResize(e.target);
+                          }}
+                        />
+                        <button
+                          className="aspect-square rounded-md mt-1"
+                          onClick={(e) => {
+                            e.preventDefault();
+
                             setValue(
                               "answer.choices",
                               watch("answer.choices")?.filter(
                                 (answerChoice) => answerChoice !== choice
                               )
                             );
-                          } else {
                             setValue(
-                              "answer.choices",
-                              watch("answer.choices")?.concat(choice)
+                              "choices",
+                              choices.filter(
+                                (answerChoice) => answerChoice !== choice
+                              )
                             );
-                          }
-                        }}
-                      />
-                      <textarea
-                        autoFocus={choice === ""}
-                        defaultValue={choice}
-                        placeholder="Write a choice"
-                        className="w-full p-1 text-sm font-light border-b focus:border focus:rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-hidden"
-                        rows={1}
-                        onFocus={(e) => autoResize(e.currentTarget)}
-                        onKeyDown={(e) => {
-                          if (
-                            e.key === "Enter" &&
-                            index === choices.length - 1
-                          ) {
-                            e.preventDefault();
-                            e.currentTarget.blur();
-                            setTimeout(() => {
-                              document.getElementById("add-choice")?.click();
-                            }, 30);
-                          }
-                        }}
-                        onChange={(e) => {
-                          setValue(
-                            "choices",
-                            choices.map((c, i) =>
-                              i === index ? e.target.value : c
-                            )
-                          );
-                          autoResize(e.target);
-                        }}
-                        onBlur={(e) => {
-                          // If the previous value has already been selected, select the new value, and don't allow it to be selected again
-
-                          if (
-                            watch("answer.choices")?.includes(choices[index])
-                          ) {
-                            const selectedChoice = watch(
-                              "answer.choices"
-                            )?.find((choice) => choices[index] === choice);
-
-                            setValue(
-                              "answer.choices",
-                              watch("answer.choices")
-                                ?.filter(
-                                  (answerChoice) =>
-                                    answerChoice !== selectedChoice
-                                )
-                                .concat(e.target.value)
+                            setChoices(
+                              choices.filter(
+                                (answerChoice) => answerChoice !== choice
+                              )
                             );
-                          }
+                          }}
+                        >
+                          <IoMdClose className="w-5 h-5 fill-black/50 hover:fill-red-500" />
+                        </button>
+                      </div>
+                    </Draggable>
+                  );
+                })}
+              </Sortable>
+            )}
 
-                          setChoices(
-                            choices.map((c, i) =>
-                              i === index ? e.target.value : c
-                            )
-                          );
-                          autoResize(e.target);
-                        }}
-                      />
-                    </div>
-                  </Draggable>
-                );
-              })}
-            </Sortable>
             <button
               id="add-choice"
               className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm gap-1 rounded-full opacity-70 hover:opacity-100 focus:opacity-100 hover:bg-black/5 focus:bg-black/5"

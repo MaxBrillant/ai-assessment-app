@@ -45,7 +45,7 @@ export default function GeneratePopover(props: {
               setNewRequirement(undefined);
             }}
           >
-            {newRequirement ? "Generate" : "Retry again"}
+            {newRequirement ? "Generate" : "Try again"}
           </Button>
         </form>
       </PopoverContent>

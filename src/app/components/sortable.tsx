@@ -3,7 +3,6 @@
 import {
   DndContext,
   closestCenter,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -12,7 +11,6 @@ import {
 import {
   arrayMove,
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useEffect, useState } from "react";
@@ -23,12 +21,14 @@ export default function Sortable({
   setItems,
   setDraggedId,
   hasDelay,
+  onDragStart,
 }: {
   children: React.ReactNode;
   items: any[];
   setItems: (items: any[]) => void;
   setDraggedId: (id: string | undefined) => void;
   hasDelay?: boolean;
+  onDragStart?: () => void;
 }) {
   const [sortableItems, setSortableItems] = useState(items);
 
@@ -50,10 +50,10 @@ export default function Sortable({
             },
           }
         : {}
-    ),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    )
+    // useSensor(KeyboardSensor, {
+    //   coordinateGetter: sortableKeyboardCoordinates,
+    // })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -76,7 +76,10 @@ export default function Sortable({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragStart={(event) => setDraggedId(event.active.id.toString())}
+      onDragStart={(event) => {
+        setDraggedId(event.active.id.toString());
+        onDragStart?.();
+      }}
       onDragEnd={(event) => {
         handleDragEnd(event);
         setDraggedId(undefined);
