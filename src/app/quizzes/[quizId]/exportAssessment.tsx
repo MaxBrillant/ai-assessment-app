@@ -11,6 +11,7 @@ import { FaRegFilePdf, FaRegFileWord } from "react-icons/fa6";
 import { TbFileExport } from "react-icons/tb";
 import SafeHTMLRenderer from "@/utils/htmlRenderer";
 import { QuestionType } from "@/app/components/question";
+import DOMPurify from "dompurify";
 
 export default function ExportAssessment(props: {
   fileName: string;
@@ -182,5 +183,39 @@ const getExportContent = (
         </div>
       }
     </div>
+  );
+};
+
+export const getQuestionExportContent = (question: QuestionType) => {
+  const questionContent = question.content
+    ? DOMPurify.sanitize(question.content, { ALLOWED_TAGS: [] })
+    : "";
+
+  const questionChoices = question.choices
+    ? question.choices
+        .map((choice, index) => `${String.fromCharCode(index + 65)}. ${choice}`)
+        .join("\n")
+    : "";
+  const questionAnswer = question.answer.choices
+    ? question.answer.choices
+        .map(
+          (choice) =>
+            `Correct choices:\n${String.fromCharCode(
+              (question.choices?.findIndex((c) => c === choice) as number) + 65
+            )}. ${choice}`
+        )
+        .join("\n")
+    : `Correct answer:\n${DOMPurify.sanitize(
+        question.answer.content as string,
+        {
+          ALLOWED_TAGS: [],
+        }
+      )}`;
+
+  return (
+    `${questionContent}\n${question.marks} marks\n` +
+    (question.type === "multiple-choice" ? questionChoices : "") +
+    "\n" +
+    questionAnswer
   );
 };

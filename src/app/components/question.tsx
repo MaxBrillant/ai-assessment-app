@@ -1,5 +1,5 @@
 "use client";
-import { FiEdit3 } from "react-icons/fi";
+import { FiCopy, FiEdit3 } from "react-icons/fi";
 import { MdMoreVert } from "react-icons/md";
 import { HiOutlineSparkles } from "react-icons/hi2";
 import { RxDotFilled } from "react-icons/rx";
@@ -22,6 +22,7 @@ import GeneratePopover from "../forms/generatePopover";
 import { generateSingleQuestion } from "../api/generate/question/generateSingleQuestion";
 import { useToast } from "@/hooks/use-toast";
 import { RiSparkling2Line } from "react-icons/ri";
+import { getQuestionExportContent } from "../quizzes/[quizId]/exportAssessment";
 
 export type QuestionType = QuestionListType[0];
 export type PropsType = {
@@ -183,6 +184,20 @@ export default function Question(props: PropsType) {
               Improve
             </button>
           </GeneratePopover>
+          <button
+            className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
+            onClick={async () => {
+              const questionContent = getQuestionExportContent(props);
+
+              await navigator.clipboard.writeText(questionContent);
+              toast({
+                title: "Copied to clipboard",
+              });
+            }}
+          >
+            <FiCopy />
+            Copy
+          </button>
         </div>
       </div>
       <div
