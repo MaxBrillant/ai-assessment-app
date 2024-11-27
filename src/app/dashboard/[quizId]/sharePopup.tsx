@@ -25,7 +25,7 @@ export default function SharePopup(props: { nanoId: string }) {
         onOpenChange={(open) => {
           if (!open) {
             setIsPublished(false);
-            replace("/quizzes/" + props.nanoId);
+            replace("/dashboard/" + props.nanoId);
           } else {
             setIsPublished(true);
           }
@@ -43,12 +43,12 @@ export default function SharePopup(props: { nanoId: string }) {
               <Input
                 disabled
                 className="flex-grow"
-                value={window.location.origin + "/quiz/" + props.nanoId}
+                value={window.location.origin + "/q/" + props.nanoId}
               />
               <Button
                 onClick={async () => {
                   await navigator.clipboard.writeText(
-                    window.location.origin + "/quiz/" + props.nanoId
+                    window.location.origin + "/q/" + props.nanoId
                   );
                   toast({
                     title: "Copied to clipboard",

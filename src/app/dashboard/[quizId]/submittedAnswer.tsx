@@ -153,7 +153,7 @@ export default function SubmittedAnswer(props: submittedAnswerProps) {
                 refresh();
               } catch (e) {
                 toast({
-                  description: "Something went wrong while updating the marks",
+                  description: "Something went wrong while updating the points",
                   title: "Error",
                   variant: "destructive",
                 });
@@ -170,7 +170,7 @@ export default function SubmittedAnswer(props: submittedAnswerProps) {
               answer.marks != undefined
           ) ? (
             <p className="font-medium">
-              Marks:{" "}
+              Points:{" "}
               {
                 props.submissionData.answers.find(
                   (answer) => answer.questionId === props.question.id
@@ -184,14 +184,14 @@ export default function SubmittedAnswer(props: submittedAnswerProps) {
                 answer.marks == undefined
             ) ? (
             <div className="space-y-2">
-              <p className="text-sm">No marks given yet</p>
+              <p className="text-sm">No points given yet</p>
 
               <button
                 className="w-fit flex flex-row px-2 py-1 items-center text-center text-sm text-black/70 gap-1 bg-black/5 border border-black/10 rounded-full"
                 onClick={() => setIsGrading(true)}
               >
                 <FiEdit3 />
-                Give marks
+                Give points
               </button>
             </div>
           ) : (
@@ -231,7 +231,7 @@ export default function SubmittedAnswer(props: submittedAnswerProps) {
               onClick={() => setIsGrading(true)}
             >
               <FiEdit3 />
-              Edit marks
+              Edit points
             </button>
           )}
         </div>

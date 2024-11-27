@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import LoginForm from "./loginForm";
+import Footer from "../footer";
 
 export default function Login() {
   const urlParams = useSearchParams();
@@ -11,13 +12,16 @@ export default function Login() {
     : undefined;
 
   return (
-    <div className="flex flex-col h-screen items-center justify-center">
-      <div className="max-w-md rounded-3xl shadow-2xl">
-        <LoginForm
-          heading={"You need to login in order to continue"}
-          redirectUrl={redirectUrl}
-        />
+    <div>
+      <div className="flex flex-col h-screen items-center justify-center">
+        <div className="max-w-md rounded-3xl shadow-2xl">
+          <LoginForm
+            heading={"Let's quickly get you signed in"}
+            redirectUrl={redirectUrl}
+          />
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

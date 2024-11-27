@@ -19,6 +19,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Loading from "@/app/loading";
+import { CreateBrowserClient } from "@/utils/supabase/browserClient";
+import { getLastPaymentDetails } from "@/app/api/auth/getUserProfile";
 
 export type SubmissionType = {
   id: number;
@@ -96,15 +98,29 @@ export default function SubmissionView(props: {
               e.preventDefault();
               setIsAiGrading(true);
               try {
-                const grade = await gradeSubmission(
-                  props.submissionNanoId,
-                  props.questions,
-                  submissionData.answers
-                );
-                toast({
-                  title: "AI Grading completed successfully",
-                });
-                refresh();
+                const supabase = await CreateBrowserClient();
+                const userId = (await supabase.auth.getUser()).data.user
+                  ?.id as string;
+                const paymentDetails = await getLastPaymentDetails(userId);
+
+                if (paymentDetails.credits > 1) {
+                  await gradeSubmission(
+                    props.submissionNanoId,
+                    props.questions,
+                    submissionData.answers
+                  );
+                  toast({
+                    title: "AI Grading completed successfully",
+                  });
+                  refresh();
+                } else {
+                  toast({
+                    description:
+                      "You don't have enough credits. Please top up your credit balance and try again",
+                    title: "Error",
+                    variant: "destructive",
+                  });
+                }
               } catch (e) {
                 toast({
                   description:

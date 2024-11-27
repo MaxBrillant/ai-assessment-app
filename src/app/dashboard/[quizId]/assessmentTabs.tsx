@@ -2,17 +2,18 @@
 import { QuestionType } from "@/app/components/question";
 import QuestionPanel from "@/app/components/questionsPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SubmissionView from "./submissionView";
 import {
   updateAssessmentQuestions,
   updateAssessmentRules,
 } from "@/app/api/assessments/mutations";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import RulesForm from "@/app/forms/rulesForm";
 import { getTimeAgo } from "@/utils/formatDates";
 import { IoMdClose } from "react-icons/io";
+import Link from "next/link";
 
 export default function AssessmentTabs(props: {
   id: number;
@@ -22,6 +23,7 @@ export default function AssessmentTabs(props: {
   instructions: string | undefined;
   questions: QuestionType[];
   credentials: string[];
+  assessmentNanoId: string;
   submissions: {
     nanoId: string;
     credentials: string[];
@@ -36,12 +38,32 @@ export default function AssessmentTabs(props: {
   const [selectedSubmission, setSelectedSubmission] = useState<
     string | undefined
   >(undefined);
+  const searchParams = useSearchParams();
 
-  const { refresh } = useRouter();
+  const { refresh, replace } = useRouter();
   const { toast } = useToast();
 
+  useEffect(() => {
+    setSelectedSubmission(undefined);
+    if (searchParams.get("submissionId")) {
+      setTimeout(() => {
+        setSelectedSubmission(searchParams.get("submissionId") as string);
+      }, 10);
+    }
+  }, [searchParams]);
+
   return (
-    <Tabs defaultValue="questions" className="w-full h-full">
+    <Tabs
+      defaultValue={
+        searchParams.get("submissionId") ? "submissions" : "questions"
+      }
+      className="w-full h-full"
+      onValueChange={(value) => {
+        if (value !== "submissions") {
+          replace(window.location.pathname);
+        }
+      }}
+    >
       {props.status !== "private" && (
         <TabsList className="w-full bg-white">
           <TabsTrigger value="questions">
@@ -54,7 +76,7 @@ export default function AssessmentTabs(props: {
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
       )}
-      <TabsContent value="questions" className="m-0">
+      <TabsContent value="questions" className="m-0 min-h-screen pb-4">
         <QuestionPanel
           defaultQuestions={props.questions}
           documentId={props.documentId}
@@ -81,7 +103,7 @@ export default function AssessmentTabs(props: {
       {props.status !== "private" && (
         <TabsContent value="submissions">
           <div
-            className={` ${
+            className={`min-h-screen ${
               selectedSubmission
                 ? "grid grid-cols-1 sm:flex sm:flex-row sm:divide-x"
                 : "grid grid-cols-1"
@@ -109,35 +131,34 @@ export default function AssessmentTabs(props: {
                       )
                       .map((submission) => {
                         return (
-                          <button
+                          <Link
                             key={submission.nanoId}
-                            onClick={() => {
-                              setSelectedSubmission(undefined);
-                              setTimeout(() => {
-                                setSelectedSubmission(submission.nanoId);
-                              }, 10);
-                            }}
-                            className={`${
-                              selectedSubmission === submission.nanoId &&
-                              "border-2 border-black/50 bg-black/5"
-                            } flex flex-col items-start gap-1 p-2 hover:bg-black/5 rounded-md`}
+                            href={`/dashboard/${props.assessmentNanoId}?submissionId=${submission.nanoId}`}
                           >
-                            {props.credentials.length > 0 ? (
-                              <p className="max-w-full truncate">
-                                {submission.credentials[0]}
-                              </p>
-                            ) : (
-                              <p>Anonymous</p>
-                            )}
-                            {submission.submissionTime && (
-                              <p className="text-xs font-light max-w-full truncate">
-                                Submitted{" "}
-                                {getTimeAgo(
-                                  new Date(submission.submissionTime)
-                                )}
-                              </p>
-                            )}
-                          </button>
+                            <button
+                              key={submission.nanoId}
+                              className={`${
+                                selectedSubmission === submission.nanoId &&
+                                "border-2 border-black/50 bg-black/5"
+                              } w-full flex flex-col items-start gap-1 p-2 hover:bg-black/5 rounded-md`}
+                            >
+                              {props.credentials.length > 0 ? (
+                                <p className="max-w-full truncate">
+                                  {submission.credentials[0]}
+                                </p>
+                              ) : (
+                                <p>Anonymous</p>
+                              )}
+                              {submission.submissionTime && (
+                                <p className="text-xs font-light max-w-full truncate">
+                                  Submitted{" "}
+                                  {getTimeAgo(
+                                    new Date(submission.submissionTime)
+                                  )}
+                                </p>
+                              )}
+                            </button>
+                          </Link>
                         );
                       })}
                   </div>
@@ -159,35 +180,34 @@ export default function AssessmentTabs(props: {
                       )
                       .map((submission) => {
                         return (
-                          <button
+                          <Link
                             key={submission.nanoId}
-                            onClick={() => {
-                              setSelectedSubmission(undefined);
-                              setTimeout(() => {
-                                setSelectedSubmission(submission.nanoId);
-                              }, 10);
-                            }}
-                            className={`${
-                              selectedSubmission === submission.nanoId &&
-                              "border-2 border-black/50 bg-black/5"
-                            } flex flex-col items-start gap-1 p-2 hover:bg-black/5 rounded-md`}
+                            href={`/dashboard/${props.assessmentNanoId}?submissionId=${submission.nanoId}`}
                           >
-                            {props.credentials.length > 0 ? (
-                              <p className="max-w-full truncate">
-                                {submission.credentials[0]}
-                              </p>
-                            ) : (
-                              <p>Anonymous</p>
-                            )}
-                            {submission.submissionTime && (
-                              <p className="text-xs font-light max-w-full truncate">
-                                Submitted{" "}
-                                {getTimeAgo(
-                                  new Date(submission.submissionTime)
-                                )}
-                              </p>
-                            )}
-                          </button>
+                            <button
+                              key={submission.nanoId}
+                              className={`${
+                                selectedSubmission === submission.nanoId &&
+                                "border-2 border-black/50 bg-black/5"
+                              } w-full flex flex-col items-start gap-1 p-2 hover:bg-black/5 rounded-md`}
+                            >
+                              {props.credentials.length > 0 ? (
+                                <p className="max-w-full truncate">
+                                  {submission.credentials[0]}
+                                </p>
+                              ) : (
+                                <p>Anonymous</p>
+                              )}
+                              {submission.submissionTime && (
+                                <p className="text-xs font-light max-w-full truncate">
+                                  Submitted{" "}
+                                  {getTimeAgo(
+                                    new Date(submission.submissionTime)
+                                  )}
+                                </p>
+                              )}
+                            </button>
+                          </Link>
                         );
                       })}
                   </div>
@@ -195,7 +215,7 @@ export default function AssessmentTabs(props: {
               )}
             </div>
             {selectedSubmission && (
-              <div className="relative flex-grow overflow-y-auto">
+              <div className="relative flex-grow max-h-[90vh] overflow-y-auto">
                 <button
                   className="absolute sm:hidden z-10 top-4 right-4 rounded-full p-2 bg-black/10"
                   onClick={() => setSelectedSubmission(undefined)}

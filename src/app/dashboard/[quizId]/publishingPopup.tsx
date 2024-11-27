@@ -46,7 +46,7 @@ export default function PublishingPopup(props: { id: number; title: string }) {
                 toast({
                   title: "Your assessment has been published",
                 });
-                push(`/quizzes/${publishedAssessment}?share=true`);
+                push(`/dashboard/${publishedAssessment}?share=true`);
               } catch (err) {
                 toast({
                   description:

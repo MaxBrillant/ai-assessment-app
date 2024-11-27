@@ -29,7 +29,7 @@ export const questionSchema = z
         .array(z.string().min(1, "Write a valid option"))
         .min(2, "Write at least two options")
     ),
-    marks: z.number().min(1, "The marks cannot be less than 1"),
+    marks: z.number().min(1, "The points cannot be less than 1"),
     answer: z.object({
       content: z.optional(
         z

@@ -48,7 +48,7 @@ export default function QuestionPanel(props: {
         setDraggedId={setDraggedId}
         hasDelay={true}
       >
-        <div className="relative w-full flex flex-col p-5 items-center bg-white">
+        <div className="relative w-full flex flex-col p-5 items-center">
           {!draggedId && (
             <div className="w-full max-w-md">
               <AddQuestionButton

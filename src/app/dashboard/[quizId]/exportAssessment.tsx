@@ -56,7 +56,8 @@ export default function ExportAssessment(props: {
 
           <div className="w-full flex gap-1 items-end justify-end">
             <Button
-              className="bg-blue-500 hover:bg-blue-700 gap-1"
+              variant="secondary"
+              className="gap-1"
               onClick={async () => {
                 const content = getExportContent(
                   props.fileName,
@@ -72,7 +73,8 @@ export default function ExportAssessment(props: {
               <FaRegFileWord className="w-4 h-4 white" /> Save as DOCX
             </Button>
             <Button
-              className="bg-red-500 hover:bg-red-700 gap-1"
+              variant="secondary"
+              className="gap-1"
               onClick={() => {
                 const content = getExportContent(
                   props.fileName,
@@ -111,8 +113,8 @@ const getExportContent = (
           {calculateTotalMarks(questions.map((question) => question.marks))}{" "}
           {calculateTotalMarks(questions.map((question) => question.marks)) ===
           1
-            ? "Mark"
-            : "Marks"}
+            ? "Point"
+            : "Points"}
         </p>
         <hr className="mt-5 border-black/70" />
       </div>
@@ -141,7 +143,7 @@ const getExportContent = (
                 )}
                 {question.marks && (
                   <p>
-                    {question.marks} {question.marks === 1 ? "Mark" : "Marks"}
+                    {question.marks} {question.marks === 1 ? "Point" : "Points"}
                   </p>
                 )}
 
@@ -213,7 +215,7 @@ export const getQuestionExportContent = (question: QuestionType) => {
       )}`;
 
   return (
-    `${questionContent}\n${question.marks} marks\n` +
+    `${questionContent}\n${question.marks} points\n` +
     (question.type === "multiple-choice" ? questionChoices : "") +
     "\n" +
     questionAnswer

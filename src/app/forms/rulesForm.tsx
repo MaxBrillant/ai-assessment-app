@@ -110,7 +110,7 @@ export default function RulesForm(props: propsType) {
       </div>
       <div className="flex flex-col">
         <label htmlFor="instructions" className="font-medium">
-          Instructions
+          Instructions (optional)
         </label>
         <Textarea
           {...register("instructions", {

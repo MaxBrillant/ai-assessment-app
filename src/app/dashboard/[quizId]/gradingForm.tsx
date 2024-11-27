@@ -54,7 +54,7 @@ export default function GradingForm(props: {
     >
       <div>
         <label htmlFor="marks" className="text-sm">
-          Marks
+          Points
         </label>
         <div className="flex gap-2 items-center">
           <Input

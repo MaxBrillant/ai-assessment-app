@@ -50,8 +50,8 @@ export default async function Page({
               {calculateTotalMarks(
                 assessmentData.questions.map((question) => question.marks)
               ) !== 1
-                ? "marks"
-                : "mark"}
+                ? "points"
+                : "point"}
             </p>
             <RxDotFilled className="w-3 h-3 text-black/30" />
             {assessmentData.instructions ? (

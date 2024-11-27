@@ -4,6 +4,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FiPlus } from "react-icons/fi";
 import { getAllUserAssessments } from "../api/assessments/fetch/getAllUserAssessments";
+import Image from "next/image";
+import AccountDropdown from "../components/accountDropdown";
+import Footer from "../footer";
 
 export default async function Assessments() {
   const supabase = CreateServerClient();
@@ -12,14 +15,26 @@ export default async function Assessments() {
     .then((user) => user.data.user);
 
   if (!authenticatedUser) {
-    redirect("/login?redirect=/quizzes");
+    redirect("/login?redirect=/dashboard");
   }
 
   const allUserAssessments = await getAllUserAssessments();
 
   return (
     <div>
-      <div className="w-full max-w-lg flex justify-between items-center p-5 mx-auto">
+      <div className="px-5 py-2 flex items-center justify-between border-b border-black/30">
+        <Link href={"/dashboard"}>
+          <Image
+            src={"/logo.svg"}
+            width={144}
+            height={40}
+            className="w-36 h-10"
+            alt="logo"
+          />
+        </Link>
+        <AccountDropdown user={authenticatedUser} />
+      </div>
+      <div className="min-w-screen w-full max-w-lg flex justify-between items-center p-5 mx-auto">
         <p className="text-2xl font-bold">All assessments</p>
         <Link href={"/create"}>
           <Button>
@@ -37,12 +52,12 @@ export default async function Assessments() {
             You have not created any assessments...yet
           </p>
         ) : (
-          <div className="flex flex-col divide-y max-w-lg mx-auto">
+          <div className="flex flex-col divide-y divide-black/10 max-w-lg mx-auto">
             {allUserAssessments.map((assessment) => (
               <Link
                 key={assessment.id}
-                href={`/quizzes/${assessment.nanoId}`}
-                className="w-full flex flex-col gap-1 p-3 rounded-md hover:bg-black/5"
+                href={`/dashboard/${assessment.nanoId}`}
+                className="w-full flex flex-col gap-1 p-5 rounded-md hover:bg-black/5"
               >
                 <p className="max-w-full truncate">{assessment.title}</p>
                 <p className="text-sm text-black/70">
@@ -61,6 +76,7 @@ export default async function Assessments() {
           </p>
         </div>
       )}
+      <Footer />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatGroq } from "@langchain/groq";
 import { z } from "zod";
+import { reduceCredits } from "../../auth/createUserProfile";
 
 export const gradeAnswer = async (
   question: string,
@@ -66,6 +67,7 @@ export const gradeAnswer = async (
       3. The "marks" field should be a number between 0 and ${marks}, representing the number of marks the submitted answer should receive, based on their provided answer, compared to the real answer
       2. If the submitted answer is empty, or is not present, just give a 0 mark
       4. The "comment" field should contain your expert-level and detailed comments on why the submitted answer received those marks, where they did wrong, the mistakes they made, and what they should have done instead
+      5. The language of the comment provided must be the one used in the context
       `);
 
     const chain = RunnableSequence.from([prompt, model as any, parser]);
@@ -86,6 +88,10 @@ export const gradeAnswer = async (
     );
 
     console.log("Answer successfully graded");
+
+    console.log("Reducing user credits...");
+
+    await reduceCredits(1);
 
     return grade;
   } catch (e) {

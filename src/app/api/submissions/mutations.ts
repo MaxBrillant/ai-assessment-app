@@ -6,6 +6,7 @@ import {
 } from "@/app/validation/submissionValidation";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { nanoid } from "nanoid";
+import { sendNewSubmissionReceivedEmail } from "../email/sendEmail";
 
 export async function createSubmission(
   assessmentId: number,
@@ -94,14 +95,20 @@ export async function updateSubmissionAnswers(
 export async function submitAssessment(submissionId: number) {
   try {
     console.log("Submitting the submission of ID " + submissionId + "...");
-    const { error } = await CreateServerClient()
+    const { data, error } = await CreateServerClient()
       .from("submissions")
       .update({
         status: "submitted",
         submission_time: new Date(),
       })
       .eq("id", submissionId)
-      .select("nano_id");
+      .select("nano_id, assessments(nano_id, title, user_email)")
+      .returns<
+        {
+          nano_id: string;
+          assessments: { nano_id: string; title: string; user_email: string };
+        }[]
+      >();
 
     if (error) {
       throw new Error(
@@ -110,6 +117,15 @@ export async function submitAssessment(submissionId: number) {
     }
 
     console.log("Submission submitted successfully!");
+
+    await sendNewSubmissionReceivedEmail(
+      data[0].assessments.user_email,
+      data[0].assessments.title,
+      "getquizdom.com/dashboard/" +
+        data[0].assessments.nano_id +
+        "?submissionId=" +
+        data[0].nano_id
+    );
   } catch (err) {
     throw new Error("Error while submitting the submission: " + err);
   }

@@ -89,7 +89,7 @@ export default function AssessmentOverview(props: assessmentProps) {
                 setStep(1);
               }}
             >
-              Begin
+              Continue
             </Button>
           </div>
         ) : (
@@ -146,7 +146,7 @@ export default function AssessmentOverview(props: assessmentProps) {
                 </p>
               )}
               <Button type="submit" className="mt-4" disabled={isPending}>
-                Begin the assessment
+                Begin
               </Button>
             </form>
           </div>

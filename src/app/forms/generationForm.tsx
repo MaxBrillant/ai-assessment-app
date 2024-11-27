@@ -41,8 +41,11 @@ export default function GenerationForm(props: {
       className="w-full grid grid-cols-2 gap-10 gap-x-7 p-5"
     >
       <div>
-        <label htmlFor="questions" className="text-sm">
-          How many questions?
+        <label
+          htmlFor="questions"
+          className="text-xs font-medium text-black/70"
+        >
+          Number of questions
         </label>
         <Input
           {...register("numberOfQuestions", {
@@ -62,8 +65,8 @@ export default function GenerationForm(props: {
         )}
       </div>
       <div className="items-end">
-        <label htmlFor="marks" className="text-sm">
-          How many marks?
+        <label htmlFor="marks" className="text-xs font-medium text-black/70">
+          Total points
         </label>
         <Input
           {...register("totalMarks", {
@@ -81,18 +84,20 @@ export default function GenerationForm(props: {
         )}
       </div>
       <div className="col-span-2">
-        <p className="text-sm">What is the level of difficulty?</p>
-        <div className="p-2 space-y-1">
-          <div className="w-full flex flex-row gap-1 justify-between">
-            <p className="text-xs">Very Easy</p>
-            <p className="text-xs">Very Hard</p>
-          </div>
+        <p className="text-sm font-medium text-black/70">
+          How difficult should the questions be?
+        </p>
+        <div className="p-2 space-y-1 mt-2">
           <Slider
             defaultValue={[watch("difficultyLevel")]}
             max={100}
             step={25}
             onValueChange={(value) => setValue("difficultyLevel", value[0])}
           />
+          <div className="w-full flex flex-row gap-1 justify-between">
+            <p className="text-xs">Very Easy</p>
+            <p className="text-xs">Very Hard</p>
+          </div>
         </div>
 
         {errors.difficultyLevel && (
@@ -103,7 +108,10 @@ export default function GenerationForm(props: {
       </div>
 
       <div className="col-span-2">
-        <label htmlFor="requirements" className="text-sm">
+        <label
+          htmlFor="requirements"
+          className="text-sm font-medium text-black/70"
+        >
           Requirements or instructions (optional)
         </label>
         <Textarea

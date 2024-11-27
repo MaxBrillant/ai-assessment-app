@@ -19,40 +19,21 @@ import Link from "next/link";
 import { handleFileDataInsertionIntoVectorStore } from "../api/document/handleFileData";
 import Loading from "../loading";
 import { getPublicAssessmentsInfo } from "../api/assessments/fetch/getTenAssessmentsInfo";
+import { useRouter } from "next/navigation";
+import { CreateBrowserClient } from "@/utils/supabase/browserClient";
+import Footer from "../footer";
+import TopBar from "../components/topBar";
 
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 
 export default function Create() {
   const assessmentContext = useContext(AssessmentContext);
   const [uploadedDocument, setUploadedDocument] = useState<File | undefined>();
-  const [assessmentsInfo, setAssessmentsInfo] = useState<
-    {
-      nanoId: string;
-      title: string;
-      duration: number;
-      numberOfQuestions: number;
-      difficultyLevel: number;
-    }[]
-  >();
+
   const [isUploading, setIsUploading] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { push } = useRouter();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const timeoutId = setTimeout(async () => {
-      const getAssessmentInfo = async () => {
-        try {
-          const data = await getPublicAssessmentsInfo();
-          setAssessmentsInfo(data);
-        } catch (err) {
-          console.log("Error fetching assessments info");
-        }
-      };
-
-      getAssessmentInfo();
-    }, 0);
-    return () => clearTimeout(timeoutId);
-  }, []);
 
   return (
     <AssessmentProvider>
@@ -96,18 +77,26 @@ export default function Create() {
 
           <GenerationForm
             uploadedDocument={uploadedDocument}
-            onSubmit={(data) => {
+            onSubmit={async (data) => {
               assessmentContext.numberOfQuestions = data.numberOfQuestions;
               assessmentContext.totalMarks = data.totalMarks;
               assessmentContext.difficultyLevel = data.difficultyLevel;
               assessmentContext.requirements = data.requirements;
-              setIsLoginOpen(true);
+
+              const supabase = await CreateBrowserClient();
+              const user = (await supabase.auth.getUser()).data.user;
+              if (!user) {
+                setIsLoginOpen(true);
+              } else {
+                push("/create/quiz");
+              }
             }}
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-10">
-          <div className="w-full flex items-center justify-center pt-10 bg-gradient-to-br from-red-100 to-orange-50">
+        <div className="relative flex flex-col items-center pb-20 bg-gradient-to-br from-primaryRed/10 to-primaryOrange/10">
+          <TopBar />
+          <div className="w-full flex items-center justify-center pt-10">
             <div className="w-full max-w-md flex flex-col gap-8 p-10">
               <h1 className="text-xl font-bold text-center text-orange-950/90">
                 Create insightful and well-crafted assessment questions from any{" "}
@@ -215,7 +204,7 @@ export default function Create() {
               />
             </div>
           </div>
-          {assessmentsInfo && assessmentsInfo.length > 0 && (
+          {/* {assessmentsInfo && assessmentsInfo.length > 0 && (
             <div className="w-full flex flex-col mb-20">
               <p className="text-2xl font-bold px-8 text-black/70">
                 See what others have created
@@ -226,7 +215,7 @@ export default function Create() {
               >
                 {assessmentsInfo.map((assessment) => (
                   <Link
-                    href={"/quiz/" + assessment.nanoId}
+                    href={"/q/" + assessment.nanoId}
                     key={assessment.nanoId}
                   >
                     <div className="relative w-fit hover:scale-110 transition-all duration-300 cursor-pointer">
@@ -263,7 +252,7 @@ export default function Create() {
                 ))}
               </div>
             </div>
-          )}
+          )} */}
           {isUploading && <Loading message="Uploading your document..." />}
         </div>
       )}
@@ -272,12 +261,14 @@ export default function Create() {
         <Dialog open onOpenChange={setIsLoginOpen}>
           <DialogContent>
             <LoginForm
-              heading="One last thing before we can start generating questions"
+              heading="Let's quickly get you signed in"
               redirectUrl="/create/quiz"
             />
           </DialogContent>
         </Dialog>
       )}
+
+      <Footer />
     </AssessmentProvider>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { createAssessment } from "@/app/api/assessments/mutations";
+import { sendNewAssessmentCreatedEmail } from "@/app/api/email/sendEmail";
 import { generateAssessmentQuestions } from "@/app/api/generate/assessment/generateAssessmentQuestions";
 import {
   AssessmentContext,
@@ -8,6 +9,7 @@ import {
 } from "@/app/context/assessmentContext";
 import Loading from "@/app/loading";
 import { useToast } from "@/hooks/use-toast";
+import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 
@@ -68,7 +70,15 @@ export default function Generate() {
         title: "Assessment created successfully",
       });
       assessmentContext.documentId = undefined;
-      replace(`/quizzes/${newAssessmentNanoId}`);
+      replace(`/dashboard/${newAssessmentNanoId}`);
+
+      const supabase = await CreateBrowserClient();
+      const userEmail = (await supabase.auth.getUser()).data.user?.email;
+      await sendNewAssessmentCreatedEmail(
+        userEmail as string,
+        assessmentContext.title,
+        window.location.origin + `/dashboard/${newAssessmentNanoId}`
+      );
     } catch (err) {
       console.log(err);
       toast({
@@ -82,7 +92,7 @@ export default function Generate() {
   };
   return (
     <AssessmentProvider>
-      <Loading message="Generating questions and creating your assessment..." />
+      <Loading message="Generating questions..." />
     </AssessmentProvider>
   );
 }

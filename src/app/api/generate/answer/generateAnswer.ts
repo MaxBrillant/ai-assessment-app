@@ -6,6 +6,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
 import { queryVectorStore } from "../../document/vectorStore";
 import { ChatGroq } from "@langchain/groq";
+import { reduceCredits } from "../../auth/createUserProfile";
 
 export const generateAnswer = async (props: {
   documentId: string;
@@ -68,6 +69,7 @@ export const generateAnswer = async (props: {
       5. The difficulty level or percentage of difficulty of the answer is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the answer is appropriate for the difficulty level, a higher difficulty level means a more complex answer, and a lower difficulty level means a simpler answer
       6. User-provided requirements (They must be prioritized if not empty, but only when they are in accordance or related to the context): "{requirements}"
       7. The type of the answer must be {type}
+      8. The language of the answer must be the one used in the context
       
     
     
@@ -116,6 +118,10 @@ export const generateAnswer = async (props: {
     );
 
     console.log("Answer successfully generated");
+
+    console.log("Reducing user credits...");
+
+    await reduceCredits(props.type === "long-answer" ? 2 : 1);
 
     return answer;
   } catch (e) {

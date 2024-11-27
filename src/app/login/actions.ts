@@ -2,24 +2,17 @@
 
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { EmailOtpType, Provider } from "@supabase/supabase-js";
-import { revalidatePath } from "next/cache"
 
 export async function loginWithEmail(email: string) {
   const supabase = CreateServerClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
+  const { error } = await supabase.auth.signInWithOtp({
     email: email,
-  };
-
-  const { error } = await supabase.auth.signInWithOtp(data);
+  });
 
   if (error) {
     throw new Error(error.message);
   }
-
-  revalidatePath("/", "layout");
 }
 
 export async function loginWithGoogle(redirectUrl: string) {
@@ -32,7 +25,10 @@ export async function loginWithGoogle(redirectUrl: string) {
     provider: "google" as Provider,
     options: {
       redirectTo:
-        new URL(redirectUrl).origin + "/auth/callback?redirect=" + new URL(redirectUrl).origin+"/login/success",
+        new URL(redirectUrl).origin +
+        "/auth/callback?redirect=" +
+        new URL(redirectUrl).origin +
+        "/login/success",
     },
   };
 
@@ -41,13 +37,13 @@ export async function loginWithGoogle(redirectUrl: string) {
   if (error) {
     throw new Error(error.message);
   }
-  return googleData.url
+  return googleData.url;
 }
 
 export async function verifyOTP(
   email: string,
   token: string,
-  redirectUrl: string,
+  redirectUrl: string
 ) {
   const supabase = CreateServerClient();
 

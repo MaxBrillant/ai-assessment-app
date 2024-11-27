@@ -164,7 +164,7 @@ export default function AssessmentForm(props: AssessmentFormProps) {
           </p>
           <p className="text-sm font-light">
             {props.questions[currentQuestion].marks}{" "}
-            {props.questions[currentQuestion].marks === 1 ? "mark" : "marks"}
+            {props.questions[currentQuestion].marks === 1 ? "point" : "points"}
           </p>
         </div>
 
@@ -207,7 +207,7 @@ export default function AssessmentForm(props: AssessmentFormProps) {
                       (watch(`submission.${currentQuestion}.choices`)?.includes(
                         choice
                       )
-                        ? "bg-blue-500 font-semibold text-white "
+                        ? "bg-primaryOrange/30 font-semibold "
                         : "") +
                       "flex text-sm text-black/70 gap-1 py-3 px-3 items-center cursor-pointer"
                     }
@@ -284,6 +284,7 @@ export default function AssessmentForm(props: AssessmentFormProps) {
         )}
         {currentQuestion < props.questions.length - 1 && (
           <Button
+            variant={"secondary"}
             onClick={async (e) => {
               e.preventDefault();
               const trig = await trigger(

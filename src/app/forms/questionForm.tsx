@@ -226,7 +226,7 @@ export default function QuestionForm(props: QuestionFormType) {
             className="w-20"
           />
           <p className="text-sm font-light">
-            {watch("marks") === 1 ? " mark" : " marks"}
+            {watch("marks") === 1 ? " point" : " points"}
           </p>
         </span>
       </div>

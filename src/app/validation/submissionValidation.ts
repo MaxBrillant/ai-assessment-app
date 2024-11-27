@@ -22,12 +22,14 @@ export const submissionSchema = z.object({
       ),
     })
   ),
-  credentials: z.array(
-    z
-      .string()
-      .min(1, "The credential title cannot be empty")
-      .max(100, "The credential title cannot be more than 100 characters")
-  ).max(3, "There cannot be more than 3 credentials"),
+  credentials: z
+    .array(
+      z
+        .string()
+        .min(1, "The credential title cannot be empty")
+        .max(100, "The credential title cannot be more than 100 characters")
+    )
+    .max(3, "There cannot be more than 3 credentials"),
 });
 
 const answersSchema = submissionSchema.pick({ submission: true });
@@ -47,7 +49,7 @@ export const gradeSchema = z
       }
     },
     {
-      message: `You must give marks in order to leave a comment`,
+      message: `You must give points in order to leave a comment`,
       path: ["marks"],
     }
   );

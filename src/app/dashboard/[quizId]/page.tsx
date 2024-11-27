@@ -3,12 +3,15 @@ import { notFound, redirect } from "next/navigation";
 import AssessmentTabs from "./assessmentTabs";
 import { calculateTotalMarks } from "@/utils/calculateTotalMarks";
 import { Button } from "@/components/ui/button";
-import { IoShareOutline } from "react-icons/io5";
 import ExportAssessment from "./exportAssessment";
 import PublishingPopup from "./publishingPopup";
 import SharePopup from "./sharePopup";
 import Link from "next/link";
 import { getAdminAssessmentData } from "@/app/api/assessments/fetch/getAdminAssessmentData";
+import Image from "next/image";
+import AccountDropdown from "@/app/components/accountDropdown";
+import { FiShare } from "react-icons/fi";
+import Footer from "@/app/footer";
 
 export default async function Assessment({
   params,
@@ -16,12 +19,12 @@ export default async function Assessment({
   params: { quizId: string };
 }) {
   const supabase = CreateServerClient();
-  const authenticatedUser = supabase.auth
+  const authenticatedUser = await supabase.auth
     .getUser()
     .then((user) => user.data.user);
 
   if (!authenticatedUser) {
-    redirect("/login?redirect=/quizzes/" + params.quizId);
+    redirect("/login?redirect=/dashboard/" + params.quizId);
   }
 
   const assessmentNanoId = params.quizId;
@@ -31,22 +34,33 @@ export default async function Assessment({
 
   return (
     <div>
-      <div className="w-full mx-auto flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4 px-5 pt-4 pb-2 sm:pb-4">
-        <div>
-          <p className="max-w-sm truncate text-lg">
-            {adminAssessmentData.title}
-          </p>
-
-          <p className="text-sm text-black/70">
-            {calculateTotalMarks(
-              adminAssessmentData.questions.map((question) => question.marks)
-            )}{" "}
-            {calculateTotalMarks(
-              adminAssessmentData.questions.map((question) => question.marks)
-            ) !== 1
-              ? "marks"
-              : "mark"}
-          </p>
+      <div className=" w-full mx-auto flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-4 px-5 py-2 bg-white">
+        <div className="w-full flex items-center gap-4 justify-between">
+          <Link href={"/dashboard"}>
+            <Image
+              src={"/logo-icon.svg"}
+              width={40}
+              height={40}
+              className="w-10 h-10"
+              alt="logo"
+            />
+          </Link>
+          <div className="w-full flex flex-col">
+            <p className="text-lg line-clamp-1">{adminAssessmentData.title}</p>
+            <p className="text-sm text-black/70">
+              {calculateTotalMarks(
+                adminAssessmentData.questions.map((question) => question.marks)
+              )}{" "}
+              {calculateTotalMarks(
+                adminAssessmentData.questions.map((question) => question.marks)
+              ) !== 1
+                ? "points"
+                : "point"}
+            </p>
+          </div>
+          <div className="block sm:hidden">
+            <AccountDropdown user={authenticatedUser} />
+          </div>
         </div>
         <div className="flex gap-3 items-center justify-end mt-2">
           <ExportAssessment
@@ -58,10 +72,10 @@ export default async function Assessment({
           )}
           {adminAssessmentData.status === "public" ? (
             <Link
-              href={"/quizzes/" + adminAssessmentData.nanoId + "?share=true"}
+              href={"/dashboard/" + adminAssessmentData.nanoId + "?share=true"}
             >
               <Button size={"lg"} className="gap-1 items-center">
-                <IoShareOutline className="w-5 h-5" />
+                <FiShare className="w-5 h-5" />
                 Share
               </Button>
             </Link>
@@ -73,6 +87,10 @@ export default async function Assessment({
               />
             )
           )}
+
+          <div className="hidden sm:block">
+            <AccountDropdown user={authenticatedUser} />
+          </div>
         </div>
       </div>
       <AssessmentTabs
@@ -82,6 +100,7 @@ export default async function Assessment({
         duration={adminAssessmentData.duration}
         instructions={adminAssessmentData.instructions}
         credentials={adminAssessmentData.credentials}
+        assessmentNanoId={adminAssessmentData.nanoId}
         questions={adminAssessmentData.questions}
         submissions={adminAssessmentData.submissions}
         documentId={adminAssessmentData.documentId}
@@ -89,6 +108,8 @@ export default async function Assessment({
         difficultyLevel={adminAssessmentData.difficultyLevel}
         requirements={adminAssessmentData.generationRequirements}
       />
+
+      <Footer />
     </div>
   );
 }
