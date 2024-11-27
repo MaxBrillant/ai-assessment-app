@@ -48,7 +48,7 @@ export default function SubmissionView(props: {
     SubmissionType | undefined
   >();
   const [isAiGrading, setIsAiGrading] = useState(false);
-  const { refresh } = useRouter();
+  const { refresh, replace } = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -163,7 +163,7 @@ export default function SubmissionView(props: {
                       toast({
                         title: "Submission deleted successfully",
                       });
-                      refresh();
+                      replace(window.location.href.split("?")[0]);
                     } catch (e) {
                       toast({
                         description:

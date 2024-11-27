@@ -4,6 +4,7 @@ import { QuestionType } from "@/app/components/question";
 import { answersType } from "@/app/validation/submissionValidation";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { gradeAnswer } from "./gradeAnswer";
+import { reduceCredits } from "../../auth/createUserProfile";
 
 export async function gradeSubmission(
   submissionNanoId: string,
@@ -19,40 +20,57 @@ export async function gradeSubmission(
         "..."
     );
 
+    let numberOfGradedAnswers = 0;
     const chunkSize = 10;
-    const chunks = Array.from(
-      { length: Math.ceil(answers.length / chunkSize) },
-      (_, i) => answers.slice(i * chunkSize, (i + 1) * chunkSize)
-    );
+    for (let i = 0; i < Math.ceil(answers.length / chunkSize); i++) {
+      const start = i * chunkSize;
+      const end = Math.min(start + chunkSize, answers.length);
+      const currentAnswers = answers.slice(start, end);
 
-    for (const chunk of chunks) {
-      const promises = chunk.map(async (answer) => {
+      const promises = currentAnswers.map(async (answer, index) => {
         const question = questions.find(
           (q) => q.id === answer.questionId && answer.marks == undefined
         );
 
         if (question) {
-          const grade = await gradeAnswer(
-            question.content,
-            question.type === "multiple-choice"
-              ? question.answer.choices?.join(",") ?? ""
-              : question.answer.content ?? "",
-            question.type === "multiple-choice"
-              ? answer.choices?.join(",") ?? ""
-              : answer.content ?? "",
-            question.marks
-          );
+          try {
+            const grade = await gradeAnswer(
+              question.content,
+              question.type === "multiple-choice"
+                ? question.answer.choices?.join(",") ?? ""
+                : question.answer.content ?? "",
+              question.type === "multiple-choice"
+                ? answer.choices?.join(",") ?? ""
+                : answer.content ?? "",
+              question.marks
+            );
 
-          return { ...answer, marks: grade.marks, comment: grade.comment };
+            numberOfGradedAnswers++;
+
+            return {
+              ...answer,
+              marks: grade.marks,
+              comment: grade.comment,
+            };
+          } catch (err) {
+            console.log("Error while grading answer: " + err);
+            return answer;
+          }
+        } else {
+          return answer;
         }
-
-        return answer;
       });
 
-      const results = await Promise.all(promises);
+      const newAnswers = await Promise.all(promises);
 
-      answers.splice(0, chunkSize, ...results);
+      answers.splice(start, end - start, ...newAnswers);
     }
+
+    console.log(
+      "Reducing user credits used (" + numberOfGradedAnswers + ")..."
+    );
+
+    await reduceCredits(numberOfGradedAnswers);
 
     console.log("Updating the submission...");
 
@@ -72,8 +90,6 @@ export async function gradeSubmission(
     }
 
     console.log("Submission graded successfully!");
-
-    return data[0].nano_id;
   } catch (err) {
     throw new Error("Error while grading the submission: " + err);
   }
