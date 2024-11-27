@@ -1,10 +1,8 @@
-import Image from "next/image";
-import { ReactNode } from "react";
-import { RiLoader3Fill } from "react-icons/ri";
+import { RiLoader2Fill } from "react-icons/ri";
 export default function Loading(props: { message?: string }) {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-white/70 pointer-events-none z-[9999] backdrop-blur-sm">
-      <Image src="/loading.gif" width={400} height={100} alt="loading" />
+      <RiLoader2Fill className="w-20 h-20 animate-spin duration-1000 opacity-30" />
       {props.message && (
         <p className="text-lg font-medium p-8 text-center">{props.message}</p>
       )}
