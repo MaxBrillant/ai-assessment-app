@@ -34,7 +34,7 @@ export default async function Assessments() {
         </Link>
         <AccountDropdown user={authenticatedUser} />
       </div>
-      <div className="min-w-screen w-full max-w-lg flex justify-between items-center p-5 mx-auto">
+      <div className="w-full max-w-lg flex justify-between items-center p-5 mx-auto">
         <p className="text-2xl font-bold">All assessments</p>
         <Link href={"/create"}>
           <Button>
@@ -48,11 +48,11 @@ export default async function Assessments() {
 
       {allUserAssessments ? (
         allUserAssessments.length === 0 ? (
-          <p className="text-center font-medium p-4 py-20">
+          <p className="min-h-screen text-center font-medium p-4 py-20">
             You have not created any assessments...yet
           </p>
         ) : (
-          <div className="flex flex-col divide-y divide-black/10 max-w-lg mx-auto">
+          <div className="min-h-screen flex flex-col divide-y divide-black/10 max-w-lg mx-auto">
             {allUserAssessments.map((assessment) => (
               <Link
                 key={assessment.id}

@@ -61,6 +61,7 @@ export default function LoginForm(props: {
         className="p-4 bg-black/5 rounded-lg flex gap-2 items-center justify-center text-black/80 hover:bg-black/10"
         onClick={() =>
           startTransition(async () => {
+            const supabase = await CreateBrowserClient();
             if (redirectUrl) {
               const url = await loginWithGoogle(redirectUrl).catch((error) => {
                 toast({
@@ -78,22 +79,22 @@ export default function LoginForm(props: {
 
                   let intervalId: NodeJS.Timeout | undefined;
                   const checkForAuthenticatedUser = async () => {
-                    const supabase = await CreateBrowserClient();
+                    intervalId = setInterval(async () => {
+                      const supabase = await CreateBrowserClient();
+                      const authenticatedUser = await supabase.auth
+                        .getUser()
+                        .then((user) => user.data.user);
 
-                    const authenticatedUser = await supabase.auth
-                      .getUser()
-                      .then((user) => user.data.user);
+                      if (authenticatedUser) {
+                        push(redirectUrl as string);
+                        clearInterval(intervalId);
+                      }
+                    }, 5000); // check every 5 seconds
 
-                    if (authenticatedUser) {
-                      clearInterval(intervalId);
-                      push(redirectUrl as string);
-                    }
-                    return () => {
-                      clearInterval(intervalId);
-                    };
-
-                    intervalId = setInterval(checkForAuthenticatedUser, 10000);
+                    return () => clearInterval(intervalId);
                   };
+
+                  await checkForAuthenticatedUser();
                 }
               }
             }
