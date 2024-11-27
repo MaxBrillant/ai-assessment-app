@@ -2,15 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginWithEmail, loginWithGoogle, verifyOTP } from "./actions";
 import { useEffect, useState, useTransition } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import { useToast } from "@/hooks/use-toast";
 import { FcGoogle } from "react-icons/fc";
-import Loading from "../loading";
-import { start } from "repl";
 import { checkIfUserProfileExists } from "../api/auth/getUserProfile";
 import { createUserProfile } from "../api/auth/createUserProfile";
 import { sendWelcomeEmail } from "../api/email/sendEmail";
@@ -21,12 +19,12 @@ export default function LoginForm(props: {
 }) {
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [otp, setOTP] = useState<string | undefined>(undefined);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const [isPending, startTransition] = useTransition();
 
   const { push } = useRouter();
+  const searchParams = useSearchParams();
 
   let redirectUrl = (
     props.redirectUrl
@@ -58,10 +56,9 @@ export default function LoginForm(props: {
       <p className="text-lg font-bold">{props.heading}</p>
       <button
         disabled={isPending}
-        className="p-4 bg-black/5 rounded-lg flex gap-2 items-center justify-center text-black/80 hover:bg-black/10"
+        className="p-2 bg-black/5 rounded-lg text-sm flex gap-2 items-center justify-center text-black/80 hover:bg-black/10"
         onClick={() =>
           startTransition(async () => {
-            const supabase = await CreateBrowserClient();
             if (redirectUrl) {
               const url = await loginWithGoogle(redirectUrl).catch((error) => {
                 toast({
@@ -111,7 +108,7 @@ export default function LoginForm(props: {
         </label>
         <Input
           type="email"
-          placeholder="max@example.com"
+          placeholder="john@example.com"
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -125,7 +122,12 @@ export default function LoginForm(props: {
               if (email) {
                 try {
                   await loginWithEmail(email);
-                  setIsDialogOpen(true);
+                  push(
+                    window.location.href +
+                      (window.location.href.includes("?")
+                        ? "&otp=true"
+                        : " ?otp=true")
+                  );
                 } catch (error) {
                   toast({
                     description:
@@ -142,52 +144,59 @@ export default function LoginForm(props: {
         </Button>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <p>We have sent a verification code to {email}</p>
-          <p>Write the code below</p>
-          <Input
-            placeholder="123456"
-            type="number"
-            value={otp}
-            onChange={(e) => setOTP(e.target.value)}
-          />
-          <Button
-            disabled={isPending}
-            onClick={() =>
-              startTransition(async () => {
-                if (redirectUrl && email && otp) {
-                  try {
-                    await verifyOTP(email, otp, redirectUrl);
-
+      {searchParams.get("otp") && searchParams.get("otp") === "true" && (
+        <Dialog
+          open={true}
+          onOpenChange={(value) => {
+            if (!value) push(window.location.href.split("otp")[0]);
+          }}
+        >
+          <DialogContent>
+            <p>We have sent a verification code to {email}</p>
+            <p>Write the code below</p>
+            <Input
+              placeholder="123456"
+              type="number"
+              value={otp}
+              onChange={(e) => setOTP(e.target.value)}
+            />
+            <Button
+              disabled={isPending}
+              onClick={() =>
+                startTransition(async () => {
+                  if (redirectUrl && email && otp) {
                     try {
-                      const profileExists = await checkIfUserProfileExists();
-                      if (!profileExists) {
-                        await createUserProfile();
-                        await sendWelcomeEmail(email as string);
-                      }
-                    } catch (error) {
-                      throw new Error(
-                        "Error while creating user profile: " + error
-                      );
-                    }
+                      await verifyOTP(email, otp, redirectUrl);
 
-                    push(redirectUrl);
-                  } catch (error) {
-                    toast({
-                      description: "Something went wrong while verifying OTP",
-                      title: "Error",
-                      variant: "destructive",
-                    });
+                      try {
+                        const profileExists = await checkIfUserProfileExists();
+                        if (!profileExists) {
+                          await createUserProfile();
+                          await sendWelcomeEmail(email as string);
+                        }
+                      } catch (error) {
+                        throw new Error(
+                          "Error while creating user profile: " + error
+                        );
+                      }
+
+                      push(redirectUrl);
+                    } catch (error) {
+                      toast({
+                        description: "Something went wrong while verifying OTP",
+                        title: "Error",
+                        variant: "destructive",
+                      });
+                    }
                   }
-                }
-              })
-            }
-          >
-            Confirm
-          </Button>
-        </DialogContent>
-      </Dialog>
+                })
+              }
+            >
+              Confirm
+            </Button>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

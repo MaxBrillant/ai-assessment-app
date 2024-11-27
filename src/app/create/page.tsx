@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Input } from "@/components/ui/input";
 import GenerationForm from "../forms/generationForm";
 import LoginForm from "../login/loginForm";
@@ -15,10 +15,8 @@ import {
 } from "../context/assessmentContext";
 import "./paper.css";
 import { Source_Serif_4 } from "next/font/google";
-import Link from "next/link";
 import { handleFileDataInsertionIntoVectorStore } from "../api/document/handleFileData";
 import Loading from "../loading";
-import { getPublicAssessmentsInfo } from "../api/assessments/fetch/getTenAssessmentsInfo";
 import { useRouter } from "next/navigation";
 import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import Footer from "../footer";
@@ -86,7 +84,7 @@ export default function Create() {
               const supabase = await CreateBrowserClient();
               const user = (await supabase.auth.getUser()).data.user;
               if (!user) {
-                setIsLoginOpen(true);
+                push("/login?redirect=/create/quiz");
               } else {
                 push("/create/quiz");
               }
@@ -257,16 +255,14 @@ export default function Create() {
         </div>
       )}
 
-      {isLoginOpen && (
-        <Dialog open onOpenChange={setIsLoginOpen}>
+      {/* <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
           <DialogContent>
             <LoginForm
               heading="Let's quickly get you signed in"
               redirectUrl="/create/quiz"
             />
           </DialogContent>
-        </Dialog>
-      )}
+        </Dialog> */}
 
       <Footer />
     </AssessmentProvider>
