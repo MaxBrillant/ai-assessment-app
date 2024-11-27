@@ -4,9 +4,7 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
-import { ChatGroq } from "@langchain/groq";
 import { z } from "zod";
-import { reduceCredits } from "../../auth/createUserProfile";
 
 export const gradeAnswer = async (
   question: string,
@@ -20,18 +18,18 @@ export const gradeAnswer = async (
       comment: submissionSchema.shape.submission.element.shape.comment,
     });
 
-    const model = new ChatGroq({
-      apiKey: process.env.GROQ_API_KEY,
-      model: "llama-3.1-70b-versatile",
+    // const model = new ChatGroq({
+    //   apiKey: process.env.GROQ_API_KEY,
+    //   model: "llama-3.1-70b-versatile",
+    //   temperature: 0.5,
+    //   maxTokens: 4096,
+    // });
+    const model = new ChatAnthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      model: "claude-3-5-haiku-20241022",
       temperature: 0.5,
       maxTokens: 4096,
     });
-    // const model = new ChatAnthropic({
-    //   apiKey: process.env.ANTHROPIC_API_KEY,
-    //   model: "claude-3-5-haiku-20241022",
-    //   temperature: 0.4,
-    //   maxTokens: 4096,
-    // });
 
     const parser = StructuredOutputParser.fromZodSchema(gradeSchema);
 
@@ -88,10 +86,6 @@ export const gradeAnswer = async (
     );
 
     console.log("Answer successfully graded");
-
-    console.log("Reducing user credits...");
-
-    await reduceCredits(1);
 
     return grade;
   } catch (e) {

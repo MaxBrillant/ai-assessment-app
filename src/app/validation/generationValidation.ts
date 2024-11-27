@@ -4,11 +4,11 @@ export const generationSchema = z.object({
   numberOfQuestions: z
     .number()
     .min(1, "The number of questions cannot be less than 1")
-    .max(5, "You can only generate up to 5 questions at a time"),
+    .max(10, "You can only generate up to 10 questions at a time"),
   totalMarks: z
     .number()
     .min(5, "The total points cannot be less than 5")
-    .max(500, "The total points cannot be more than 500"),
+    .max(100, "The total points cannot be more than 100"),
   difficultyLevel: z
     .number()
     .min(0, "The difficulty level cannot be less than 0")
