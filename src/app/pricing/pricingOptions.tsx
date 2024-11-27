@@ -9,6 +9,7 @@ import PaystackButton from "./paystackButton";
 export default function PricingOptions(props: {
   user: User | null;
   mode: "newUser" | "renewalOfCredits";
+  onPlanSelection?: () => void;
 }) {
   return (
     <div className="flex flex-col gap-2 items-center py-4">
@@ -19,7 +20,7 @@ export default function PricingOptions(props: {
         className={`grid grid-cols-1 md:grid-cols-2
           ${
             props.mode === "newUser" ? "lg:grid-cols-3" : ""
-          } items-center justify-center gap-6 p-4 px-10`}
+          } items-center justify-center gap-6 p-4 px-6`}
       >
         {props.mode === "newUser" && (
           <div className="flex flex-col justify-between gap-6 w-full p-4 rounded-2xl bg-black/5 border border-black/30">
@@ -68,7 +69,7 @@ export default function PricingOptions(props: {
                 : window.location.href
             }
           >
-            <Button className="w-full">
+            <Button className="w-full" onClick={props.onPlanSelection}>
               {props.mode === "newUser" ? "Get started" : "Get credits"}
             </Button>
           </PaystackButton>
@@ -99,7 +100,11 @@ export default function PricingOptions(props: {
                 : window.location.href
             }
           >
-            <Button variant={"outline"} className="w-full">
+            <Button
+              variant={"outline"}
+              className="w-full"
+              onClick={props.onPlanSelection}
+            >
               {props.mode === "newUser" ? "Get started" : "Get credits"}
             </Button>
           </PaystackButton>
