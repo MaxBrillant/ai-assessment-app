@@ -4,7 +4,6 @@ import { QuestionType } from "@/app/components/question";
 import { answersType } from "@/app/validation/submissionValidation";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { gradeAnswer } from "./gradeAnswer";
-import { reduceCredits } from "../../auth/createUserProfile";
 
 export async function gradeSubmission(
   submissionNanoId: string,
@@ -43,10 +42,6 @@ export async function gradeSubmission(
               : answer.content ?? "",
             question.marks
           );
-
-          console.log("Reducing user credits...");
-
-          await reduceCredits(1);
 
           return { ...answer, marks: grade.marks, comment: grade.comment };
         }

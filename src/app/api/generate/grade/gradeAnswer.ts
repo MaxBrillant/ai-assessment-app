@@ -5,6 +5,7 @@ import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { z } from "zod";
+import { reduceCredits } from "../../auth/createUserProfile";
 
 export const gradeAnswer = async (
   question: string,
@@ -87,7 +88,13 @@ export const gradeAnswer = async (
 
     console.log("Answer successfully graded");
 
-    return grade;
+    console.log("Reducing user credits...");
+
+    const gradeAfterCreditReduction = await reduceCredits(1).then(() => {
+      return grade;
+    });
+
+    return gradeAfterCreditReduction;
   } catch (e) {
     throw new Error(`Error while grading the answer, the error is: ${e}`);
   }
