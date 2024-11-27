@@ -30,7 +30,7 @@ export default function Home() {
               sourceSerif.className
             }
           >
-            Fast, Reliable Assessments in the Age of AI
+            Fast, Reliable Assessments for the Age of AI
           </h1>
           <p className="md:text-lg text-black/70 md:font-medium">
             Easily Create, Customize, and Grade High-Quality Assessments,
