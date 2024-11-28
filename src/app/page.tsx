@@ -9,9 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Source_Serif_4 } from "next/font/google";
 import Link from "next/link";
 import { IoIosArrowForward } from "react-icons/io";
-import { redirect } from "next/navigation";
 import Image from "next/image";
-import HamburgerMenu from "./components/hamburgerMenu";
 import Footer from "./footer";
 import TopBar from "./components/topBar";
 

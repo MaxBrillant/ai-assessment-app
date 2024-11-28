@@ -20,7 +20,7 @@ export default function PricingOptions(props: {
         className={`grid grid-cols-1 md:grid-cols-2
           ${
             props.mode === "newUser" ? "lg:grid-cols-3" : ""
-          } items-center justify-center gap-6 p-4 px-6`}
+          } gap-6 p-4 px-6 max-w-4xl`}
       >
         {props.mode === "newUser" && (
           <div className="flex flex-col justify-between gap-6 w-full p-4 rounded-2xl bg-black/5 border border-black/30">
