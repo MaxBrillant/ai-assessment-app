@@ -1,21 +1,21 @@
-"use server";
+import { nanoid } from "nanoid";
+import { addToVectorStore } from "./vectorStore";
+import { generateTitle } from "../generate/assessment/generateTitle";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import type { Document } from "@langchain/core/documents";
-import { generateTitle } from "../generate/assessment/generateTitle";
-import { addToVectorStore } from "./vectorStore";
-import { nanoid } from "nanoid";
+import { NextResponse } from "next/server";
 
-export async function handleFileDataInsertionIntoVectorStore(
-  formData: FormData,
-  type: "pdf" | "docx" | "pptx"
-) {
+export async function POST(request: Request) {
+  const formData = await request.formData();
+
   try {
     const documentId = nanoid();
 
     const fileBlob = formData.get("file") as File;
+    const type = formData.get("type") as "pdf" | "docx" | "pptx";
     console.log("Extracting document data...");
     const docs = await getDocumentData(fileBlob, type);
 
@@ -40,11 +40,11 @@ export async function handleFileDataInsertionIntoVectorStore(
     );
 
     console.log("Title generated");
-    return {
-      documentId: documentId,
-      title: title,
-      chunksLength: chunks.length,
-    };
+
+    return new NextResponse(
+      JSON.stringify({ documentId, title, chunksLength: chunks.length }),
+      { status: 200 }
+    );
   } catch (e) {
     throw new Error(
       `Error while inserting file data into vector store, the error is: ${e}`

@@ -3,8 +3,6 @@
 import { useContext, useState } from "react";
 import { Input } from "@/components/ui/input";
 import GenerationForm from "../forms/generationForm";
-import LoginForm from "../login/loginForm";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FiEdit3 } from "react-icons/fi";
 import DropZone from "./dropzone";
 import { FaFilePdf, FaFilePowerpoint, FaFileWord } from "react-icons/fa6";
@@ -15,7 +13,6 @@ import {
 } from "../context/assessmentContext";
 import "./paper.css";
 import { Source_Serif_4 } from "next/font/google";
-import { handleFileDataInsertionIntoVectorStore } from "../api/document/handleFileData";
 import Loading from "../loading";
 import { useRouter } from "next/navigation";
 import { CreateBrowserClient } from "@/utils/supabase/browserClient";
@@ -95,13 +92,18 @@ export default function Create() {
         <div className="relative flex flex-col items-center pb-20 bg-gradient-to-br from-primaryRed/10 to-primaryOrange/10">
           <TopBar />
           <div className="w-full flex items-center justify-center pt-10">
-            <div className="w-full max-w-md flex flex-col gap-8 p-10">
-              <h1 className="text-xl font-bold text-center text-orange-950/90">
-                Create insightful and well-crafted assessment questions from any{" "}
-                <span className="text-red-500 font-bold">PDF</span>,{" "}
+            <div className="w-full max-w-lg flex flex-col gap-8 p-10">
+              <h1
+                className={
+                  "text-xl sm:text-2xl font-bold text-center text-orange-950/90 " +
+                  sourceSerif.className
+                }
+              >
+                Create insightful and well-crafted assessment questions from
+                your <span className="text-red-500 font-bold">PDF</span>,{" "}
                 <span className="text-blue-500 font-bold">Word • Docs</span> or{" "}
                 <span className="text-orange-500 font-bold">PowerPoint</span>{" "}
-                file
+                files
               </h1>
               <p className="text-center -mt-4 text-black/70">
                 Just bring your notes and let us handle the rest
@@ -120,21 +122,27 @@ export default function Create() {
                     setIsUploading(true);
                     const formData = new FormData();
                     formData.append("file", file);
+                    formData.append(
+                      "type",
+                      file.type === "application/pdf"
+                        ? "pdf"
+                        : file.type ===
+                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        ? "docx"
+                        : "pptx"
+                    );
 
                     try {
+                      const response = await fetch("/api/document", {
+                        method: "POST",
+                        body: formData,
+                      });
+
                       const { documentId, title, chunksLength } =
-                        await handleFileDataInsertionIntoVectorStore(
-                          formData,
-                          file.type === "application/pdf"
-                            ? "pdf"
-                            : file.type ===
-                              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            ? "docx"
-                            : "pptx"
-                        );
-                      assessmentContext.documentId = documentId;
-                      assessmentContext.title = title;
-                      assessmentContext.numberOfChunks = chunksLength;
+                        await response.json();
+                      assessmentContext.documentId = documentId as string;
+                      assessmentContext.title = title as string;
+                      assessmentContext.numberOfChunks = chunksLength as number;
                       setUploadedDocument(file);
                       setIsUploading(false);
                     } catch (err) {
@@ -168,21 +176,27 @@ export default function Create() {
                     setIsUploading(true);
                     const formData = new FormData();
                     formData.append("file", file);
+                    formData.append(
+                      "type",
+                      file.type === "application/pdf"
+                        ? "pdf"
+                        : file.type ===
+                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        ? "docx"
+                        : "pptx"
+                    );
 
                     try {
+                      const response = await fetch("/api/document", {
+                        method: "POST",
+                        body: formData,
+                      });
+
                       const { documentId, title, chunksLength } =
-                        await handleFileDataInsertionIntoVectorStore(
-                          formData,
-                          file.type === "application/pdf"
-                            ? "pdf"
-                            : file?.type ===
-                              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            ? "docx"
-                            : "pptx"
-                        );
-                      assessmentContext.documentId = documentId;
-                      assessmentContext.title = title;
-                      assessmentContext.numberOfChunks = chunksLength;
+                        await response.json();
+                      assessmentContext.documentId = documentId as string;
+                      assessmentContext.title = title as string;
+                      assessmentContext.numberOfChunks = chunksLength as number;
                       setUploadedDocument(file);
                       setIsUploading(false);
                     } catch (err) {
