@@ -8,6 +8,7 @@ import {
 import { getQuestionTypeAndMarks } from "./getQuestionTypesAndMarks";
 import pickRandomChunks from "./pickRandomChunks";
 import { generateQuestion } from "../question/generateQuestion";
+import { reduceCredits } from "../../auth/createUserProfile";
 
 export async function generateAssessmentQuestions(
   documentId: string,
@@ -118,6 +119,16 @@ export async function generateAssessmentQuestions(
         "Error while generating the assessment questions: not enough questions could be generated"
       );
     }
+
+    const creditsToReduce = questions.reduce((acc, cur) => {
+      if (cur.type === "long-answer") {
+        return acc + 2;
+      }
+      return acc + 1;
+    }, 0);
+
+    console.log("Reducing user credits (" + creditsToReduce + " credits)...");
+    await reduceCredits(creditsToReduce);
 
     console.log("Successfully generated the assessment questions!");
     return questions;

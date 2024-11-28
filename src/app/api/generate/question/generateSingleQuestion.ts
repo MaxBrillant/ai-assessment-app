@@ -6,6 +6,7 @@ import {
   queryVectorStoreFromChunkIndex,
 } from "../../document/vectorStore";
 import { generateQuestion } from "./generateQuestion";
+import { reduceCredits } from "../../auth/createUserProfile";
 
 export async function generateSingleQuestion(props: {
   documentId: string;
@@ -58,6 +59,10 @@ export async function generateSingleQuestion(props: {
       props.marks,
       props.previousQuestion
     );
+
+    console.log("Reducing user credits...");
+
+    await reduceCredits(props.type === "long-answer" ? 2 : 1);
 
     return question;
   } catch (e) {

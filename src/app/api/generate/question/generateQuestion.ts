@@ -1,12 +1,10 @@
 "use server";
-import { ChatGroq } from "@langchain/groq";
 import { QuestionType } from "@/app/components/question";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { questionSchema } from "@/app/validation/questionValidation";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { nanoid } from "nanoid";
-import { reduceCredits } from "../../auth/createUserProfile";
 import { ChatAnthropic } from "@langchain/anthropic";
 
 export const generateQuestion = async (
@@ -74,7 +72,6 @@ export const generateQuestion = async (
   Key Guidelines for Question Generation:
 
   1. Cognitive Engagement
-  - Move beyond factual recall to encourage deep analysis
   - Design a question that has multiple valid approaches
   - Promote metacognitive reflection
   
@@ -133,10 +130,6 @@ export const generateQuestion = async (
     );
 
     console.log("Question successfully generated");
-
-    console.log("Reducing user credits...");
-
-    await reduceCredits(type === "long-answer" ? 2 : 1);
 
     return { ...question, id: nanoid() };
   } catch (e) {
