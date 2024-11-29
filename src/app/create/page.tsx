@@ -95,15 +95,12 @@ export default function Create() {
             <div className="w-full max-w-lg flex flex-col gap-8 p-10">
               <h1
                 className={
-                  "text-xl sm:text-2xl font-bold text-center text-orange-950/90 " +
+                  "text-xl sm:text-2xl font-bold text-center text-black/70 " +
                   sourceSerif.className
                 }
               >
-                Create insightful and well-crafted assessment questions from
-                your <span className="text-red-500 font-bold">PDF</span>,{" "}
-                <span className="text-blue-500 font-bold">Word • Docs</span> or{" "}
-                <span className="text-orange-500 font-bold">PowerPoint</span>{" "}
-                files
+                Create insightful and well-crafted questions from your notes and
+                documents
               </h1>
               <p className="text-center -mt-4 text-black/70">
                 Just bring your notes and let us handle the rest
@@ -157,6 +154,9 @@ export default function Create() {
                   }
                 }}
               />
+              <p className="text-sm -mt-4">
+                Supported file types: .pdf, .docx, .pptx
+              </p>
               <Input
                 id="doc"
                 type="file"
