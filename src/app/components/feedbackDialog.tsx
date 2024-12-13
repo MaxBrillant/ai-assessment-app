@@ -12,7 +12,7 @@ export default function FeedbackDialog() {
         <p>What do you think about the results</p>
         <div className="grid grid-cols-2 gap-2">
           <Button variant={"ghost"}>I like it</Button>
-          <Button variant={"ghost"}>I don't like it</Button>
+          <Button variant={"ghost"}>{`I don't like it`}</Button>
         </div>
       </DialogContent>
     </Dialog>
