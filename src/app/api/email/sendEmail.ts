@@ -78,7 +78,12 @@ export async function sendNewAssessmentCreatedEmail(
       <h1>You have just created a new assessment</h1>
       <p>Assessment Name: ${assessmentName}</p>
       <p>Assessment Link: <a href="${assessmentLink}">${assessmentLink}</a></p>
-      <p>You can share it with colleagues or friends so that they can take it right away.</p>
+      <h3>Next steps:</h3>
+      <ul>
+        <li>Publish your assessment.</li>
+        <li>Share the assessment link with colleagues and friends.</li>
+        <li>Review and grade received submissions.</li>
+      </ul>
       <br/>
       <p>If you have any questions or need assistance, please don't hesitate to reach out to us at <a href="support@getquizdom.com">support@getquizdom.com</a>.</p>
     `,
