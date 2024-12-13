@@ -5,7 +5,7 @@ import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { questionSchema } from "@/app/validation/questionValidation";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { nanoid } from "nanoid";
-import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatGroq } from "@langchain/groq";
 
 export const generateQuestion = async (
   type: "short-answer" | "multiple-choice" | "long-answer",
@@ -16,16 +16,9 @@ export const generateQuestion = async (
   previousQuestion: string
 ) => {
   try {
-    // const model = new ChatGroq({
-    //   apiKey: process.env.GROQ_API_KEY,
-    //   model: "llama-3.1-70b-versatile",
-    //   temperature: 0.5,
-    //   maxTokens: 4096,
-    // });
-
-    const model = new ChatAnthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-      model: "claude-3-5-haiku-20241022",
+    const model = new ChatGroq({
+      apiKey: process.env.GROQ_API_KEY,
+      model: "llama-3.3-70b-versatile",
       temperature: 0.5,
       maxTokens: 4096,
     });

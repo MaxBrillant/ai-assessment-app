@@ -1,11 +1,11 @@
 "use server";
-import { ChatAnthropic } from "@langchain/anthropic";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
 import { queryVectorStore } from "../../document/vectorStore";
 import { reduceCredits } from "../../auth/createUserProfile";
+import { ChatGroq } from "@langchain/groq";
 
 export const generateAnswer = async (props: {
   documentId: string;
@@ -17,15 +17,9 @@ export const generateAnswer = async (props: {
   try {
     const context = await queryVectorStore(props.documentId, props.question, 1);
 
-    // const model = new ChatGroq({
-    //   apiKey: process.env.GROQ_API_KEY,
-    //   model: "llama-3.1-70b-versatile",
-    //   temperature: 0.5,
-    //   maxTokens: 4096,
-    // });
-    const model = new ChatAnthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-      model: "claude-3-5-haiku-20241022",
+    const model = new ChatGroq({
+      apiKey: process.env.GROQ_API_KEY,
+      model: "llama-3.3-70b-versatile",
       temperature: 0.5,
       maxTokens: 4096,
     });

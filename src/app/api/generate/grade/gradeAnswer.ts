@@ -1,10 +1,10 @@
 "use server";
 import { submissionSchema } from "@/app/validation/submissionValidation";
-import { ChatAnthropic } from "@langchain/anthropic";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { z } from "zod";
+import { ChatGroq } from "@langchain/groq";
 
 export const gradeAnswer = async (
   question: string,
@@ -18,15 +18,9 @@ export const gradeAnswer = async (
       comment: submissionSchema.shape.submission.element.shape.comment,
     });
 
-    // const model = new ChatGroq({
-    //   apiKey: process.env.GROQ_API_KEY,
-    //   model: "llama-3.1-70b-versatile",
-    //   temperature: 0.5,
-    //   maxTokens: 4096,
-    // });
-    const model = new ChatAnthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-      model: "claude-3-5-haiku-20241022",
+    const model = new ChatGroq({
+      apiKey: process.env.GROQ_API_KEY,
+      model: "llama-3.3-70b-versatile",
       temperature: 0.5,
       maxTokens: 4096,
     });
