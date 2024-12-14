@@ -12,7 +12,7 @@ export async function generateTitle(content: string) {
     const model = new ChatGroq({
       apiKey: process.env.GROQ_API_KEY,
       model: "llama-3.1-70b-versatile",
-      temperature: 0.2,
+      temperature: 0.1,
       maxTokens: 1000,
     });
 

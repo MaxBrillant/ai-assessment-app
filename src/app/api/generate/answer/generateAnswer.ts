@@ -20,7 +20,7 @@ export const generateAnswer = async (props: {
     const model = new ChatGroq({
       apiKey: process.env.GROQ_API_KEY,
       model: "llama-3.1-70b-versatile",
-      temperature: 0.5,
+      temperature: 0.3,
       maxTokens: 4096,
     });
 
