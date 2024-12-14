@@ -38,7 +38,7 @@ export default function PricingOptions(props: {
             </div>
             <Link href={"/login?redirect=/create"}>
               <Button variant={"outline"} className="w-full">
-                Get started for free
+                Get started now
               </Button>
             </Link>
           </div>

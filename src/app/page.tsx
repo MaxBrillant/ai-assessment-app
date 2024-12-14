@@ -36,8 +36,7 @@ export default function Home() {
           </p>
           <Link href="/create" className="w-fit">
             <Button size={"lg"}>
-              Get started for free{" "}
-              <IoIosArrowForward className="w-4 h-4 ml-1" />
+              Get started now <IoIosArrowForward className="w-4 h-4 ml-1" />
             </Button>
           </Link>
         </section>
@@ -200,8 +199,7 @@ export default function Home() {
 
             <Link href="/create">
               <Button size={"lg"}>
-                Get started for free{" "}
-                <IoIosArrowForward className="w-4 h-4 ml-1" />
+                Get started now <IoIosArrowForward className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>
