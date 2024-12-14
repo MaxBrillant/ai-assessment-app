@@ -6,6 +6,7 @@ import { questionSchema } from "@/app/validation/questionValidation";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import { sendNewAssessmentCreatedEmail } from "../email/sendEmail";
 
 export async function createAssessment(
   data: z.infer<typeof assessmentSchema>,
@@ -57,6 +58,12 @@ export async function createAssessment(
     }
 
     console.log("Assessment created successfully");
+
+    await sendNewAssessmentCreatedEmail(
+      userEmail as string,
+      data.title,
+      window.location.origin + `/dashboard/${nanoId}`
+    );
 
     return nanoId;
   } catch (err) {

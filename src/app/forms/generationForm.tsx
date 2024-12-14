@@ -4,17 +4,18 @@ import { z } from "zod";
 import { generationSchema } from "../validation/generationValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FaFilePdf, FaFilePowerpoint, FaFileWord } from "react-icons/fa6";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
+import { useTransition } from "react";
 
 type SchemaType = z.infer<typeof generationSchema>;
 export default function GenerationForm(props: {
   uploadedDocument: File;
   onSubmit: (data: SchemaType) => void;
 }) {
+  const [isPending, startTransition] = useTransition();
   const {
     register,
     handleSubmit,
@@ -31,9 +32,10 @@ export default function GenerationForm(props: {
     },
   });
 
-  const onSubmit = (data: SchemaType) => {
-    props.onSubmit(data);
-  };
+  const onSubmit = (data: SchemaType) =>
+    startTransition(async () => {
+      props.onSubmit(data);
+    });
 
   return (
     <form
@@ -125,7 +127,7 @@ export default function GenerationForm(props: {
           <p className="text-red-500 text-sm">{errors.requirements.message}</p>
         )}
       </div>
-      <Button type="submit" className="col-span-2">
+      <Button type="submit" className="col-span-2" disabled={isPending}>
         Finish
       </Button>
     </form>

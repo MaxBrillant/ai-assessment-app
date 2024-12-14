@@ -71,14 +71,6 @@ export default function Generate() {
       });
       assessmentContext.documentId = undefined;
       replace(`/dashboard/${newAssessmentNanoId}`);
-
-      const supabase = await CreateBrowserClient();
-      const userEmail = (await supabase.auth.getUser()).data.user?.email;
-      await sendNewAssessmentCreatedEmail(
-        userEmail as string,
-        assessmentContext.title,
-        window.location.origin + `/dashboard/${newAssessmentNanoId}`
-      );
     } catch (err) {
       console.log(err);
       toast({
