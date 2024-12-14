@@ -121,7 +121,7 @@ export async function submitAssessment(submissionId: number) {
     await sendNewSubmissionReceivedEmail(
       data[0].assessments.user_email,
       data[0].assessments.title,
-      "getquizdom.com/dashboard/" +
+      "https://getquizdom.com/dashboard/" +
         data[0].assessments.nano_id +
         "?submissionId=" +
         data[0].nano_id
