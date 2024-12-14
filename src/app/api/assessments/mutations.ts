@@ -62,7 +62,7 @@ export async function createAssessment(
     await sendNewAssessmentCreatedEmail(
       userEmail as string,
       data.title,
-      window.location.origin + `/dashboard/${nanoId}`
+      `getquizdom.com/dashboard/${nanoId}`
     );
 
     return nanoId;
