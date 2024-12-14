@@ -20,7 +20,7 @@ export const gradeAnswer = async (
 
     const model = new ChatGroq({
       apiKey: process.env.GROQ_API_KEY,
-      model: "llama-3.3-70b-versatile",
+      model: "llama-3.1-70b-versatile",
       temperature: 0.5,
       maxTokens: 4096,
     });
