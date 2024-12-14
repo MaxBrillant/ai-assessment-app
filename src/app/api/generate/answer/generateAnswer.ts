@@ -5,7 +5,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { z } from "zod";
 import { queryVectorStore } from "../../document/vectorStore";
 import { reduceCredits } from "../../auth/createUserProfile";
-import { ChatGroq } from "@langchain/groq";
+import { ChatDeepInfra } from "@langchain/community/chat_models/deepinfra";
 
 export const generateAnswer = async (props: {
   documentId: string;
@@ -17,9 +17,9 @@ export const generateAnswer = async (props: {
   try {
     const context = await queryVectorStore(props.documentId, props.question, 1);
 
-    const model = new ChatGroq({
-      apiKey: process.env.GROQ_API_KEY,
-      model: "llama-3.1-70b-versatile",
+    const model = new ChatDeepInfra({
+      apiKey: process.env.DEEPINFRA_API_KEY,
+      model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
       temperature: 0.3,
       maxTokens: 4096,
     });

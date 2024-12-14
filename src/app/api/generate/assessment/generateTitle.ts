@@ -3,15 +3,15 @@ import { assessmentSchema } from "@/app/validation/assessmentValidation";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
-import { ChatGroq } from "@langchain/groq";
+import { ChatDeepInfra } from "@langchain/community/chat_models/deepinfra";
 export async function generateTitle(content: string) {
   const titleSchema = assessmentSchema.pick({
     title: true,
   });
   try {
-    const model = new ChatGroq({
-      apiKey: process.env.GROQ_API_KEY,
-      model: "llama-3.1-70b-versatile",
+    const model = new ChatDeepInfra({
+      apiKey: process.env.DEEPINFRA_API_KEY,
+      model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
       temperature: 0.1,
       maxTokens: 1000,
     });

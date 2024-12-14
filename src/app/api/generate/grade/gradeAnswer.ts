@@ -4,7 +4,7 @@ import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { z } from "zod";
-import { ChatGroq } from "@langchain/groq";
+import { ChatDeepInfra } from "@langchain/community/chat_models/deepinfra";
 
 export const gradeAnswer = async (
   question: string,
@@ -18,9 +18,9 @@ export const gradeAnswer = async (
       comment: submissionSchema.shape.submission.element.shape.comment,
     });
 
-    const model = new ChatGroq({
-      apiKey: process.env.GROQ_API_KEY,
-      model: "llama-3.1-70b-versatile",
+    const model = new ChatDeepInfra({
+      apiKey: process.env.DEEPINFRA_API_KEY,
+      model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
       temperature: 0.3,
       maxTokens: 4096,
     });
