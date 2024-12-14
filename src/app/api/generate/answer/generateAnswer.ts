@@ -20,7 +20,7 @@ export const generateAnswer = async (props: {
     const model = new ChatDeepInfra({
       apiKey: process.env.DEEPINFRA_API_KEY,
       model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
-      temperature: 0.3,
+      temperature: 0.5,
       maxTokens: 4096,
     });
 
