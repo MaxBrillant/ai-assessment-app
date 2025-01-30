@@ -18,7 +18,7 @@ export const generateQuestion = async (
   try {
     const model = new ChatDeepInfra({
       apiKey: process.env.DEEPINFRA_API_KEY,
-      model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+      model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
       temperature: 0.5,
       maxTokens: 4096,
     });
