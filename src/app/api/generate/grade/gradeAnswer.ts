@@ -77,6 +77,7 @@ export const gradeAnswer = async (
         .replaceAll("\n", "")
         .replaceAll("\r", "")
         .replaceAll("\t", "")
+        .replace(/<think>.*?<\/think>/g, "")
     );
 
     console.log("Answer successfully graded");

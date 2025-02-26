@@ -25,16 +25,18 @@ export async function generateTitle(content: string) {
   Format Instructions:
   {format_instructions}
 
-
-  Context:
-  {context}
-
   
   Rules to follow:
   1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema
   2. Make an understandable and meaningful title for the assessment. Something that resonates well with the context provided
   3. The language of the title must be the one used in the context
   4. The title must be less than 70 characters
+  
+
+    
+  Context:
+  {context}
+
 `
     );
 
@@ -49,6 +51,7 @@ export async function generateTitle(content: string) {
         .replaceAll("\n", "")
         .replaceAll("\r", "")
         .replaceAll("\t", "")
+        .replace(/<think>.*?<\/think>/g, "")
     );
     return newObject.title;
   } catch (e) {

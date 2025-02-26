@@ -41,16 +41,9 @@ export const generateAnswer = async (props: {
       
       Format Instructions: {format_instructions}
     
-    
-    
-      Context:
-      {context}
 
-
-    
       Question:
-      {question}
-    
+      {question}   
     
       
       Rules to follow:
@@ -90,6 +83,12 @@ export const generateAnswer = async (props: {
       - Include opportunities for knowledge transformation
       - Encourage both divergent and convergent thinking
       - Promote both analytical and creative problem-solving
+
+
+    
+      Context:
+      {context}
+
       `);
 
     const chain = RunnableSequence.from([prompt, model as any, parser]);
@@ -108,6 +107,7 @@ export const generateAnswer = async (props: {
         .replaceAll("\n", "")
         .replaceAll("\r", "")
         .replaceAll("\t", "")
+        .replace(/<think>.*?<\/think>/g, "")
     );
 
     console.log("Answer successfully generated");
