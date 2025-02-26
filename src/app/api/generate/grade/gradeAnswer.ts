@@ -21,7 +21,7 @@ export const gradeAnswer = async (
     const model = new ChatDeepInfra({
       apiKey: process.env.DEEPINFRA_API_KEY,
       model: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
-      temperature: 0.5,
+      temperature: 0.6,
       maxTokens: 4096,
     });
 
