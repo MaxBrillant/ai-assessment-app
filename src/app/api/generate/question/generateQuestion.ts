@@ -48,7 +48,7 @@ Previous Question:
 6. Adhere to the specified difficulty level ({difficultyLevel}%), calibrating complexity appropriately.
 7. Prioritize user-provided requirements when related to the context: "{requirements}"
 8. Generate questions distinct from previous ones unless requirements suggest otherwise.
-9. Use the specified question type {type} unless user requirements indicate otherwise.
+9. The type of the question MUST be {type}, unless the user-provided requirements recommend a different type, which you must prioritize
 10. Assign {marks} marks to the question.
 11. Match the language used in the context.
 
