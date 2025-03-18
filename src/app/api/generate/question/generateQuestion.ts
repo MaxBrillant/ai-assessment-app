@@ -41,17 +41,25 @@ Previous Question:
 
 ## Core Rules:
 
+Rules to follow:
   1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema. 
   2. Don't mention the context anywhere in the question. You are the only one who knows the context, don't assume that anyone else already knows it. Make sure the question is ONLY related to or derived from the context provided, don't make up a question or rely on your own knowledge. Avoid incomplete questions that lack any useful information at all cost to avoid confusion
   3. The "choices" array and "answer.choices" array should only be present if the question type is "multiple-choice". The "answer.content" string should only be present if the question type is "short-answer" or "long-answer"
   4. The "content" and "answer.content" fields must be composed of valid HTML strings, with the following tags ONLY: p, strong, em, u, br, ul, li, ol, span, <pre class="ql-syntax" spellcheck="false"></pre>. Don't include any HTML tags anywhere else except for "content" and "answer.content" fields only. Never in "choices" or "answer.choices", no matter what
-  5. When the type of the question is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer, simplify the answer or provide an incomplete or ambiguous answer.
+  5. When the type of the question is "long-answer", the "answer.content" should contain comprehensive, nuanced answers that demonstrate multiple thinking pathways. DO NOT, under any circumstances, make up an answer for the question
   6. The difficulty level or percentage of difficulty of the question is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the question is appropriate for the difficulty level, a higher difficulty level means a more complex question, and a lower difficulty level means a simpler question
   7. User-provided requirements (They must be prioritized if not empty, but only when they are in accordance or related to the context): "{requirements}"
   8. Make sure to generate a question that is different from the previous question, in one way or another. Unless the user-provided requirements recommend otherwise, the question must be different from the previous question
   9. The type of the question must be {type}, unless the user-provided requirements recommend a different type, which you must prioritize
   10. The number of marks for the question is {marks}
   11. The language of the question must be the one used in the context
+  
+5. For "long-answer" types, provide comprehensive, nuanced answers that demonstrate multiple thinking pathways.
+7. Prioritize user-provided requirements when related to the context: "{requirements}"
+8. Generate questions distinct from previous ones unless requirements suggest otherwise.
+9. The type of the question MUST be {type}, unless the user-provided requirements recommend a different type, which you must prioritize
+10. Assign {marks} marks to the question.
+11. Match the language used in the context.
 
 ## AI-Resistance Strategy:
 

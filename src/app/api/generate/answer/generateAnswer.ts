@@ -46,15 +46,15 @@ Question:
 {question}
 
 ## Core Rules:
-1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE.
-2. Don't mention the context anywhere in the answer. Ensure the answer is ONLY derived from the provided context.
-3. Use valid HTML formatting only with permitted tags: p, strong, em, u, br, ul, li, ol, span, pre.
-4. Keep the "answer" field under 2000 characters.
-5. For "long-answer" types, provide comprehensive, nuanced answers that demonstrate multi-faceted thinking.
-6. Adhere to the specified difficulty level ({difficultyLevel}%), calibrating complexity appropriately.
-7. Prioritize user-provided requirements when related to the context: "{requirements}"
-8. Use the specified answer type {type}.
-9. Match the language used in the context.
+1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema
+2. Don't mention the context anywhere in the answer. You are the only one who knows the context, don't assume that anyone else already knows it. Make sure the answer is ONLY related to or derived from the context provided. Avoid incomplete answers that lack any useful information at all cost to avoid confusion
+3. The "answer" field must be composed of valid HTML strings, with the following tags ONLY: p, strong, em, u, br, ul, li, ol, span, <pre class="ql-syntax" spellcheck="false"></pre>
+4. The "answer" field must have less than 2000 characters
+5. When the type of the question is "long-answer", the "answer.content" should contain comprehensive, nuanced answers that demonstrate multiple thinking pathways. DO NOT, under any circumstances, make up an answer for the question
+6. The difficulty level or percentage of difficulty of the answer is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the answer is appropriate for the difficulty level, a higher difficulty level means a more complex answer, and a lower difficulty level means a simpler answer
+7. User-provided requirements (They must be prioritized if not empty, but only when they are in accordance or related to the context): "{requirements}"
+8. The type of the answer must be {type}
+9. The language of the answer must be the one used in the context
 
 ## Human Thinking Demonstration Strategy:
 
