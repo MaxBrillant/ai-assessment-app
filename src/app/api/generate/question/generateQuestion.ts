@@ -31,78 +31,86 @@ export const generateQuestion = async (
 
     // Create a detailed prompt template
     const prompt = ChatPromptTemplate.fromTemplate(`
-  You are an expert educator tasked with generating meaningful questions from provided content.
-  Analyze the following context and generate a question that tests different cognitive levels.
-  
-  Format Instructions: {format_instructions}
+You are an expert educator tasked with generating questions that require authentic human thinking and cannot be easily answered by AI systems. Analyze the provided content and generate questions that specifically challenge AI capabilities while being accessible to human learners.
 
+Format Instructions: 
+{format_instructions}
 
-  Previous Question:
-  {previousQuestion}
+Previous Question: 
+{previousQuestion}
 
+## Core Rules:
+1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE.
+2. Don't mention the context anywhere in the question. The question must be derived from the provided context only.
+3. Format options must match the question type (choices for multiple-choice; content for short/long-answer).
+4. Use valid HTML formatting only in designated fields with permitted tags: p, strong, em, u, br, ul, li, ol, span, pre.
+5. For "long-answer" types, provide comprehensive, nuanced answers that demonstrate multiple thinking pathways.
+6. Adhere to the specified difficulty level ({difficultyLevel}%), calibrating complexity appropriately.
+7. Prioritize user-provided requirements when related to the context: "{requirements}"
+8. Generate questions distinct from previous ones unless requirements suggest otherwise.
+9. Use the specified question type {type} unless user requirements indicate otherwise.
+10. Assign {marks} marks to the question.
+11. Match the language used in the context.
 
-  
-  Rules to follow:
-  1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema. 
-  2. Don't mention the context anywhere in the question. You are the only one who knows the context, don't assume that anyone else already knows it. Make sure the question is ONLY related to or derived from the context provided, don't make up a question or rely on your own knowledge. Avoid incomplete questions that lack any useful information at all cost to avoid confusion
-  3. The "choices" array and "answer.choices" array should only be present if the question type is "multiple-choice". The "answer.content" string should only be present if the question type is "short-answer" or "long-answer"
-  4. The "content" and "answer.content" fields must be composed of valid HTML strings, with the following tags ONLY: p, strong, em, u, br, ul, li, ol, span, <pre class="ql-syntax" spellcheck="false"></pre>. Don't include any HTML tags anywhere else except for "content" and "answer.content" fields only. Never in "choices" or "answer.choices", no matter what
-  5. When the type of the question is "long-answer", the "answer.content" should be a very detailed and thouroughly thought answer to the question. DO NOT, under any circumstances, make up an answer, simplify the answer or provide an incomplete or ambiguous answer.
-  6. The difficulty level or percentage of difficulty of the question is {difficultyLevel}%. Where 0% is the easiest and 100% is the most difficult. Ensure that the question is appropriate for the difficulty level, a higher difficulty level means a more complex question, and a lower difficulty level means a simpler question
-  7. User-provided requirements (They must be prioritized if not empty, but only when they are in accordance or related to the context): "{requirements}"
-  8. Make sure to generate a question that is different from the previous question, in one way or another. Unless the user-provided requirements recommend otherwise, the question must be different from the previous question
-  9. The type of the question must be {type}, unless the user-provided requirements recommend a different type, which you must prioritize
-  10. The number of marks for the question is {marks}
-  11. The language of the question must be the one used in the context
+## AI-Resistance Strategy:
 
+### 1. Human Experience Focus
+- Create questions requiring personal reflection, lived experiences, or embodied knowledge
+- Design questions that leverage human intuition and implicit cultural understanding
+- Develop scenarios requiring empathy or emotional intelligence
 
-  Key Guidelines for Question Generation:
+### 2. Process Verification Elements
+- Include requirements to explain reasoning paths, not just final answers
+- Design multi-stage questions that reveal thought development
+- Require connections to personal contexts or experiences
 
-  1. Cognitive Engagement
-  - Promote metacognitive reflection
-  - Design a question that has multiple valid approaches
-  
+### 3. Knowledge Authentication
+- Create questions that test understanding beyond surface-level facts
+- Design questions requiring synthesis across multiple concepts
+- Include elements that reveal mastery of subtle nuances
 
-  2. Creative Thinking Elements
-  - Encourage novel connections and associations
-  - Promote divergent thinking and multiple perspectives
-  - Generate a question that transforms or combines ideas
-  - Foster imagination and innovative problem-solving
+### 4. Cognitive Engagement
+- Promote metacognitive reflection on the learning process
+- Design questions with multiple valid approaches
+- Encourage transfer of knowledge to novel contexts
 
-  3. Critical Thinking Components
-  - Promote logical reasoning and inference
-  - Encourage systematic problem-solving
+### 5. Creative Thinking Elements
+- Encourage unexpected connections and associations
+- Promote divergent thinking and multiple perspectives
+- Generate questions that transform or combine ideas in original ways
+- Foster imagination and innovative problem-solving
 
-  4. Question Design Principles
-  - Include real-world applications and connections
-  - Focus on key concepts and important details, and present them in a very fun and engaging way
-  - Anticipate and address common misconceptions
-  - Remember that the questions are for human beings. Remember to make questions engaging and thought-provoking while maintaining educational value
-  
+### 6. Critical Thinking Components
+- Promote logical reasoning and evidence-based inference
+- Encourage systematic problem-solving
+- Require evaluation of assumptions and biases
 
-  5. Answer Framework
-  - Explain thinking processes and reasoning
-  - Include alternative perspectives where applicable
-  - Connect to broader concepts and applications
-  - Encourage creative problem-solving
-  - Encourage critical thinking
+### 7. Question Design Principles
+- Include authentic real-world applications and connections
+- Present key concepts in engaging, thought-provoking ways
+- Address common misconceptions
+- Design questions that resist template-based responses
 
-  6. Learning Development
-  - Include metacognitive reflection opportunities
-  - Encourage intellectual risk-taking
+### 8. Answer Framework
+- Explain thinking processes and reasoning pathways
+- Include alternative perspectives where applicable
+- Connect to broader concepts and applications
+- Demonstrate both analytical and creative problem-solving
 
-  Remember:
-  - The question should provoke curiosity and wonder
-  - The answer should demonstrate multiple thinking pathways
-  - Include opportunities for knowledge transformation
-  - Encourage both divergent and convergent thinking
-  - Promote both analytical and creative problem-solving
-  
+### 9. Learning Development
+- Include metacognitive reflection opportunities
+- Encourage intellectual risk-taking
+- Design questions that resist algorithmic solution methods
 
-    
-  Context:
-  {context}
+Remember:
+- Questions should provoke curiosity while being anchored in the provided content
+- Answers should demonstrate multiple thinking pathways
+- Include opportunities for knowledge transformation
+- Encourage both divergent and convergent thinking
+- Target specific AI limitations while remaining accessible to human learners
 
+Context: 
+{context}
   `);
 
     const chain = RunnableSequence.from([prompt, model as any, parser]);
