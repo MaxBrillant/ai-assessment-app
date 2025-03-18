@@ -33,14 +33,14 @@ export const generateQuestion = async (
     const prompt = ChatPromptTemplate.fromTemplate(`
 You are an expert educator tasked with generating questions that require authentic human thinking and cannot be easily answered by AI systems. Analyze the provided content and generate questions that specifically challenge AI capabilities while being accessible to human learners.
 
-Format Instructions: 
+Format Instructions (you MUST follow these instructions or it will result in a failed question): 
 {format_instructions}
 
 Previous Question: 
 {previousQuestion}
 
 ## Core Rules:
-1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE.
+1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. It's the first priority.
 2. Don't mention the context anywhere in the question. The question must be derived from the provided context only.
 3. Format options must match the question type (choices for multiple-choice; content for short/long-answer).
 4. Use valid HTML formatting only in designated fields with permitted tags: p, strong, em, u, br, ul, li, ol, span, pre.
