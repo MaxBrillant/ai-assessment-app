@@ -91,7 +91,7 @@ Previous Question:
 - Address common misconceptions
 - Design questions that resist template-based responses
 
-### 8. Answer Framework
+### 8. Answer Framework (for short-answer and long-answer questions only)
 - Explain thinking processes and reasoning pathways
 - Include alternative perspectives where applicable
 - Connect to broader concepts and applications
@@ -104,7 +104,7 @@ Previous Question:
 
 Remember:
 - Questions should provoke curiosity while being anchored in the provided content
-- Answers should demonstrate multiple thinking pathways
+- Answers should demonstrate multiple thinking pathways (for short-answer and long-answer questions only)
 - Include opportunities for knowledge transformation
 - Encourage both divergent and convergent thinking
 - Target specific AI limitations while remaining accessible to human learners
