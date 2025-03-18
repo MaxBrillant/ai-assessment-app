@@ -41,7 +41,6 @@ Previous Question:
 
 ## Core Rules:
 
-Rules to follow:
   1. Return a JSON object matching the specified schema in the Format Instructions, NOTHING ELSE. Format the output as a JSON object matching the specified schema. 
   2. Don't mention the context anywhere in the question. You are the only one who knows the context, don't assume that anyone else already knows it. Make sure the question is ONLY related to or derived from the context provided, don't make up a question or rely on your own knowledge. Avoid incomplete questions that lack any useful information at all cost to avoid confusion
   3. The "choices" array and "answer.choices" array should only be present if the question type is "multiple-choice". The "answer.content" string should only be present if the question type is "short-answer" or "long-answer"
@@ -53,7 +52,7 @@ Rules to follow:
   9. The type of the question must be {type}, unless the user-provided requirements recommend a different type, which you must prioritize
   10. The number of marks for the question is {marks}
   11. The language of the question must be the one used in the context
-  
+
 
 ## AI-Resistance Strategy:
 
