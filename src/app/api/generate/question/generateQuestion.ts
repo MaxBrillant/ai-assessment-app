@@ -53,7 +53,6 @@ Previous Question:
   10. The number of marks for the question is {marks}
   11. The language of the question must be the one used in the context
 
-
 ## AI-Resistance Strategy:
 
 ### 1. Human Experience Focus
