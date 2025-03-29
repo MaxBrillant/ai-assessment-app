@@ -30,11 +30,6 @@ export default function TopBar() {
               Features
             </Button>
           </a>
-          <a href="#how-it-works">
-            <Button variant={"link"} size={"sm"}>
-              How it works
-            </Button>
-          </a>
           <a href="#use-cases">
             <Button variant={"link"} size={"sm"}>
               Use cases
@@ -50,9 +45,6 @@ export default function TopBar() {
       <div className="flex gap-2">
         <Link href="/login" className="hidden md:flex">
           <Button variant={"outline"}>Log in</Button>
-        </Link>
-        <Link href={"/create"}>
-          <Button>Get started</Button>
         </Link>
         <HamburgerMenu />
       </div>

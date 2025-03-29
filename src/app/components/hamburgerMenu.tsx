@@ -29,9 +29,6 @@ export default function HamburgerMenu() {
         <Link href={"/#features"}>
           <DropdownMenuItem>Features</DropdownMenuItem>
         </Link>
-        <Link href={"/#how-it-works"}>
-          <DropdownMenuItem>How it works</DropdownMenuItem>
-        </Link>
         <Link href={"/#use-cases"}>
           <DropdownMenuItem>Use cases</DropdownMenuItem>
         </Link>

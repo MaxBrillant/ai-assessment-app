@@ -36,11 +36,6 @@ export default function PricingOptions(props: {
                 <li>• No credit card required</li>
               </ul>
             </div>
-            <Link href={"/login?redirect=/create"}>
-              <Button variant={"outline"} className="w-full">
-                Get started now
-              </Button>
-            </Link>
           </div>
         )}
 

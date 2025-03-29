@@ -12,6 +12,7 @@ import { IoIosArrowForward } from "react-icons/io";
 import Image from "next/image";
 import Footer from "./footer";
 import TopBar from "./components/topBar";
+import FilePicker from "./components/filePicker";
 
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 
@@ -20,25 +21,37 @@ export default function Home() {
     <div>
       <div className="absolute z-[-10] h-[80vh] w-full bg-gradient-to-b from-primaryRed/10  via-primaryOrange/10 to-background"></div>
       <TopBar />
-      <div className="flex-grow w-full flex flex-col p-20 px-10 md:px-24 gap-40 divide-y">
-        <section id="hero" className="w-full max-w-2xl flex flex-col gap-6">
+      <div className="flex-grow flex flex-col items-center p-20 px-10 md:px-24 gap-32 divide-y">
+        <section
+          id="hero"
+          className="w-full max-w-2xl flex flex-col gap-6 items-center justify-center text-center"
+        >
           <h1
             className={
               "text-4xl sm:text-5xl font-bold text-balance " +
               sourceSerif.className
             }
           >
-            Fast, Reliable Assessments for the Age of AI
+            Screw ChatGPT and AI submissions!
           </h1>
           <p className="md:text-lg text-black/70 md:font-medium">
-            Easily Create, Customize, and Grade High-Quality Assessments,
-            Quizzes and Tests with AI-Powered Precision.
+            Take back control of your assessments by creating questions
+            engineered to outsmart AI, ensuring authentic, engaging evaluations
           </p>
-          <Link href="/create" className="w-fit">
-            <Button size={"lg"}>
-              Get started now <IoIosArrowForward className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
+          <FilePicker />
+        </section>
+        <section id="problem-statement" className="flex flex-col gap-10 pt-10">
+          <h2
+            className={
+              "text-4xl font-bold text-center text-balance " +
+              sourceSerif.className
+            }
+          >
+            {`Why use Quizdom?`}
+          </h2>
+          <h4 className={"text-xl text-center text-balance "}>
+            {`Let’s be honest—AI has blurred the lines between genuine and AI-generated submissions, making authenticity harder to verify. With Quizdom, you can craft AI-resistant questions that ensure authentic, meaningful assessments.`}
+          </h4>
         </section>
         <section id="features" className="flex flex-col gap-10 pt-10">
           <h2
@@ -47,8 +60,7 @@ export default function Home() {
               sourceSerif.className
             }
           >
-            {`Assessments can be tedious and flawed... but we're here to change
-            that.`}
+            {`Key Features`}
           </h2>
           <div className="flex flex-col gap-20">
             {features.map((feature) => (
@@ -71,30 +83,6 @@ export default function Home() {
                     className="w-full h-full object-cover rounded-xl border border-black/30 shadow-2xl"
                   />
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        <section id="how-it-works" className="flex flex-col gap-10 pt-10">
-          <h2
-            className={
-              "text-4xl font-bold text-center text-balance " +
-              sourceSerif.className
-            }
-          >
-            A Fast, Smooth Process
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className="flex flex-col gap-4 p-8 border border-black/10"
-              >
-                <div className="flex w-10 h-10 font-bold items-center justify-center p-4 rounded-full border border-black">
-                  {index + 1}
-                </div>
-                <h3 className="text-2xl font-bold">{step.name}</h3>
-                <p>{step.description}</p>
               </div>
             ))}
           </div>
@@ -129,16 +117,6 @@ export default function Home() {
                       <h3 className="text-xl font-medium lg:text-2xl pt-8 text-black/70 text-balance">
                         {useCase.desription}
                       </h3>
-                      <Link href={"/create"}>
-                        <Button
-                          variant={"link"}
-                          size={"lg"}
-                          className="p-0 py-4 mt-4 underline underline-offset-8 hover:text-primaryRed"
-                        >
-                          Get started now{" "}
-                          <IoIosArrowForward className="w-4 h-4 ml-1" />
-                        </Button>
-                      </Link>
                     </div>
                     <div className="bg-black/30 aspect-[3/2]">
                       <Image
@@ -194,14 +172,10 @@ export default function Home() {
                 "text-4xl font-bold text-center " + sourceSerif.className
               }
             >
-              Start Creating Smarter Assessments Today
+              Take back control of your assessments today
             </h2>
 
-            <Link href="/create">
-              <Button size={"lg"}>
-                Get started now <IoIosArrowForward className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
+            <FilePicker />
           </div>
         </section>
       </div>
@@ -240,29 +214,6 @@ const features = [
     description:
       "Choose between grading submissions yourself or using AI-assisted grading to save time and ensure accuracy.",
     url: "/feature5.webp",
-  },
-];
-
-const steps = [
-  {
-    name: "Bring your Resources",
-    description:
-      "Upload any relevant notes, documents, or PDFs. Our system can handle various formats, so you don’t have to start from scratch.",
-  },
-  {
-    name: "Get High-Quality Questions & Answers",
-    description:
-      "Let our AI analyze your content and instantly generate thoughtfully crafted questions and answers tailored to the subject matter. No more hours spent creating questions manually.",
-  },
-  {
-    name: "Customize & Export",
-    description:
-      "Fine-tune the generated questions to meet your exact requirements. Add new questions, regenerate ones you’d like improved, and then export as a PDF or DOCX file.",
-  },
-  {
-    name: "Publish & Grade",
-    description:
-      "Publish your assessment for others to access and complete. Review submissions at your convenience and choose to grade manually or let the AI do it for you.",
   },
 ];
 

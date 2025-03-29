@@ -9,7 +9,6 @@ import {
 } from "@/app/context/assessmentContext";
 import Loading from "@/app/loading";
 import { useToast } from "@/hooks/use-toast";
-import { CreateBrowserClient } from "@/utils/supabase/browserClient";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 
@@ -26,7 +25,7 @@ export default function Generate() {
         assessmentContext.difficultyLevel == undefined
         // !authenticatedUser
       ) {
-        replace("/create");
+        replace("/");
       } else {
         generateQuestionsAndCreateNewAssessment();
       }
@@ -70,7 +69,8 @@ export default function Generate() {
         title: "Assessment created successfully",
       });
       assessmentContext.documentId = undefined;
-      replace(`/dashboard/${newAssessmentNanoId}`);
+      window.location.href =
+        window.location.origin + `/dashboard/${newAssessmentNanoId}`;
     } catch (err) {
       console.log(err);
       toast({
@@ -78,7 +78,7 @@ export default function Generate() {
         title: "Error",
         variant: "destructive",
       });
-      replace("/create");
+      replace("/");
       assessmentContext.documentId = undefined;
     }
   };

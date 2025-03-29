@@ -28,9 +28,6 @@ export default function Footer() {
           <Link href={"/#features"}>Features</Link>
         </li>
         <li>
-          <Link href={"/#how-it-works"}>How it works</Link>
-        </li>
-        <li>
           <Link href={"/#use-cases"}>Use cases</Link>
         </li>
         <li>
