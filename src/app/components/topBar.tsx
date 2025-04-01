@@ -7,7 +7,7 @@ export default function TopBar() {
   return (
     <section
       id="top-bar"
-      className="sticky z-20 top-0 w-full flex justify-between items-center px-6 py-4 bg-white/50 backdrop-blur-sm"
+      className="sticky z-20 top-0 w-full flex justify-between items-center px-6 py-2 bg-white/50 backdrop-blur-sm"
     >
       <div className="flex gap-4 items-center">
         <Link href={"/"}>

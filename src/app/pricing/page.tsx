@@ -1,8 +1,5 @@
 import { Source_Serif_4 } from "next/font/google";
 import PricingOptions from "./pricingOptions";
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -10,9 +7,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { CreateServerClient } from "@/utils/supabase/serverClient";
-import HamburgerMenu from "../components/hamburgerMenu";
 import Footer from "../footer";
 import TopBar from "../components/topBar";
+import FeedbackDialog from "../components/feedbackDialog";
 
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 export default async function Pricing() {
@@ -64,7 +61,9 @@ export default async function Pricing() {
           </div>
         </div>
       </div>
-
+      <div className="fixed right-4 bottom-4 z-50">
+        <FeedbackDialog />
+      </div>
       <Footer />
     </div>
   );
@@ -90,7 +89,7 @@ const faqs = [
   {
     question: "Can I carry over unused credits to the next month?",
     answer:
-      "Yes, any unused credits from your monthly allocation will automatically roll over to the next month, ensuring you don’t lose the credits you’ve already paid for. For example, if your plan includes 100 credits per month and you only use 70, the remaining 30 credits will be added to your next month’s balance.",
+      "Yes, any unused credits will automatically roll over to the next month, ensuring you don’t lose the credits you’ve already paid for.",
   },
   {
     question: "How can I check my remaining credits?",

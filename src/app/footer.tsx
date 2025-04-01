@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <div className="flex flex-col md:flex-wrap gap-6 p-6 bg-gradient-to-br from-primaryRed/5 to-primaryOrange/5 border-t border-black/30">
+    <div className="flex flex-col gap-6 p-6 bg-gradient-to-br from-primaryRed/5 to-primaryOrange/5 border-t border-black/30">
       <Link href={"/"}>
         <Image
           src={"/logo.svg"}
@@ -15,11 +15,6 @@ export default function Footer() {
         />
       </Link>
 
-      <a href="mailto:support@getquizdom.com">
-        <Button variant={"secondary"} className="w-fit">
-          Give us feedback
-        </Button>
-      </a>
       <ul className="flex flex-col gap-2">
         <li>
           <Link href={"/pricing"}>Pricing</Link>
@@ -34,6 +29,7 @@ export default function Footer() {
           <Link href={"/#faq"}>FAQ</Link>
         </li>
       </ul>
+      <p className="text-sm">&copy; 2025 Quizdom Corp.</p>
     </div>
   );
 }

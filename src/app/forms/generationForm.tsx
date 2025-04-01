@@ -40,7 +40,7 @@ export default function GenerationForm(props: {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full grid grid-cols-2 gap-10 gap-x-7 p-5"
+      className="w-full grid grid-cols-2 gap-10 gap-x-7 p-2 py-5"
     >
       <div>
         <label

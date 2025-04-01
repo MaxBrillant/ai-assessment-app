@@ -73,14 +73,15 @@ export default function GeneratePopover(props: {
                 setNewRequirement(undefined);
               }}
             >
-              {newRequirement ? "Generate" : "Try again"}
+              {newRequirement ? "Generate" : "Regenerate"}
             </Button>
           ) : (
-            user && (
+            user &&
+            userCredits && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button className="w-full">
-                    {newRequirement ? "Generate" : "Try again"}
+                    {newRequirement ? "Generate" : "Regenerate"}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>

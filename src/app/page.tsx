@@ -7,12 +7,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Source_Serif_4 } from "next/font/google";
-import Link from "next/link";
-import { IoIosArrowForward } from "react-icons/io";
 import Image from "next/image";
 import Footer from "./footer";
 import TopBar from "./components/topBar";
 import FilePicker from "./components/filePicker";
+import FeedbackDialog from "./components/feedbackDialog";
 
 const sourceSerif = Source_Serif_4({ subsets: ["latin"] });
 
@@ -32,7 +31,7 @@ export default function Home() {
               sourceSerif.className
             }
           >
-            Screw ChatGPT and AI submissions!
+            Say No to ChatGPT and AI submissions
           </h1>
           <p className="md:text-lg text-black/70 md:font-medium">
             Take back control of your assessments by creating questions
@@ -50,7 +49,7 @@ export default function Home() {
             {`Why use Quizdom?`}
           </h2>
           <h4 className={"text-xl text-center text-balance "}>
-            {`Let’s be honest—AI has blurred the lines between genuine and AI-generated submissions, making authenticity harder to verify. With Quizdom, you can craft AI-resistant questions that ensure authentic, meaningful assessments.`}
+            {`Let’s be honest—AI has blurred the lines between genuine and AI-generated submissions, making authenticity harder to verify. With Quizdom, you can craft AI-resistant questions, guaranteeing genuine assessments that measure true understanding.`}
           </h4>
         </section>
         <section id="features" className="flex flex-col gap-10 pt-10">
@@ -179,6 +178,9 @@ export default function Home() {
           </div>
         </section>
       </div>
+      <div className="fixed right-4 bottom-4 z-50">
+        <FeedbackDialog />
+      </div>
       <Footer />
     </div>
   );
@@ -188,7 +190,7 @@ const features = [
   {
     name: "Intelligent Content Understanding",
     description:
-      "Our advanced AI doesn’t just skim through your uploads...It deeply analyzes your notes, documents, and resources to extract key concepts and themes.",
+      "Our system thoroughly examines your uploads, diving deep into your notes, documents, and resources to identify and extract essential concepts and themes.",
     url: "/feature1.webp",
   },
   {

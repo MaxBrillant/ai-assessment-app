@@ -111,3 +111,19 @@ export async function sendNewSubmissionReceivedEmail(
 
   console.log("New submission received email sent.");
 }
+
+export async function sendFeedbackEmail(userEmail: string, feedback: string) {
+  console.log("Sending feedback email...");
+  await sendEmail({
+    to: "ndashimax37@gmail.com",
+    subject: "Feedback to Quizdom AI",
+    html: `
+      <h1>Feedback Received from ${userEmail}</h1>
+      <p>${feedback}</p>
+      <br/>
+      <p>Time: ${new Date().toLocaleString()}</p>
+    `,
+  });
+
+  console.log("Feedback email sent.");
+}

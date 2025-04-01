@@ -166,7 +166,7 @@ export default function FilePicker() {
                 }}
               />
               <p className="text-sm -mt-4">
-                Supported file types: .pdf, .docx, .pptx
+                Supported file types: .pdf (recommended), .docx, .pptx
               </p>
               <Input
                 id="doc"

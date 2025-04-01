@@ -8,6 +8,7 @@ import Image from "next/image";
 import AccountDropdown from "../components/accountDropdown";
 import Footer from "../footer";
 import NewAssessmentDialog from "./newAssessmentDialog";
+import FeedbackDialog from "../components/feedbackDialog";
 
 export default async function Assessments() {
   const supabase = CreateServerClient();
@@ -70,6 +71,10 @@ export default async function Assessments() {
           </p>
         </div>
       )}
+
+      <div className="fixed right-4 bottom-4 z-50">
+        <FeedbackDialog />
+      </div>
       <Footer />
     </div>
   );

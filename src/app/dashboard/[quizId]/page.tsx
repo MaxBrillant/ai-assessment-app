@@ -12,6 +12,7 @@ import Image from "next/image";
 import AccountDropdown from "@/app/components/accountDropdown";
 import { FiShare } from "react-icons/fi";
 import Footer from "@/app/footer";
+import FeedbackDialog from "@/app/components/feedbackDialog";
 
 export default async function Assessment({
   params,
@@ -109,6 +110,9 @@ export default async function Assessment({
         requirements={adminAssessmentData.generationRequirements}
       />
 
+      <div className="fixed right-4 bottom-4 z-50">
+        <FeedbackDialog />
+      </div>
       <Footer />
     </div>
   );
