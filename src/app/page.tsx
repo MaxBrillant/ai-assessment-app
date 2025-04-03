@@ -31,7 +31,7 @@ export default function Home() {
               sourceSerif.className
             }
           >
-            Say No to ChatGPT and AI submissions
+            To hell with ChatGPT and AI submissions!
           </h1>
           <p className="md:text-lg text-black/70 md:font-medium">
             Take back control of your assessments by creating questions
