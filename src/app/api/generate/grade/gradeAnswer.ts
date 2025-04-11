@@ -20,7 +20,7 @@ export const gradeAnswer = async (
 
     const model = new ChatDeepInfra({
       apiKey: process.env.DEEPINFRA_API_KEY,
-      model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+      model: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
       temperature: 0.6,
       maxTokens: 4096,
     });
