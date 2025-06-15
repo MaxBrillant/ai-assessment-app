@@ -31,11 +31,11 @@ export default function Home() {
               sourceSerif.className
             }
           >
-            To hell with ChatGPT and AI submissions!
+            Fast, Reliable Assessments for the Age of AI
           </h1>
           <p className="md:text-lg text-black/70 md:font-medium">
-            Take back control of your assessments by creating questions
-            engineered to outsmart AI, ensuring authentic, engaging evaluations
+            Easily Create, Customize, and Grade High-Quality Assessments,
+            Quizzes and Tests with AI-Powered Precision.
           </p>
           <FilePicker />
         </section>
@@ -49,7 +49,7 @@ export default function Home() {
             {`Why use Quizdom?`}
           </h2>
           <h4 className={"text-xl text-center text-balance "}>
-            {`Let’s be honest—AI has blurred the lines between genuine and AI-generated submissions, making authenticity harder to verify. With Quizdom, you can craft AI-resistant questions, guaranteeing genuine assessments that measure true understanding.`}
+            {`Let’s be honest, AI has blurred the lines between genuine and AI-generated submissions, making authenticity harder to verify. With Quizdom, you can craft AI-resistant questions, guaranteeing genuine assessments that measure true understanding.`}
           </h4>
         </section>
         <section id="features" className="flex flex-col gap-10 pt-10">
